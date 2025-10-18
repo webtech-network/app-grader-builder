@@ -9,7 +9,11 @@ const FeedbackForm = () => {
   const [reportTitle, setReportTitle] = useState("");
   const [feedbackTone, setFeedbackTone] = useState("");
   const [feedbackPersona, setFeedbackPersona] = useState("");
+  const [activityContext, setActivityContext] = useState("");
   const [extraGuidelines, setExtraGuidelines] = useState("");
+  const [solutionType, setSolutionType] = useState("hint");
+  const [readingFiles, setReadingFiles] = useState([]);
+  const [currentFile, setCurrentFile] = useState("");
   const [toggleStates, setToggleStates] = useState({
     show_score: true,
     show_passed_tests: true,
@@ -59,8 +63,7 @@ const FeedbackForm = () => {
       <div className="max-w-5xl mx-auto">
         {/* Header Section */}
         <header className="text-center mb-10 p-4 border-b border-gray-700/50">
-          <h1 className="text-4xl font-extrabold text-white">Visualizador de Configuração</h1>
-          <p className="text-lg text-gray-400 mt-2">Uma apresentação clara dos parâmetros do relatório.</p>
+          <h1 className="text-4xl font-extrabold text-white">Configuração do Feedback</h1>
         </header>
 
         {/* Section Wrapper - General, AI, Standard */}
@@ -124,12 +127,22 @@ const FeedbackForm = () => {
             <div className="space-y-5 text-sm">
               {/* Fornecimento de Soluções */}
               <div>
-                <p className="text-gray-400 font-medium mb-1">Fornecimento de Soluções</p>
-                <p className="text-gray-50">
-                  <span className="bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
-                    hint
-                  </span>
-                </p>
+                <p className="text-gray-400 font-medium mb-2">Fornecimento de Soluções</p>
+                <div className="flex gap-3">
+                  {["hint", "yes", "no"].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setSolutionType(type)}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold shadow-md transition-colors ${
+                        solutionType === type 
+                          ? "bg-indigo-600 text-white" 
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      }`}
+                    >
+                      {type === "hint" ? "Dica" : type === "yes" ? "Sim" : "Não"}
+                    </button>
+                  ))}
+                </div>
               </div>
               
               {/* Tom do Feedback */}
@@ -149,11 +162,14 @@ const FeedbackForm = () => {
               />
               
               {/* Contexto da Atividade */}
-              <div>
-                <p className="text-gray-400 font-medium mb-1">Contexto da Atividade</p>
-                <p className="bg-gray-700 p-4 rounded-xl text-gray-300 text-xs leading-relaxed border border-gray-600">
-                  O objetivo desta atividade é criar um portal de notícias com duas páginas: uma home (`index.html`) que exibe uma lista de notícias em formato de 'cards', e uma página de detalhes (`detalhes.html`) que mostra o conteúdo completo de uma notícia. Todo o conteúdo deve ser carregado dinamicamente a partir de uma estrutura de dados (array de objetos) no ficheiro `app.js`. É proibido o uso de frameworks como React, Vue ou Angular.
-                </p>
+              <div className="space-y-1">
+                <p className="text-gray-400 font-medium text-sm">Contexto da Atividade</p>
+                <textarea
+                  value={activityContext}
+                  onChange={(e) => setActivityContext(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-xl p-4 text-gray-300 text-xs leading-relaxed focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[150px] resize-y"
+                  placeholder="Descreva o contexto da atividade..."
+                />
               </div>
               
               {/* Orientações Extras */}
@@ -168,14 +184,65 @@ const FeedbackForm = () => {
               </div>
               
               {/* Arquivos para Leitura */}
-              <div>
-                <p className="text-gray-400 font-medium mb-1">Arquivos para Leitura</p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md">index.html</span>
-                  <span className="bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md">detalhes.html</span>
-                  <span className="bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md">css/styles.css</span>
-                  <span className="bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md">app.js</span>
+              <div className="space-y-3 ">
+                <div className="flex flex-col justify-between gap-3">
+                  <p className="text-gray-400 font-medium">Arquivos para Leitura</p>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={currentFile}
+                      onChange={(e) => setCurrentFile(e.target.value)}
+                      placeholder="Nome do arquivo..."
+                      className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <button
+                      onClick={() => {
+                        if (currentFile.trim()) {
+                          setReadingFiles(prev => [...prev, currentFile.trim()]);
+                          setCurrentFile("");
+                        }
+                      }}
+                      type="button"
+                      className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
                 </div>
+
+                <div>
+                  {readingFiles.length === 0 ? (
+                    <p className="text-gray-500 italic text-sm">Nenhum arquivo adicionado</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {readingFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="group flex items-center bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md"
+                        >
+                          {file}
+                          <button
+                            onClick={() => setReadingFiles(prev => prev.filter((_, i) => i !== index))}
+                            className="ml-2 text-indigo-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Save Button */}
+              <div className="mt-8 flex justify-end">
+                <button
+                  type="button"
+                  className="px-6 py-3 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors shadow-lg"
+                  onClick={() => {/* Save logic will go here */}}
+                >
+                  Salvar
+                </button>
               </div>
             </div>
           </section>
