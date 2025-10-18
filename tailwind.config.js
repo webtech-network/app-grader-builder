@@ -1,0 +1,18 @@
+const flowbiteReact = require("flowbite-react/plugin/tailwindcss");
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./src/**/*.{js,jsx,ts,tsx}', ".flowbite-react/class-list.json"],
+  theme: {
+    extend: {
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+      },
+      colors: {
+        "yellow": "#FDBC2F",
+        "dark": "#041418"
+      }
+    },
+  },
+  plugins: [flowbiteReact],
+}
