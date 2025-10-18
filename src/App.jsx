@@ -1,11 +1,20 @@
 import React from "react";
-import FeedbackForm from "./components/feedback";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LandingPage from "./components/LandingPage";
+import ConfigurationPage from "./components/ConfigurationPage";
+import DocumentationPage from "./components/DocumentationPage";
 
 const App = () => {
   return (
-    <div className="min-h-screen w-full bg-gray-900">
-      <FeedbackForm />
-    </div>
+    <Router>
+      <div className="min-h-screen w-full">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/configure" element={<ConfigurationPage />} />
+          <Route path="/documentation" element={<DocumentationPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 };
 
