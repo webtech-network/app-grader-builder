@@ -39,6 +39,78 @@ const TreeStyles = () => (
     .tree > ul > li:last-child:before {
       background: #111827; /* Cor do fundo para esconder a linha vertical */
     }
+    
+    /* Save celebration animation */
+    @keyframes celebrate {
+      0% {
+        transform: scale(1);
+      }
+      25% {
+        transform: scale(1.1) rotate(3deg);
+      }
+      50% {
+        transform: scale(1.15) rotate(-3deg);
+      }
+      75% {
+        transform: scale(1.1) rotate(2deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+    }
+    
+    @keyframes confetti {
+      0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) rotate(360deg);
+      }
+    }
+    
+    .save-celebrate {
+      animation: celebrate 0.6s ease-in-out;
+    }
+    
+    .confetti-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      animation: confetti 0.8s ease-out forwards;
+      pointer-events: none;
+    }
+    
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOutDown {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    }
+    
+    .toast-enter {
+      animation: slideInUp 0.3s ease-out;
+    }
+    
+    .toast-exit {
+      animation: slideOutDown 0.3s ease-in;
+    }
   `}</style>
 );
 // --- FIM DOS ESTILOS CUSTOMIZADOS ---
@@ -284,7 +356,7 @@ const calculateChildWeights = (node) => {
 };
 
 // Componente Principal
-const CriteriaForm = () => {
+const CriteriaForm = ({ onSave }) => {
   // Estrutura inicial da árvore com peso 0
   const initialTreeData = [
     // Base é sempre 100 por padrão, o weight aqui define o valor inicial
@@ -298,7 +370,10 @@ const CriteriaForm = () => {
   const [newNodeName, setNewNodeName] = useState('');
   const [selectedParentId, setSelectedParentId] = useState(null);
   // Novo estado para o seletor: 'Subject' ou 'Test'
-  const [nodeTypeToCreate, setNodeTypeToCreate] = useState('Subject'); 
+  const [nodeTypeToCreate, setNodeTypeToCreate] = useState('Subject');
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // Calcula a soma dos pesos de cada categoria L0 (memoization)
   const categoryWeights = useMemo(() => {
@@ -368,6 +443,114 @@ const CriteriaForm = () => {
   
   const handleWeightChange = (targetId, newWeight) => {
       setTreeData(prevTree => updateNodeWeight(prevTree, targetId, newWeight));
+  };
+
+  const handleSaveCriteria = () => {
+    // Transform tree structure to backend format
+    // Backend expects: { base: {...}, bonus: {...}, penalty: {...} }
+    // Each category has: weight and subjects (dict of subjects)
+    // Each subject has: weight and either tests OR nested subjects
+    
+    const transformSubjectToBackend = (node) => {
+      const subject = {};
+      
+      if (node.weight && node.weight > 0) {
+        subject.weight = node.weight;
+      }
+      
+      // Check if this subject has test children (leaf nodes with children === null)
+      const hasTests = node.children && node.children.some(child => child.children === null);
+      
+      if (hasTests) {
+        // Has tests - collect them (for now, as placeholder structure)
+        subject.tests = node.children
+          .filter(child => child.children === null)
+          .map(test => ({
+            name: test.name.replace(' (Teste)', ''),
+            file: 'all', // Default, user should configure this later
+            calls: [[]] // Empty calls array as placeholder
+          }));
+      } else if (node.children && node.children.length > 0) {
+        // Has nested subjects
+        subject.subjects = {};
+        node.children.forEach(child => {
+          // Use sanitized name as key (remove special chars, lowercase, spaces to underscores)
+          const key = child.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+          subject.subjects[key] = transformSubjectToBackend(child);
+        });
+      }
+      
+      return subject;
+    };
+
+    const buildCategoryConfig = (categoryNode) => {
+      if (!categoryNode || !categoryNode.children || categoryNode.children.length === 0) {
+        return null;
+      }
+      
+      const category = {
+        subjects: {}
+      };
+      
+      if (categoryNode.weight && categoryNode.weight > 0) {
+        category.weight = categoryNode.weight;
+      }
+      
+      // Convert each child to a subject
+      categoryNode.children.forEach(child => {
+        const key = child.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+        category.subjects[key] = transformSubjectToBackend(child);
+      });
+      
+      return category;
+    };
+
+    const baseNode = treeData.find(n => n.id === 'base');
+    const bonusNode = treeData.find(n => n.id === 'bonus');
+    const penaltyNode = treeData.find(n => n.id === 'penalty');
+
+    const criteriaConfig = {
+      base: buildCategoryConfig(baseNode) || { subjects: {} }
+    };
+    
+    // Only add bonus/penalty if they have content
+    const bonusConfig = buildCategoryConfig(bonusNode);
+    if (bonusConfig) {
+      criteriaConfig.bonus = bonusConfig;
+    }
+    
+    const penaltyConfig = buildCategoryConfig(penaltyNode);
+    if (penaltyConfig) {
+      criteriaConfig.penalty = penaltyConfig;
+    }
+
+    // Call parent callback if provided
+    if (onSave) {
+      onSave(criteriaConfig);
+    }
+    
+    // Trigger celebration animation
+    setSaveButtonAnimation(true);
+    setShowSaveSuccess(true);
+    setIsSaved(true);
+    
+    // Reset animation after it completes
+    setTimeout(() => {
+      setSaveButtonAnimation(false);
+    }, 600);
+    
+    // Hide success message after 2 seconds
+    setTimeout(() => {
+      setShowSaveSuccess(false);
+    }, 2000);
+  };
+
+  const handleCancelSave = () => {
+    setIsSaved(false);
+    // Call parent callback with null to indicate unsaved state
+    if (onSave) {
+      onSave(null);
+    }
   };
 
   const handleAddChild = (parentId) => {
@@ -465,7 +648,7 @@ const CriteriaForm = () => {
       <div className="max-w-5xl mx-auto">
 
         {/* Header - Raiz da Árvore */}
-        <header className="text-center mb-12 border-b border-indigo-700/50 pb-4">
+        <header className="text-center mb-3 border-b border-indigo-700/50 pb-4">
           <h1 className="text-4xl font-extrabold text-white">
             <span className="text-indigo-400">Assignment</span> Structure
           </h1>
@@ -537,6 +720,80 @@ const CriteriaForm = () => {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* Save Button */}
+        <div className="flex justify-start items-center gap-3 relative">
+          <button
+            onClick={handleSaveCriteria}
+            disabled={isSaved}
+            className={`px-4 py-2 font-medium rounded-lg transition duration-150 flex items-center gap-2 text-sm relative overflow-hidden ${
+              isSaved 
+                ? 'bg-green-600 text-white cursor-not-allowed' 
+                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+            } ${saveButtonAnimation ? 'save-celebrate' : ''}`}
+          >
+            {isSaved ? (
+              <>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Saved
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                </svg>
+                Salvar Critérios
+              </>
+            )}
+            {saveButtonAnimation && (
+              <>
+                {[...Array(8)].map((_, i) => (
+                  <span
+                    key={i}
+                    className="confetti-particle"
+                    style={{
+                      left: '50%',
+                      top: '50%',
+                      backgroundColor: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'][i % 5],
+                      transform: `translate(-50%, -50%) rotate(${i * 45}deg) translateX(${20 + i * 5}px)`,
+                      animationDelay: `${i * 0.05}s`
+                    }}
+                  />
+                ))}
+              </>
+            )}
+          </button>
+          
+          {isSaved && (
+            <button
+              onClick={handleCancelSave}
+              className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition duration-150 flex items-center gap-2 text-sm"
+              title="Cancel and unsave changes"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cancel
+            </button>
+          )}
+        </div>
+
+        {/* Success Toast Notification */}
+        {showSaveSuccess && (
+          <div className="fixed bottom-8 right-8 z-50 toast-enter">
+            <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border-2 border-green-400">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <div>
+                <p className="font-bold">Saved!</p>
+                <p className="text-sm text-green-100">Criteria saved successfully</p>
+              </div>
+            </div>
           </div>
         )}
 
