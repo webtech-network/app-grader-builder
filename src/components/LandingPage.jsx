@@ -1,23 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronDown, Info, Code, Sparkles, X, Zap, FileCode } from 'lucide-react';
 import logo from '../assets/logo.jpeg';
 
 const LandingPage = () => {
   const [gradingTemplate, setGradingTemplate] = useState('');
   const [feedbackMode, setFeedbackMode] = useState('');
+  const [templates, setTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [selectedTemplateDetails, setSelectedTemplateDetails] = useState(null);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showTestsModal, setShowTestsModal] = useState(false);
+  const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
   const navigate = useNavigate();
 
-  const gradingTemplateOptions = [
-    { value: 'web-dev', label: 'Web Dev (HTML/CSS/JS)' },
-    { value: 'essay', label: 'Essay (AI Grading)' },
-    { value: 'api-testing', label: 'API Testing' },
-    { value: 'input-output', label: 'Input/Output' }
-  ];
+  // Fetch templates from API
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/templates/');
+        const data = await response.json();
+        setTemplates(data);
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        // Fallback templates
+        setTemplates(['webdev', 'api', 'essay', 'io']);
+      } finally {
+        setLoadingTemplates(false);
+      }
+    };
+    fetchTemplates();
+  }, []);
+
+  // Fetch template details
+  const fetchTemplateDetails = async (templateName) => {
+    try {
+      const response = await fetch(`http://localhost:8000/templates/${templateName}`);
+      const data = await response.json();
+      setSelectedTemplateDetails(data);
+      setShowTemplateModal(true);
+    } catch (error) {
+      console.error('Error fetching template details:', error);
+    }
+  };
 
   const feedbackModeOptions = [
-    { value: 'default', label: 'Default' },
-    { value: 'ai-powered', label: 'AI-Powered' }
+    { value: 'default', label: 'Default', icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' },
+    { value: 'ai-powered', label: 'AI-Powered', icon: '🤖', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' }
   ];
+
+  const [showFeedbackDropdown, setShowFeedbackDropdown] = useState(false);
+
+  const getFeedbackDisplayInfo = (feedbackValue) => {
+    return feedbackModeOptions.find(opt => opt.value === feedbackValue) || 
+           { label: feedbackValue, icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' };
+  };
+
+  // Template display names and icons
+  const getTemplateDisplayInfo = (templateName) => {
+    const templates = {
+      'webdev': { label: 'Web Development', icon: '🌐', color: 'from-blue-500 to-cyan-500', bgColor: 'bg-blue-500/10' },
+      'api': { label: 'API Testing', icon: '🔌', color: 'from-green-500 to-emerald-500', bgColor: 'bg-green-500/10' },
+      'essay': { label: 'Essay Grading', icon: '📝', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' },
+      'io': { label: 'Input/Output', icon: '💻', color: 'from-orange-500 to-red-500', bgColor: 'bg-orange-500/10' }
+    };
+    return templates[templateName] || { label: templateName, icon: '📦', color: 'from-gray-500 to-gray-600', bgColor: 'bg-gray-500/10' };
+  };
 
   const isConfigurationReady = gradingTemplate && feedbackMode;
 
@@ -76,50 +124,149 @@ const LandingPage = () => {
           <div className="space-y-8">
             {/* Dropdowns Container */}
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Grading Template Dropdown */}
+              {/* Grading Template Dropdown - Custom Design */}
               <div className="space-y-3">
                 <label 
-                  htmlFor="grading-template" 
                   className="block text-sm font-semibold text-gray-400 mb-2"
                 >
                   Grading Template
                 </label>
-                <select
-                  id="grading-template"
-                  value={gradingTemplate}
-                  onChange={(e) => setGradingTemplate(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 text-gray-100"
-                >
-                  <option value="">Select a template...</option>
-                  {gradingTemplateOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
+                    className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-100 flex items-center justify-between hover:border-gray-500"
+                  >
+                    {gradingTemplate ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{getTemplateDisplayInfo(gradingTemplate).icon}</span>
+                        <span>{getTemplateDisplayInfo(gradingTemplate).label}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">Select a template...</span>
+                    )}
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showTemplateDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Custom Dropdown Menu */}
+                  {showTemplateDropdown && (
+                    <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-gray-600 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      {loadingTemplates ? (
+                        <div className="p-4 text-center text-gray-400">Loading templates...</div>
+                      ) : (
+                        <div className="max-h-80 overflow-y-auto">
+                          {templates.map((template) => {
+                            const info = getTemplateDisplayInfo(template);
+                            return (
+                              <div
+                                key={template}
+                                className="group relative"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setGradingTemplate(template);
+                                    setShowTemplateDropdown(false);
+                                  }}
+                                  className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-all duration-200 flex items-center justify-between ${
+                                    gradingTemplate === template ? 'bg-indigo-600/20 border-l-4 border-indigo-500' : ''
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-lg ${info.bgColor} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-200`}>
+                                      {info.icon}
+                                    </div>
+                                    <span className="font-medium text-gray-100">{info.label}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      fetchTemplateDetails(template);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-600 rounded"
+                                    title="View details"
+                                  >
+                                    <Info className="w-5 h-5 text-indigo-400" />
+                                  </button>
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Feedback Mode Dropdown */}
+              {/* Feedback Mode Dropdown - Custom Design */}
               <div className="space-y-3">
                 <label 
-                  htmlFor="feedback-mode" 
                   className="block text-sm font-semibold text-gray-400 mb-2"
                 >
                   Feedback Mode
                 </label>
-                <select
-                  id="feedback-mode"
-                  value={feedbackMode}
-                  onChange={(e) => setFeedbackMode(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 text-gray-100"
-                >
-                  <option value="">Select feedback mode...</option>
-                  {feedbackModeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowFeedbackDropdown(!showFeedbackDropdown)}
+                    className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-100 flex items-center justify-between hover:border-gray-500"
+                  >
+                    {feedbackMode ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{getFeedbackDisplayInfo(feedbackMode).icon}</span>
+                        <span>{getFeedbackDisplayInfo(feedbackMode).label}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">Select feedback mode...</span>
+                    )}
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showFeedbackDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Custom Dropdown Menu */}
+                  {showFeedbackDropdown && (
+                    <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-gray-600 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="max-h-80 overflow-y-auto">
+                        {feedbackModeOptions.map((option) => (
+                          <div
+                            key={option.value}
+                            className="group relative"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFeedbackMode(option.value);
+                                setShowFeedbackDropdown(false);
+                              }}
+                              className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-all duration-200 flex items-center justify-between ${
+                                feedbackMode === option.value ? 'bg-indigo-600/20 border-l-4 border-indigo-500' : ''
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg ${option.bgColor} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-200`}>
+                                  {option.icon}
+                                </div>
+                                <span className="font-medium text-gray-100">{option.label}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/documentation#feedback-modes');
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-600 rounded"
+                                title="View details"
+                              >
+                                <Info className="w-5 h-5 text-indigo-400" />
+                              </button>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -131,7 +278,7 @@ const LandingPage = () => {
                   {gradingTemplate && (
                     <p>
                       <span className="font-medium text-gray-300">Template:</span> {
-                        gradingTemplateOptions.find(opt => opt.value === gradingTemplate)?.label
+                        getTemplateDisplayInfo(gradingTemplate).label
                       }
                     </p>
                   )}
@@ -259,6 +406,265 @@ const LandingPage = () => {
         </div>
         </div>
       </div>
+
+      {/* Template Overview Modal - First Level */}
+      {showTemplateModal && selectedTemplateDetails && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowTemplateModal(false)}
+        >
+          <div 
+            className="bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full border-2 border-indigo-500/50 animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className={`bg-gradient-to-r ${getTemplateDisplayInfo(gradingTemplate).color} p-6 relative overflow-hidden`}>
+              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative z-10 flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-4xl border-2 border-white/20">
+                    {getTemplateDisplayInfo(gradingTemplate).icon}
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-white mb-1">
+                      {selectedTemplateDetails.template_name}
+                    </h2>
+                    <p className="text-white/90 text-sm">
+                      Template Overview
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowTemplateModal(false)}
+                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-2 transition-all duration-200"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content - Overview */}
+            <div className="p-6 space-y-6">
+              {/* Description */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-400 mb-2">Description</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  {selectedTemplateDetails.template_description}
+                </p>
+              </div>
+
+              {/* Available Tests Summary */}
+              <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap className="w-5 h-5 text-yellow-400" />
+                  <span className="px-3 py-1 bg-indigo-600/20 text-indigo-300 rounded-full text-sm font-bold">
+                    {selectedTemplateDetails.tests.length}
+                  </span>
+                  <h3 className="text-sm font-semibold text-gray-300">Available Tests</h3>
+                </div>
+                <p className="text-xs text-gray-400 mb-4">
+                  This template includes {selectedTemplateDetails.tests.length} pre-configured tests to validate student submissions.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowTestsModal(true);
+                    setShowTemplateModal(false);
+                  }}
+                  className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <FileCode className="w-4 h-4" />
+                  View All Tests Details
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-900/50 px-6 py-4 border-t border-gray-700 flex justify-end">
+              <button
+                onClick={() => setShowTemplateModal(false)}
+                className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tests Details Modal - Second Level */}
+      {showTestsModal && selectedTemplateDetails && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowTestsModal(false)}
+        >
+          <div 
+            className="bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border-2 border-indigo-500/50 animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className={`bg-gradient-to-r ${getTemplateDisplayInfo(gradingTemplate).color} p-6 relative overflow-hidden`}>
+              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative z-10 flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-4xl border-2 border-white/20">
+                    {getTemplateDisplayInfo(gradingTemplate).icon}
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-white mb-1">
+                      {selectedTemplateDetails.template_name}
+                    </h2>
+                    <p className="text-white/90 text-sm">
+                      Test Details
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowTestsModal(false)}
+                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-2 transition-all duration-200"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content - Tests List */}
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              {/* Tests Count Info */}
+              <div className="flex items-center gap-2 text-sm text-gray-400 mb-4 pb-3 border-b border-gray-700">
+                <Zap className="w-4 h-4 text-yellow-400" />
+                <span className="px-3 py-1 bg-indigo-600/20 text-indigo-300 rounded-full text-xs font-bold">
+                  {selectedTemplateDetails.tests.length}
+                </span>
+                <span className="font-medium">Available Tests</span>
+              </div>
+
+              {/* Tests Grid */}
+              <div className="grid md:grid-cols-2 gap-4 items-start">
+                {selectedTemplateDetails.tests.map((test, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-900/50 rounded-lg border border-gray-700 hover:border-indigo-500/50 transition-all duration-200 overflow-hidden"
+                  >
+                    {/* Test Card Header */}
+                    <div className="p-4 bg-gradient-to-r from-gray-800/50 to-gray-900/30 border-b border-gray-700">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
+                          <Code className="w-5 h-5 text-indigo-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-white text-sm mb-1">
+                            {test.name}
+                          </h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {test.parameters && test.parameters.length > 0 && (
+                              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs font-medium">
+                                {test.parameters.length} params
+                              </span>
+                            )}
+                            {test.required_file && (
+                              <span className="px-2 py-0.5 bg-green-500/20 text-green-300 rounded text-xs font-medium">
+                                📁 File required
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Test Card Body */}
+                    <div className="p-4 space-y-3">
+                      {/* Description */}
+                      <div>
+                        <p className="text-xs text-gray-300 leading-relaxed">
+                          {test.description}
+                        </p>
+                      </div>
+
+                      {/* Required File */}
+                      {test.required_file && (
+                        <div>
+                          <h4 className="text-xs font-semibold text-gray-400 mb-1">Required File:</h4>
+                          <code className="text-xs text-green-400 bg-gray-900/50 px-2 py-1 rounded block break-all">
+                            {test.required_file}
+                          </code>
+                        </div>
+                      )}
+
+                      {/* Parameters - Collapsed by default or simple message */}
+                      {test.parameters && test.parameters.length > 0 ? (
+                        <details className="group">
+                          <summary className="text-xs font-semibold text-indigo-400 cursor-pointer hover:text-indigo-300 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" />
+                            View Parameters ({test.parameters.length})
+                          </summary>
+                          <div className="mt-2 space-y-2 pl-4">
+                            {test.parameters.map((param, pIndex) => (
+                              <div
+                                key={pIndex}
+                                className="bg-gray-900/70 rounded p-2 border border-gray-700"
+                              >
+                                <div className="flex items-start justify-between mb-1">
+                                  <code className="text-indigo-300 font-mono text-xs font-bold">
+                                    {param.name}
+                                  </code>
+                                  <span className="text-xs px-1.5 py-0.5 bg-purple-500/30 text-purple-200 rounded font-medium ml-2 flex-shrink-0">
+                                    {param.type}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-400">
+                                  {param.description}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      ) : (
+                        <div className="text-xs text-gray-500 italic flex items-center gap-1.5">
+                          <Sparkles className="w-3 h-3" />
+                          This test needs no parameters
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-900/50 px-6 py-4 border-t border-gray-700 flex justify-between">
+              <button
+                onClick={() => {
+                  setShowTestsModal(false);
+                  setShowTemplateModal(true);
+                }}
+                className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors duration-200"
+              >
+                ← Back to Overview
+              </button>
+              <button
+                onClick={() => setShowTestsModal(false)}
+                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Click outside to close dropdowns */}
+      {showTemplateDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowTemplateDropdown(false)}
+        ></div>
+      )}
+      {showFeedbackDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowFeedbackDropdown(false)}
+        ></div>
+      )}
     </div>
   );
 };
