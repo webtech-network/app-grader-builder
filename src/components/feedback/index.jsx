@@ -4,7 +4,7 @@ import ToggleSwitch from './ToggleSwitch';
 import ResourceForm from './ResourceForm';
 import ResourceList from './ResourceList';
 
-const FeedbackForm = () => {
+const FeedbackForm = ({ onSave }) => {
   // State management
   const [reportTitle, setReportTitle] = useState("");
   const [feedbackTone, setFeedbackTone] = useState("");
@@ -20,6 +20,9 @@ const FeedbackForm = () => {
     add_report_summary: true
   });
   const [resources, setResources] = useState([]);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // Event handlers
   const handleToggle = (id) => {
@@ -38,40 +41,91 @@ const FeedbackForm = () => {
   };
 
   const assembleConfiguration = () => {
-    const config = {
-      general: {
-        report_title: reportTitle,
-        show_score: toggleStates.show_score,
-        show_passed_tests: toggleStates.show_passed_tests,
-        add_report_summary: toggleStates.add_report_summary,
-        online_content: resources.map(resource => ({
-          url: resource.url,
-          description: resource.title,
-          linked_tests: resource.tags
-        }))
-      },
-      ai: {
-        provide_solutions: solutionType,
-        feedback_tone: feedbackTone,
-        feedback_persona: feedbackPersona,
-        assignment_context: activityContext,
-        extra_orientations: extraGuidelines,
-        submission_files_to_read: readingFiles
-      },
-      default: {
-        category_headers: {
-          base: "✅ Essential Requirements",
-          bonus: "⭐ Extra Points and Best Practices",
-          penalty: "🚨 Points of Attention and Bad Practices"
-        }
-      }
-    };
-    //TODO: remover este log
-    console.log(JSON.stringify(config, null, 2));
+    // Backend expects: { general: {...}, ai: {...}, default: {...} }
+    const config = {};
+    
+    // General configuration (always include if any value is set)
+    const generalConfig = {};
+    if (reportTitle) {
+      generalConfig.report_title = reportTitle;
+    }
+    if (toggleStates.show_passed_tests !== undefined) {
+      generalConfig.show_passed_tests = toggleStates.show_passed_tests;
+    }
+    if (toggleStates.show_score !== undefined) {
+      generalConfig.show_test_details = toggleStates.show_score; // Map to backend field
+    }
+    
+    if (Object.keys(generalConfig).length > 0) {
+      config.general = generalConfig;
+    }
+    
+    // AI configuration (only if values are provided)
+    const aiConfig = {};
+    if (feedbackPersona) {
+      aiConfig.feedback_persona = feedbackPersona;
+    }
+    if (activityContext) {
+      aiConfig.assignment_context = activityContext;
+    }
+    if (extraGuidelines) {
+      aiConfig.extra_orientations = extraGuidelines;
+    }
+    if (readingFiles && readingFiles.length > 0) {
+      aiConfig.submission_files_to_read = readingFiles;
+    }
+    
+    if (Object.keys(aiConfig).length > 0) {
+      config.ai = aiConfig;
+    }
+    
+    // Default configuration (custom category headers)
+    const defaultConfig = {};
+    if (toggleStates.add_report_summary || Object.keys(defaultConfig).length > 0) {
+      defaultConfig.category_headers = {
+        base: "✅ Essential Requirements",
+        bonus: "⭐ Extra Points and Best Practices",
+        penalty: "🚨 Points of Attention and Bad Practices"
+      };
+      config.default = defaultConfig;
+    }
+    
     return config;
   };
 
-  // Custom styles for toggle
+  const handleSave = () => {
+    const config = assembleConfiguration();
+    
+    // Call parent callback if provided
+    if (onSave) {
+      onSave(config);
+    }
+    
+    // Trigger celebration animation
+    setSaveButtonAnimation(true);
+    setShowSaveSuccess(true);
+    setIsSaved(true);
+    
+    // Reset animation after it completes
+    setTimeout(() => {
+      setSaveButtonAnimation(false);
+    }, 600);
+    
+    // Hide success message after 2 seconds
+    setTimeout(() => {
+      setShowSaveSuccess(false);
+    }, 2000);
+  };
+
+  const handleCancelSave = () => {
+    setIsSaved(false);
+    // Call parent callback with null to indicate unsaved state
+    if (onSave) {
+      onSave(null);
+    }
+  };
+
+  // Custom styles for toggle and animations
   const ToggleStyle = () => (
     <style jsx="true">{`
       .toggle-checkbox {
@@ -87,6 +141,78 @@ const FeedbackForm = () => {
       .toggle-checkbox:focus {
         outline: none;
         box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+      }
+      
+      /* Save celebration animation */
+      @keyframes celebrate {
+        0% {
+          transform: scale(1);
+        }
+        25% {
+          transform: scale(1.1) rotate(3deg);
+        }
+        50% {
+          transform: scale(1.15) rotate(-3deg);
+        }
+        75% {
+          transform: scale(1.1) rotate(2deg);
+        }
+        100% {
+          transform: scale(1) rotate(0deg);
+        }
+      }
+      
+      @keyframes confetti {
+        0% {
+          opacity: 1;
+          transform: translateY(0) rotate(0deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-100px) rotate(360deg);
+        }
+      }
+      
+      .save-celebrate {
+        animation: celebrate 0.6s ease-in-out;
+      }
+      
+      .confetti-particle {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        animation: confetti 0.8s ease-out forwards;
+        pointer-events: none;
+      }
+      
+      @keyframes slideInUp {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideOutDown {
+        from {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+      }
+      
+      .toast-enter {
+        animation: slideInUp 0.3s ease-out;
+      }
+      
+      .toast-exit {
+        animation: slideOutDown 0.3s ease-in;
       }
     `}</style>
   );
@@ -269,15 +395,80 @@ const FeedbackForm = () => {
               </div>
               
               {/* Save Button */}
-              <div className="mt-8 flex justify-end">
+              <div className="mt-8 flex justify-end items-center gap-3 relative">
                 <button
                   type="button"
-                  className="px-6 py-3 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors shadow-lg"
-                  onClick={assembleConfiguration}
+                  disabled={isSaved}
+                  className={`px-6 py-3 rounded-xl text-sm font-semibold transition-colors shadow-lg flex items-center gap-2 relative overflow-hidden ${
+                    isSaved 
+                      ? 'bg-green-600 text-white cursor-not-allowed' 
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  } ${saveButtonAnimation ? 'save-celebrate' : ''}`}
+                  onClick={handleSave}
                 >
-                  Salvar
+                  {isSaved ? (
+                    <>
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Saved
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                      </svg>
+                      Salvar
+                    </>
+                  )}
+                  {saveButtonAnimation && (
+                    <>
+                      {[...Array(8)].map((_, i) => (
+                        <span
+                          key={i}
+                          className="confetti-particle"
+                          style={{
+                            left: '50%',
+                            top: '50%',
+                            backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5],
+                            transform: `translate(-50%, -50%) rotate(${i * 45}deg) translateX(${20 + i * 5}px)`,
+                            animationDelay: `${i * 0.05}s`
+                          }}
+                        />
+                      ))}
+                    </>
+                  )}
                 </button>
+                
+                {isSaved && (
+                  <button
+                    type="button"
+                    onClick={handleCancelSave}
+                    className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition duration-150 flex items-center gap-2 text-sm"
+                    title="Cancel and unsave changes"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Cancel
+                  </button>
+                )}
               </div>
+              
+              {/* Success Toast Notification */}
+              {showSaveSuccess && (
+                <div className="fixed bottom-8 right-8 z-50 toast-enter">
+                  <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border-2 border-green-400">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div>
+                      <p className="font-bold">Saved!</p>
+                      <p className="text-sm text-green-100">Feedback saved successfully</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         </div>
