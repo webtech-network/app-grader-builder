@@ -37,6 +37,40 @@ const FeedbackForm = () => {
     setResources(prev => prev.filter((_, i) => i !== index));
   };
 
+  const assembleConfiguration = () => {
+    const config = {
+      general: {
+        report_title: reportTitle,
+        show_score: toggleStates.show_score,
+        show_passed_tests: toggleStates.show_passed_tests,
+        add_report_summary: toggleStates.add_report_summary,
+        online_content: resources.map(resource => ({
+          url: resource.url,
+          description: resource.title,
+          linked_tests: resource.tags
+        }))
+      },
+      ai: {
+        provide_solutions: solutionType,
+        feedback_tone: feedbackTone,
+        feedback_persona: feedbackPersona,
+        assignment_context: activityContext,
+        extra_orientations: extraGuidelines,
+        submission_files_to_read: readingFiles
+      },
+      default: {
+        category_headers: {
+          base: "✅ Essential Requirements",
+          bonus: "⭐ Extra Points and Best Practices",
+          penalty: "🚨 Points of Attention and Bad Practices"
+        }
+      }
+    };
+    //TODO: remover este log
+    console.log(JSON.stringify(config, null, 2));
+    return config;
+  };
+
   // Custom styles for toggle
   const ToggleStyle = () => (
     <style jsx="true">{`
@@ -239,7 +273,7 @@ const FeedbackForm = () => {
                 <button
                   type="button"
                   className="px-6 py-3 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors shadow-lg"
-                  onClick={() => {/* Save logic will go here */}}
+                  onClick={assembleConfiguration}
                 >
                   Salvar
                 </button>
