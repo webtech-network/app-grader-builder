@@ -89,58 +89,27 @@ const DocumentationPage = () => {
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
               📝 Grading Templates
             </h2>
-            <div className="grid gap-6">
-              
-              {/* Web Dev Template */}
-              <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
-                <h3 className="text-xl font-semibold text-indigo-400 mb-3">🌐 Web Dev (HTML/CSS/JS)</h3>
-                <p className="text-gray-300 mb-4">
-                  Perfect for front-end development assignments, websites, and interactive web applications.
-                </p>
-                <div className="space-y-2 text-sm">
-                  <p><span className="font-medium text-gray-200">Best for:</span> HTML structure, CSS styling, JavaScript functionality</p>
-                  <p><span className="font-medium text-gray-200">Tests:</span> DOM elements, CSS selectors, JavaScript functions, responsive design</p>
-                  <p><span className="font-medium text-gray-200">Files checked:</span> index.html, style.css, script.js, assets</p>
-                </div>
+            <div className="space-y-4 text-gray-300">
+              <p>
+                Grading templates provide pre-configured test suites tailored to specific assignment types. 
+                Each template includes specialized tests, validation rules, and file structure requirements 
+                optimized for different development scenarios.
+              </p>
+              <div className="bg-indigo-900/30 border border-indigo-600 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-indigo-400 mb-2">How to Select a Template:</h3>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>On the landing page, click the "Grading Template" dropdown</li>
+                  <li>Hover over any template to see the info icon (ℹ️)</li>
+                  <li>Click the info icon to view detailed test descriptions</li>
+                  <li>Select the template that best matches your assignment requirements</li>
+                </ol>
               </div>
-
-              {/* Essay Template */}
-              <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
-                <h3 className="text-xl font-semibold text-indigo-400 mb-3">📄 Essay (AI Grading)</h3>
-                <p className="text-gray-300 mb-4">
-                  AI-powered grading for written assignments, research papers, and documentation.
+              <div className="bg-gray-700 rounded-lg p-4 mt-4">
+                <p className="text-sm text-gray-400">
+                  💡 <span className="font-medium text-gray-300">Tip:</span> Each template comes with a complete overview 
+                  showing all available tests, required files, and parameters. Review the template details before 
+                  making your selection to ensure it matches your assignment needs.
                 </p>
-                <div className="space-y-2 text-sm">
-                  <p><span className="font-medium text-gray-200">Best for:</span> Written content, documentation, research assignments</p>
-                  <p><span className="font-medium text-gray-200">Tests:</span> Content quality, structure, grammar, citations</p>
-                  <p><span className="font-medium text-gray-200">Files checked:</span> README.md, documentation files, text content</p>
-                </div>
-              </div>
-
-              {/* API Testing Template */}
-              <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
-                <h3 className="text-xl font-semibold text-indigo-400 mb-3">🔌 API Testing</h3>
-                <p className="text-gray-300 mb-4">
-                  Comprehensive testing for REST APIs, backend services, and server applications.
-                </p>
-                <div className="space-y-2 text-sm">
-                  <p><span className="font-medium text-gray-200">Best for:</span> Backend APIs, web services, server applications</p>
-                  <p><span className="font-medium text-gray-200">Tests:</span> Endpoint responses, status codes, data validation, authentication</p>
-                  <p><span className="font-medium text-gray-200">Files checked:</span> Server files, API routes, configuration files</p>
-                </div>
-              </div>
-
-              {/* Input/Output Template */}
-              <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
-                <h3 className="text-xl font-semibold text-indigo-400 mb-3">⚡ Input/Output</h3>
-                <p className="text-gray-300 mb-4">
-                  Traditional testing for command-line programs, algorithms, and computational tasks.
-                </p>
-                <div className="space-y-2 text-sm">
-                  <p><span className="font-medium text-gray-200">Best for:</span> Console applications, algorithms, data processing</p>
-                  <p><span className="font-medium text-gray-200">Tests:</span> Program output, performance, edge cases, correctness</p>
-                  <p><span className="font-medium text-gray-200">Files checked:</span> Source code, executables, test data</p>
-                </div>
               </div>
             </div>
           </div>
@@ -152,50 +121,110 @@ const DocumentationPage = () => {
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
               💬 Feedback Modes
             </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              
-              {/* Default Mode */}
-              <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
-                <h3 className="text-xl font-semibold text-indigo-400 mb-3">🔧 Default</h3>
-                <p className="text-gray-300 mb-4">
-                  Standard template-based feedback with predefined messages and scoring.
-                </p>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                    <span>Fast and consistent feedback</span>
+            <div className="space-y-6">
+              <p className="text-gray-300">
+                Choose how your autograder communicates test results to students. Each mode offers different 
+                levels of detail and personalization to match your teaching style and assignment goals.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Default Mode */}
+                <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">📋</span>
+                    <h3 className="text-xl font-semibold text-indigo-400">Default Mode</h3>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                    <span>Clear pass/fail indicators</span>
+                  <p className="text-gray-300 mb-4 text-sm">
+                    Standard template-based feedback with predefined messages and consistent scoring across all submissions.
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">✓ Features:</h4>
+                      <div className="space-y-2 text-sm text-gray-400">
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Fast execution with instant feedback</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Consistent messaging across all students</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Clear pass/fail indicators for each test</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Structured JSON and HTML reports</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">📌 Best For:</h4>
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        <li>• Large classes requiring consistent grading</li>
+                        <li>• Assignments with objective test criteria</li>
+                        <li>• Quick turnaround requirements</li>
+                        <li>• Standard programming exercises</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                    <span>Structured test results</span>
+                </div>
+
+                {/* AI-Powered Mode */}
+                <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-lg p-6 border border-purple-600/50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">🤖</span>
+                    <h3 className="text-xl font-semibold text-purple-400">AI-Powered Mode</h3>
+                  </div>
+                  <p className="text-gray-300 mb-4 text-sm">
+                    Intelligent feedback generation with personalized tone, contextual suggestions, and adaptive learning insights.
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">✨ Features:</h4>
+                      <div className="space-y-2 text-sm text-gray-400">
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Personalized feedback tone (encouraging, professional, etc.)</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Context-aware improvement suggestions</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Detailed explanations for failed tests</span>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>Natural language report generation</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">📌 Best For:</h4>
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        <li>• Smaller classes with diverse skill levels</li>
+                        <li>• Complex assignments requiring detailed feedback</li>
+                        <li>• Encouraging struggling students</li>
+                        <li>• Creative or design-focused projects</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* AI-Powered Mode */}
-              <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
-                <h3 className="text-xl font-semibold text-indigo-400 mb-3">🤖 AI-Powered</h3>
-                <p className="text-gray-300 mb-4">
-                  Intelligent feedback with personalized suggestions and detailed explanations.
+              {/* Configuration Note */}
+              <div className="bg-yellow-900/30 border border-yellow-600 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-yellow-400 mb-2 flex items-center gap-2">
+                  <span>⚙️</span> Configuration Options
+                </h3>
+                <p className="text-xs text-gray-300">
+                  AI-Powered mode offers additional configuration in the Feedback tab, including tone selection 
+                  (Professional, Encouraging, Strict, Friendly), custom AI persona, and specific guidelines for 
+                  feedback generation. Default mode uses the standard templates without additional configuration.
                 </p>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                    <span>Personalized feedback tone</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                    <span>Contextual improvement suggestions</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                    <span>Adaptive learning insights</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
