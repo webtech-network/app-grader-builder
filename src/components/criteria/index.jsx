@@ -447,7 +447,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
-                                Saved
+                                Salvo
                             </>
                         ) : (
                             <>
@@ -480,12 +480,12 @@ const CriteriaForm = ({ templateName, onSave }) => {
                         <button
                             onClick={handleCancelSave}
                             className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition duration-150 flex items-center gap-2 text-sm"
-                            title="Cancel and unsave changes"
+                            title="Cancelar e descartar alterações"
                         >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            Cancel
+                            Cancelar
                         </button>
                     )}
                 </div>
@@ -498,8 +498,8 @@ const CriteriaForm = ({ templateName, onSave }) => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                             <div>
-                                <p className="font-bold">Saved!</p>
-                                <p className="text-sm text-green-100">Criteria saved successfully</p>
+                                <p className="font-bold">Salvo!</p>
+                                <p className="text-sm text-green-100">Critérios salvos com sucesso</p>
                             </div>
                         </div>
                     </div>

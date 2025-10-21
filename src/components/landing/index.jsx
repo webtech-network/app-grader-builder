@@ -47,8 +47,8 @@ const LandingPage = () => {
   };
 
   const feedbackModeOptions = [
-    { value: 'default', label: 'Default', icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' },
-    { value: 'ai', label: 'AI-Powered', icon: '🤖', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' }
+    { value: 'default', label: 'Padrão', icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' },
+    { value: 'ai', label: 'Inteligência Artificial', icon: '🤖', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' }
   ];
 
   const getFeedbackDisplayInfo = (feedbackValue) => {
@@ -58,10 +58,10 @@ const LandingPage = () => {
 
   const getTemplateDisplayInfo = (templateName = gradingTemplate) => {
     const templates = {
-      'webdev': { label: 'Web Development', icon: '🌐', color: 'from-blue-500 to-cyan-500', bgColor: 'bg-blue-500/10' },
+      'webdev': { label: 'Web Dev', icon: '🌐', color: 'from-blue-500 to-cyan-500', bgColor: 'bg-blue-500/10' },
       'api': { label: 'API Testing', icon: '🔌', color: 'from-green-500 to-emerald-500', bgColor: 'bg-green-500/10' },
-      'essay': { label: 'Essay Grading', icon: '📝', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' },
-      'io': { label: 'Input/Output', icon: '💻', color: 'from-orange-500 to-red-500', bgColor: 'bg-orange-500/10' }
+      'essay': { label: 'Redações', icon: '📝', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' },
+      'io': { label: 'Entrada/Saída', icon: '💻', color: 'from-orange-500 to-red-500', bgColor: 'bg-orange-500/10' }
     };
     return templates[templateName] || { label: templateName, icon: '📦', color: 'from-gray-500 to-gray-600', bgColor: 'bg-gray-500/10' };
   };
@@ -106,14 +106,14 @@ const LandingPage = () => {
           {/* Main Title Section */}
           <div className="text-center mb-12 pt-8">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Create Your Grading Package
+              Crie Seu Pacote de Avaliação
             </h2>
             <h3 className="text-xl md:text-2xl text-gray-400 mb-2">
-              for GitHub Classroom
+              para GitHub Classroom
             </h3>
             <p className="text-gray-400 max-w-lg mx-auto">
-              Configure your automated grading system with just a few clicks. 
-              Select your template and feedback preferences to get started.
+              Configure seu sistema de avaliação automatizada com apenas alguns cliques. 
+              Selecione seu modelo e preferências de feedback para começar.
             </p>
           </div>
 
@@ -125,7 +125,7 @@ const LandingPage = () => {
               {/* Grading Template Dropdown */}
               <div className="space-y-3">
                 <label className="block text-sm font-semibold text-gray-400 mb-2">
-                  Grading Template
+                  Modelo de Avaliação
                 </label>
                 <div className="relative">
                   <button
@@ -139,7 +139,7 @@ const LandingPage = () => {
                         <span>{getTemplateDisplayInfo(gradingTemplate).label}</span>
                       </div>
                     ) : (
-                      <span className="text-gray-400">Select a template...</span>
+                      <span className="text-gray-400">Selecione um modelo...</span>
                     )}
                     <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showTemplateDropdown ? 'rotate-180' : ''}`} />
                   </button>
@@ -147,7 +147,7 @@ const LandingPage = () => {
                   {showTemplateDropdown && (
                     <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-gray-600 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                       {loadingTemplates ? (
-                        <div className="p-4 text-center text-gray-400">Loading templates...</div>
+                        <div className="p-4 text-center text-gray-400">Carregando modelos...</div>
                       ) : (
                         <div className="max-h-80 overflow-y-auto">
                           {templates.map((template) => {
@@ -177,7 +177,7 @@ const LandingPage = () => {
                                       fetchTemplateDetails(template);
                                     }}
                                     className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-600 rounded"
-                                    title="View details"
+                                    title="Ver detalhes"
                                   >
                                     <Info className="w-5 h-5 text-indigo-400" />
                                   </button>
@@ -195,7 +195,7 @@ const LandingPage = () => {
               {/* Feedback Mode Dropdown */}
               <div className="space-y-3">
                 <label className="block text-sm font-semibold text-gray-400 mb-2">
-                  Feedback Mode
+                  Modo de Feedback
                 </label>
                 <div className="relative">
                   <button
@@ -209,7 +209,7 @@ const LandingPage = () => {
                         <span>{getFeedbackDisplayInfo(feedbackMode).label}</span>
                       </div>
                     ) : (
-                      <span className="text-gray-400">Select feedback mode...</span>
+                      <span className="text-gray-400">Selecione o modo...</span>
                     )}
                     <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showFeedbackDropdown ? 'rotate-180' : ''}`} />
                   </button>
@@ -289,10 +289,10 @@ const LandingPage = () => {
                 {isConfigurationReady ? (
                   <>
                     <span className="mr-2">🚀</span>
-                    Start Configuring
+                    Começar Configuração
                   </>
                 ) : (
-                  'Please select both options above'
+                  'Selecione um modelo e modo de feedback para continuar'
                 )}
               </button>
             </div>
@@ -302,16 +302,16 @@ const LandingPage = () => {
         {/* Footer Info */}
         <div className="text-center mt-8 text-gray-500 text-sm">
           <p>
-            Need help? Check out our{' '}
+            Precisa de ajuda? Confira nossa{' '}
             <button 
               onClick={() => navigate('/documentation')}
               className="text-indigo-400 hover:text-indigo-300 underline bg-transparent border-none cursor-pointer"
             >
-              documentation
+              documentação
             </button>{' '}
-            or{' '}
+            ou{' '}
             <button className="text-indigo-400 hover:text-indigo-300 underline bg-transparent border-none cursor-pointer">
-              examples
+              exemplos
             </button>
           </p>
         </div>
@@ -329,22 +329,22 @@ const LandingPage = () => {
             </div>
             
             <p className="text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
-              Webtech Autograder is a robust educational platform trusted by educators worldwide. 
-              Join our growing community and help shape the future of automated grading!
+              Webtech Autograder é uma plataforma educacional robusta confiável por educadores em todo o mundo. 
+              Junte-se à nossa comunidade crescente e ajude a moldar o futuro da avaliação automatizada!
             </p>
 
             <div className="grid md:grid-cols-3 gap-4 mb-6 text-sm">
               <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600">
-                <div className="text-green-400 font-semibold mb-1">🔧 Hyper Flexible</div>
-                <div className="text-gray-400">Adapt to any grading workflow</div>
+                <div className="text-green-400 font-semibold mb-1">🔧 Hiper Flexível</div>
+                <div className="text-gray-400">Adapta-se a qualquer fluxo de avaliação</div>
               </div>
               <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600">
-                <div className="text-blue-400 font-semibold mb-1">🎯 Precise Grading</div>
-                <div className="text-gray-400">Accurate & consistent evaluation</div>
+                <div className="text-blue-400 font-semibold mb-1">🎯 Avaliação Precisa</div>
+                <div className="text-gray-400">Avaliação precisa e consistente</div>
               </div>
               <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600">
-                <div className="text-purple-400 font-semibold mb-1">🤖 AI-Enhanced</div>
-                <div className="text-gray-400">Smart feedback generation</div>
+                <div className="text-purple-400 font-semibold mb-1">🤖 Aprimorado com IA</div>
+                <div className="text-gray-400">Geração inteligente de feedback</div>
               </div>
             </div>
 
@@ -359,7 +359,7 @@ const LandingPage = () => {
                 <svg className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20" style={{ display: 'block' }}>
                   <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
                 </svg>
-                <span className="whitespace-nowrap">Star on GitHub</span>
+                <span className="whitespace-nowrap">Estrelar no GitHub</span>
               </a>
               
               <div className="flex items-center flex-wrap gap-3 sm:gap-4 justify-center text-xs sm:text-sm text-gray-400">
@@ -372,17 +372,17 @@ const LandingPage = () => {
                 </div>
                 <div className="flex items-center space-x-1">
                   <span className="w-3 h-3 bg-green-400 rounded-full"></span>
-                  <span>Active Development</span>
+                  <span>Desenvolvimento Ativo</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <span className="w-3 h-3 bg-purple-400 rounded-full"></span>
-                  <span>Community Driven</span>
+                  <span>Dirigido pela Comunidade</span>
                 </div>
               </div>
             </div>
 
             <div className="mt-4 text-xs text-gray-500">
-              Built with ❤️ by the Autograder team
+              Feito com ❤️ pela equipe Autograder
             </div>
           </div>
         </div>
