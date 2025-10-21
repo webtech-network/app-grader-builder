@@ -20,7 +20,7 @@ const DocumentationPage = () => {
               Webtech Autograder
             </h1>
             <p className="text-indigo-400 text-sm font-medium">
-              Documentation
+              Documentação
             </p>
           </div>
         </div>
@@ -28,7 +28,7 @@ const DocumentationPage = () => {
           onClick={() => navigate('/')}
           className="px-4 py-2 text-gray-400 hover:text-gray-200 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors"
         >
-          ← Back to Home
+          ← Voltar ao Início
         </button>
       </header>
 
@@ -37,23 +37,23 @@ const DocumentationPage = () => {
         {/* Page Title */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Grader Builder Documentation
+            Documentação do Grader Builder
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Learn how to configure and customize your GitHub Classroom autograder with our comprehensive guide.
+            Aprenda a configurar e personalizar seu autograder do GitHub Classroom com nosso guia completo.
           </p>
         </div>
 
         {/* Table of Contents */}
         <div className="bg-gray-800 rounded-lg p-6 mb-8 border border-gray-700">
-          <h2 className="text-xl font-semibold text-white mb-4">📋 Table of Contents</h2>
+          <h2 className="text-xl font-semibold text-white mb-4">📋 Índice</h2>
           <div className="grid md:grid-cols-2 gap-2 text-sm">
-            <a href="#overview" className="text-indigo-400 hover:text-indigo-300 transition-colors">1. Overview</a>
-            <a href="#grading-templates" className="text-indigo-400 hover:text-indigo-300 transition-colors">2. Grading Templates</a>
-            <a href="#feedback-modes" className="text-indigo-400 hover:text-indigo-300 transition-colors">3. Feedback Modes</a>
-            <a href="#configuration" className="text-indigo-400 hover:text-indigo-300 transition-colors">4. Configuration Guide</a>
-            <a href="#criteria" className="text-indigo-400 hover:text-indigo-300 transition-colors">5. Criteria Setup</a>
-            <a href="#best-practices" className="text-indigo-400 hover:text-indigo-300 transition-colors">6. Best Practices</a>
+            <a href="#overview" className="text-indigo-400 hover:text-indigo-300 transition-colors">1. Visão Geral</a>
+            <a href="#grading-templates" className="text-indigo-400 hover:text-indigo-300 transition-colors">2. Modelos de Avaliação</a>
+            <a href="#feedback-modes" className="text-indigo-400 hover:text-indigo-300 transition-colors">3. Modos de Feedback</a>
+            <a href="#configuration" className="text-indigo-400 hover:text-indigo-300 transition-colors">4. Guia de Configuração</a>
+            <a href="#criteria" className="text-indigo-400 hover:text-indigo-300 transition-colors">5. Configuração de Critérios</a>
+            <a href="#best-practices" className="text-indigo-400 hover:text-indigo-300 transition-colors">6. Melhores Práticas</a>
           </div>
         </div>
 
@@ -61,22 +61,22 @@ const DocumentationPage = () => {
         <section id="overview" className="mb-12">
           <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
-              🎯 Overview
+              🎯 Visão Geral
             </h2>
             <div className="space-y-4 text-gray-300">
               <p>
-                The Webtech Autograder Builder is a powerful tool that generates complete autograder configurations 
-                for GitHub Classroom assignments. It simplifies the process of creating comprehensive grading 
-                criteria and feedback systems for educational projects.
+                O Webtech Autograder Builder é uma ferramenta poderosa que gera configurações completas de autograder 
+                para tarefas do GitHub Classroom. Ele simplifica o processo de criação de critérios abrangentes de 
+                avaliação e sistemas de feedback para projetos educacionais.
               </p>
               <div className="bg-indigo-900/30 border border-indigo-600 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-indigo-400 mb-2">Key Features:</h3>
+                <h3 className="text-lg font-semibold text-indigo-400 mb-2">Recursos Principais:</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Multiple grading templates for different assignment types</li>
-                  <li>AI-powered and traditional feedback modes</li>
-                  <li>Visual criteria tree configuration</li>
-                  <li>Automated test generation</li>
-                  <li>Custom feedback personalization</li>
+                  <li>Múltiplos modelos de avaliação para diferentes tipos de tarefa</li>
+                  <li>Modos de feedback com IA e tradicionais</li>
+                  <li>Configuração visual da árvore de critérios</li>
+                  <li>Geração automatizada de testes</li>
+                  <li>Personalização de feedback customizado</li>
                 </ul>
               </div>
             </div>
@@ -87,28 +87,28 @@ const DocumentationPage = () => {
         <section id="grading-templates" className="mb-12">
           <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
-              📝 Grading Templates
+              📝 Modelos de Avaliação
             </h2>
             <div className="space-y-4 text-gray-300">
               <p>
-                Grading templates provide pre-configured test suites tailored to specific assignment types. 
-                Each template includes specialized tests, validation rules, and file structure requirements 
-                optimized for different development scenarios.
+                Os modelos de avaliação fornecem suítes de teste pré-configuradas adaptadas a tipos específicos de tarefa. 
+                Cada modelo inclui testes especializados, regras de validação e requisitos de estrutura de arquivos 
+                otimizados para diferentes cenários de desenvolvimento.
               </p>
               <div className="bg-indigo-900/30 border border-indigo-600 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-indigo-400 mb-2">How to Select a Template:</h3>
+                <h3 className="text-lg font-semibold text-indigo-400 mb-2">Como Selecionar um Modelo:</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>On the landing page, click the "Grading Template" dropdown</li>
-                  <li>Hover over any template to see the info icon (ℹ️)</li>
-                  <li>Click the info icon to view detailed test descriptions</li>
-                  <li>Select the template that best matches your assignment requirements</li>
+                  <li>Na página inicial, clique no menu suspenso "Modelo de Avaliação"</li>
+                  <li>Passe o mouse sobre qualquer modelo para ver o ícone de informação (ℹ️)</li>
+                  <li>Clique no ícone de informação para visualizar descrições detalhadas dos testes</li>
+                  <li>Selecione o modelo que melhor corresponde aos requisitos da sua tarefa</li>
                 </ol>
               </div>
               <div className="bg-gray-700 rounded-lg p-4 mt-4">
                 <p className="text-sm text-gray-400">
-                  💡 <span className="font-medium text-gray-300">Tip:</span> Each template comes with a complete overview 
-                  showing all available tests, required files, and parameters. Review the template details before 
-                  making your selection to ensure it matches your assignment needs.
+                  💡 <span className="font-medium text-gray-300">Dica:</span> Cada modelo vem com uma visão geral completa 
+                  mostrando todos os testes disponíveis, arquivos necessários e parâmetros. Revise os detalhes do modelo antes 
+                  de fazer sua seleção para garantir que atende às necessidades da sua tarefa.
                 </p>
               </div>
             </div>
@@ -119,12 +119,12 @@ const DocumentationPage = () => {
         <section id="feedback-modes" className="mb-12">
           <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
-              💬 Feedback Modes
+              💬 Modos de Feedback
             </h2>
             <div className="space-y-6">
               <p className="text-gray-300">
-                Choose how your autograder communicates test results to students. Each mode offers different 
-                levels of detail and personalization to match your teaching style and assignment goals.
+                Escolha como seu autograder comunica os resultados dos testes aos alunos. Cada modo oferece diferentes 
+                níveis de detalhe e personalização para corresponder ao seu estilo de ensino e objetivos da tarefa.
               </p>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -132,40 +132,40 @@ const DocumentationPage = () => {
                 <div className="bg-gray-700 rounded-lg p-6 border border-gray-600">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">📋</span>
-                    <h3 className="text-xl font-semibold text-indigo-400">Default Mode</h3>
+                    <h3 className="text-xl font-semibold text-indigo-400">Modo Padrão</h3>
                   </div>
                   <p className="text-gray-300 mb-4 text-sm">
-                    Standard template-based feedback with predefined messages and consistent scoring across all submissions.
+                    Feedback baseado em modelo padrão com mensagens predefinidas e pontuação consistente em todas as submissões.
                   </p>
                   <div className="space-y-3">
                     <div>
-                      <h4 className="font-medium text-gray-200 text-sm mb-2">✓ Features:</h4>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">✓ Recursos:</h4>
                       <div className="space-y-2 text-sm text-gray-400">
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Fast execution with instant feedback</span>
+                          <span>Execução rápida com feedback instantâneo</span>
                         </div>
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Consistent messaging across all students</span>
+                          <span>Mensagens consistentes para todos os alunos</span>
                         </div>
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Clear pass/fail indicators for each test</span>
+                          <span>Indicadores claros de aprovação/reprovação para cada teste</span>
                         </div>
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Structured JSON and HTML reports</span>
+                          <span>Relatórios estruturados em JSON e HTML</span>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-200 text-sm mb-2">📌 Best For:</h4>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">📌 Melhor Para:</h4>
                       <ul className="text-xs text-gray-400 space-y-1">
-                        <li>• Large classes requiring consistent grading</li>
-                        <li>• Assignments with objective test criteria</li>
-                        <li>• Quick turnaround requirements</li>
-                        <li>• Standard programming exercises</li>
+                        <li>• Turmas grandes que requerem avaliação consistente</li>
+                        <li>• Tarefas com critérios de teste objetivos</li>
+                        <li>• Requisitos de entrega rápida</li>
+                        <li>• Exercícios de programação padrão</li>
                       </ul>
                     </div>
                   </div>
@@ -175,40 +175,40 @@ const DocumentationPage = () => {
                 <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-lg p-6 border border-purple-600/50">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">🤖</span>
-                    <h3 className="text-xl font-semibold text-purple-400">AI-Powered Mode</h3>
+                    <h3 className="text-xl font-semibold text-purple-400">Modo com IA</h3>
                   </div>
                   <p className="text-gray-300 mb-4 text-sm">
-                    Intelligent feedback generation with personalized tone, contextual suggestions, and adaptive learning insights.
+                    Geração inteligente de feedback com tom personalizado, sugestões contextuais e insights de aprendizado adaptativo.
                   </p>
                   <div className="space-y-3">
                     <div>
-                      <h4 className="font-medium text-gray-200 text-sm mb-2">✨ Features:</h4>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">✨ Recursos:</h4>
                       <div className="space-y-2 text-sm text-gray-400">
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Personalized feedback tone (encouraging, professional, etc.)</span>
+                          <span>Tom de feedback personalizado (encorajador, profissional, etc.)</span>
                         </div>
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Context-aware improvement suggestions</span>
+                          <span>Sugestões de melhoria conscientes do contexto</span>
                         </div>
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Detailed explanations for failed tests</span>
+                          <span>Explicações detalhadas para testes reprovados</span>
                         </div>
                         <div className="flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>Natural language report generation</span>
+                          <span>Geração de relatórios em linguagem natural</span>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-200 text-sm mb-2">📌 Best For:</h4>
+                      <h4 className="font-medium text-gray-200 text-sm mb-2">📌 Melhor Para:</h4>
                       <ul className="text-xs text-gray-400 space-y-1">
-                        <li>• Smaller classes with diverse skill levels</li>
-                        <li>• Complex assignments requiring detailed feedback</li>
-                        <li>• Encouraging struggling students</li>
-                        <li>• Creative or design-focused projects</li>
+                        <li>• Turmas menores com níveis de habilidade diversos</li>
+                        <li>• Tarefas complexas que requerem feedback detalhado</li>
+                        <li>• Encorajar alunos com dificuldades</li>
+                        <li>• Projetos criativos ou focados em design</li>
                       </ul>
                     </div>
                   </div>
@@ -218,12 +218,12 @@ const DocumentationPage = () => {
               {/* Configuration Note */}
               <div className="bg-yellow-900/30 border border-yellow-600 rounded-lg p-4">
                 <h3 className="text-sm font-semibold text-yellow-400 mb-2 flex items-center gap-2">
-                  <span>⚙️</span> Configuration Options
+                  <span>⚙️</span> Opções de Configuração
                 </h3>
                 <p className="text-xs text-gray-300">
-                  AI-Powered mode offers additional configuration in the Feedback tab, including tone selection 
-                  (Professional, Encouraging, Strict, Friendly), custom AI persona, and specific guidelines for 
-                  feedback generation. Default mode uses the standard templates without additional configuration.
+                  O modo com IA oferece configuração adicional na aba Feedback, incluindo seleção de tom 
+                  (Profissional, Encorajador, Rigoroso, Amigável), persona de IA personalizada e diretrizes específicas para 
+                  geração de feedback. O modo Padrão usa os modelos padrão sem configuração adicional.
                 </p>
               </div>
             </div>
@@ -234,40 +234,40 @@ const DocumentationPage = () => {
         <section id="configuration" className="mb-12">
           <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
-              ⚙️ Configuration Guide
+              ⚙️ Guia de Configuração
             </h2>
             <div className="space-y-6">
               <div className="bg-yellow-900/30 border border-yellow-600 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-yellow-400 mb-2">📋 Step-by-Step Process</h3>
+                <h3 className="text-lg font-semibold text-yellow-400 mb-2">📋 Processo Passo a Passo</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-gray-300">
-                  <li>Select your grading template based on assignment type</li>
-                  <li>Choose feedback mode (Default or AI-Powered)</li>
-                  <li>Click "Start Configuring" to proceed to detailed setup</li>
-                  <li>Configure criteria tree with subjects and tests</li>
-                  <li>Set up feedback preferences and AI settings (if applicable)</li>
-                  <li>Download your complete autograder package</li>
+                  <li>Selecione seu modelo de avaliação com base no tipo de tarefa</li>
+                  <li>Escolha o modo de feedback (Padrão ou com IA)</li>
+                  <li>Clique em "Começar Configuração" para prosseguir com a configuração detalhada</li>
+                  <li>Configure a árvore de critérios com assuntos e testes</li>
+                  <li>Configure preferências de feedback e configurações de IA (se aplicável)</li>
+                  <li>Baixe seu pacote completo de autograder</li>
                 </ol>
               </div>
 
               <div className="bg-gray-700 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-indigo-400 mb-3">🎛️ Configuration Tabs</h3>
+                <h3 className="text-lg font-semibold text-indigo-400 mb-3">🎛️ Abas de Configuração</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <h4 className="font-medium text-gray-200 mb-2">Criteria Tab</h4>
+                    <h4 className="font-medium text-gray-200 mb-2">Aba Critérios</h4>
                     <ul className="space-y-1 text-gray-400">
-                      <li>• Visual tree structure</li>
-                      <li>• Subject nodes with weights</li>
-                      <li>• Test nodes with parameters</li>
-                      <li>• Bonus criteria sections</li>
+                      <li>• Estrutura de árvore visual</li>
+                      <li>• Nós de assunto com pesos</li>
+                      <li>• Nós de teste com parâmetros</li>
+                      <li>• Seções de critérios de bônus</li>
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-200 mb-2">Feedback Tab</h4>
+                    <h4 className="font-medium text-gray-200 mb-2">Aba Feedback</h4>
                     <ul className="space-y-1 text-gray-400">
-                      <li>• Report title customization</li>
-                      <li>• Display preferences</li>
-                      <li>• AI tone and persona (AI mode)</li>
-                      <li>• Additional guidelines</li>
+                      <li>• Personalização do título do relatório</li>
+                      <li>• Preferências de exibição</li>
+                      <li>• Tom e persona da IA (modo IA)</li>
+                      <li>• Diretrizes adicionais</li>
                     </ul>
                   </div>
                 </div>
@@ -280,25 +280,25 @@ const DocumentationPage = () => {
         <section id="criteria" className="mb-12">
           <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
-              🌳 Criteria Setup
+              🌳 Configuração de Critérios
             </h2>
             <div className="space-y-6">
               <div className="bg-gray-700 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-indigo-400 mb-3">Subject Nodes</h3>
+                <h3 className="text-lg font-semibold text-indigo-400 mb-3">Nós de Assunto</h3>
                 <p className="text-gray-300 mb-4">
-                  Subject nodes represent major categories of your grading criteria (e.g., HTML, CSS, JavaScript).
+                  Nós de assunto representam categorias principais dos seus critérios de avaliação (por exemplo, HTML, CSS, JavaScript).
                 </p>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <h4 className="font-medium text-gray-200 mb-2">Properties:</h4>
+                    <h4 className="font-medium text-gray-200 mb-2">Propriedades:</h4>
                     <ul className="space-y-1 text-gray-400">
-                      <li>• Name (e.g., "HTML Structure")</li>
-                      <li>• Weight (percentage of total grade)</li>
-                      <li>• Description</li>
+                      <li>• Nome (ex: "Estrutura HTML")</li>
+                      <li>• Peso (porcentagem da nota total)</li>
+                      <li>• Descrição</li>
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-200 mb-2">Example:</h4>
+                    <h4 className="font-medium text-gray-200 mb-2">Exemplo:</h4>
                     <div className="bg-gray-800 p-3 rounded border">
                       <code className="text-green-400 text-xs">
                         HTML: 40%<br/>
@@ -311,27 +311,27 @@ const DocumentationPage = () => {
               </div>
 
               <div className="bg-gray-700 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-indigo-400 mb-3">Test Nodes</h3>
+                <h3 className="text-lg font-semibold text-indigo-400 mb-3">Nós de Teste</h3>
                 <p className="text-gray-300 mb-4">
-                  Test nodes define specific checks within each subject category.
+                  Nós de teste definem verificações específicas dentro de cada categoria de assunto.
                 </p>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <h4 className="font-medium text-gray-200 mb-2">Common Tests:</h4>
+                    <h4 className="font-medium text-gray-200 mb-2">Testes Comuns:</h4>
                     <ul className="space-y-1 text-gray-400">
-                      <li>• <code className="text-green-400">has_tag</code> - Check for HTML elements</li>
-                      <li>• <code className="text-green-400">has_attribute</code> - Verify attributes</li>
-                      <li>• <code className="text-green-400">has_selector</code> - CSS selectors</li>
-                      <li>• <code className="text-green-400">has_function</code> - JavaScript functions</li>
+                      <li>• <code className="text-green-400">has_tag</code> - Verificar elementos HTML</li>
+                      <li>• <code className="text-green-400">has_attribute</code> - Verificar atributos</li>
+                      <li>• <code className="text-green-400">has_selector</code> - Seletores CSS</li>
+                      <li>• <code className="text-green-400">has_function</code> - Funções JavaScript</li>
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-200 mb-2">Parameters:</h4>
+                    <h4 className="font-medium text-gray-200 mb-2">Parâmetros:</h4>
                     <ul className="space-y-1 text-gray-400">
-                      <li>• Target file</li>
-                      <li>• Test arguments</li>
-                      <li>• Point values</li>
-                      <li>• Error messages</li>
+                      <li>• Arquivo alvo</li>
+                      <li>• Argumentos do teste</li>
+                      <li>• Valores de pontos</li>
+                      <li>• Mensagens de erro</li>
                     </ul>
                   </div>
                 </div>
@@ -344,64 +344,64 @@ const DocumentationPage = () => {
         <section id="best-practices" className="mb-12">
           <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
             <h2 className="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-3">
-              🚀 Best Practices
+              🚀 Melhores Práticas
             </h2>
             <div className="space-y-6">
               
               <div className="bg-green-900/30 border border-green-600 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-green-400 mb-4">✅ Do's</h3>
+                <h3 className="text-lg font-semibold text-green-400 mb-4">✅ O Que Fazer</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
                   <ul className="space-y-2">
-                    <li>• Keep criteria weights balanced and logical</li>
-                    <li>• Use clear, descriptive test names</li>
-                    <li>• Test core functionality thoroughly</li>
-                    <li>• Provide helpful error messages</li>
+                    <li>• Mantenha os pesos dos critérios balanceados e lógicos</li>
+                    <li>• Use nomes de teste claros e descritivos</li>
+                    <li>• Teste funcionalidades principais minuciosamente</li>
+                    <li>• Forneça mensagens de erro úteis</li>
                   </ul>
                   <ul className="space-y-2">
-                    <li>• Include bonus criteria for advanced features</li>
-                    <li>• Test edge cases and error handling</li>
-                    <li>• Use consistent file naming conventions</li>
-                    <li>• Document your grading criteria clearly</li>
+                    <li>• Inclua critérios de bônus para recursos avançados</li>
+                    <li>• Teste casos extremos e tratamento de erros</li>
+                    <li>• Use convenções consistentes de nomenclatura de arquivos</li>
+                    <li>• Documente seus critérios de avaliação claramente</li>
                   </ul>
                 </div>
               </div>
 
               <div className="bg-red-900/30 border border-red-600 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-red-400 mb-4">❌ Don'ts</h3>
+                <h3 className="text-lg font-semibold text-red-400 mb-4">❌ O Que Não Fazer</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
                   <ul className="space-y-2">
-                    <li>• Don't make tests too specific or brittle</li>
-                    <li>• Avoid testing implementation details</li>
-                    <li>• Don't create overly complex criteria trees</li>
-                    <li>• Avoid unclear or misleading test names</li>
+                    <li>• Não faça testes muito específicos ou frágeis</li>
+                    <li>• Evite testar detalhes de implementação</li>
+                    <li>• Não crie árvores de critérios excessivamente complexas</li>
+                    <li>• Evite nomes de teste confusos ou enganosos</li>
                   </ul>
                   <ul className="space-y-2">
-                    <li>• Don't forget to test accessibility features</li>
-                    <li>• Avoid hardcoding specific values unnecessarily</li>
-                    <li>• Don't skip testing error conditions</li>
-                    <li>• Avoid inconsistent grading weights</li>
+                    <li>• Não esqueça de testar recursos de acessibilidade</li>
+                    <li>• Evite valores codificados desnecessariamente</li>
+                    <li>• Não pule o teste de condições de erro</li>
+                    <li>• Evite pesos de avaliação inconsistentes</li>
                   </ul>
                 </div>
               </div>
 
               <div className="bg-blue-900/30 border border-blue-600 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-blue-400 mb-4">💡 Pro Tips</h3>
+                <h3 className="text-lg font-semibold text-blue-400 mb-4">💡 Dicas Profissionais</h3>
                 <div className="space-y-3 text-sm text-gray-300">
                   <div className="flex items-start space-x-3">
                     <span className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
-                    <p><strong>Start Simple:</strong> Begin with basic tests and gradually add complexity</p>
+                    <p><strong>Comece Simples:</strong> Comece com testes básicos e adicione complexidade gradualmente</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <span className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
-                    <p><strong>Test Early:</strong> Run your configuration on sample submissions before deployment</p>
+                    <p><strong>Teste Cedo:</strong> Execute sua configuração em submissões de amostra antes da implantação</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <span className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
-                    <p><strong>Iterate:</strong> Refine your criteria based on student submissions and feedback</p>
+                    <p><strong>Itere:</strong> Refine seus critérios com base nas submissões e feedback dos alunos</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <span className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">4</span>
-                    <p><strong>Backup:</strong> Keep copies of working configurations for future assignments</p>
+                    <p><strong>Faça Backup:</strong> Mantenha cópias de configurações funcionais para tarefas futuras</p>
                   </div>
                 </div>
               </div>
@@ -411,10 +411,10 @@ const DocumentationPage = () => {
 
         {/* Footer with External Link */}
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
-          <h3 className="text-xl font-semibold text-white mb-4">📖 Additional Resources</h3>
+          <h3 className="text-xl font-semibold text-white mb-4">📖 Recursos Adicionais</h3>
           <p className="text-gray-300 mb-4">
-            For more detailed technical documentation and advanced configuration options, 
-            visit our comprehensive documentation repository.
+            Para documentação técnica mais detalhada e opções avançadas de configuração, 
+            visite nosso repositório de documentação abrangente.
           </p>
           <a
             href="https://github.com/webtech-network/autograder/tree/main/docs/system/configuration"
@@ -425,7 +425,7 @@ const DocumentationPage = () => {
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
             </svg>
-            View GitHub Documentation
+            Ver Documentação no GitHub
           </a>
         </div>
       </div>
