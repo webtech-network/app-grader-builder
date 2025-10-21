@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Download, ArrowLeft } from 'lucide-react';
-import CriteriaForm from './criteria';
-import FeedbackForm from './feedback';
+import CriteriaForm from './criteria'; // This imports from criteria/index.jsx
+import FeedbackForm from './feedback'; // This imports from feedback/index.jsx
+import SetupForm from './SetupForm'; // This is a standalone component
 
 const ConfigurationPage = () => {
   const location = useLocation();
@@ -11,16 +12,25 @@ const ConfigurationPage = () => {
   const [activeTab, setActiveTab] = useState('criteria');
   const [criteriaSaved, setCriteriaSaved] = useState(false);
   const [feedbackSaved, setFeedbackSaved] = useState(false);
+  const [setupSaved, setSetupSaved] = useState(false);
   const [criteriaConfig, setCriteriaConfig] = useState(null);
   const [feedbackConfig, setFeedbackConfig] = useState(null);
+  const [setupConfig, setSetupConfig] = useState(null);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
 
-  // Check if both configurations are saved (must be before early return)
+  // Check if setup is required for this template
+  const isSetupRequired = gradingTemplate === 'api' || gradingTemplate === 'io';
+
+  // Check if all required configurations are saved
   useEffect(() => {
-    if (criteriaSaved && feedbackSaved && criteriaConfig && feedbackConfig) {
+    const allRequiredSaved = criteriaSaved && feedbackSaved && 
+      (isSetupRequired ? setupSaved : true);
+    
+    if (allRequiredSaved && criteriaConfig && feedbackConfig && 
+        (isSetupRequired ? setupConfig : true)) {
       setShowDownloadModal(true);
     }
-  }, [criteriaSaved, feedbackSaved, criteriaConfig, feedbackConfig]);
+  }, [criteriaSaved, feedbackSaved, setupSaved, criteriaConfig, feedbackConfig, setupConfig, isSetupRequired]);
 
   if (!gradingTemplate || !feedbackMode) {
     // Redirect back to landing page if no configuration data
@@ -52,10 +62,23 @@ const ConfigurationPage = () => {
     }
   };
 
+  const handleSetupSave = (config) => {
+    if (config === null) {
+      // Unsaved/cancelled
+      setSetupConfig(null);
+      setSetupSaved(false);
+    } else {
+      setSetupConfig(config);
+      setSetupSaved(true);
+      console.log('Setup Configuration Saved:', JSON.stringify(config, null, 2));
+    }
+  };
+
   const handleDownloadZip = () => {
     // Create configuration files
     const criteriaJson = JSON.stringify(criteriaConfig, null, 2);
     const feedbackJson = JSON.stringify(feedbackConfig, null, 2);
+    const setupJson = setupConfig ? JSON.stringify(setupConfig, null, 2) : null;
     
     // Create a simple download for each file (since we can't create actual ZIP in browser without library)
     // Download criteria_config.json
@@ -80,6 +103,21 @@ const ConfigurationPage = () => {
       feedbackLink.click();
       document.body.removeChild(feedbackLink);
       URL.revokeObjectURL(feedbackUrl);
+      
+      // Download setup_config.json if it exists
+      if (setupJson) {
+        setTimeout(() => {
+          const setupBlob = new Blob([setupJson], { type: 'application/json' });
+          const setupUrl = URL.createObjectURL(setupBlob);
+          const setupLink = document.createElement('a');
+          setupLink.href = setupUrl;
+          setupLink.download = 'setup_config.json';
+          document.body.appendChild(setupLink);
+          setupLink.click();
+          document.body.removeChild(setupLink);
+          URL.revokeObjectURL(setupUrl);
+        }, 200);
+      }
     }, 100);
   };
 
@@ -122,7 +160,7 @@ const ConfigurationPage = () => {
               }`}
             >
               <span className="flex items-center justify-center gap-2">
-                📋 Criteria Configuration
+                📋 Criteria
                 {criteriaSaved && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
                     Saved
@@ -139,8 +177,30 @@ const ConfigurationPage = () => {
               }`}
             >
               <span className="flex items-center justify-center gap-2">
-                💬 Feedback Configuration
+                💬 Feedback
                 {feedbackSaved && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
+                    Saved
+                  </span>
+                )}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('setup')}
+              className={`flex-1 px-6 py-4 text-center font-medium transition-colors relative ${
+                activeTab === 'setup'
+                  ? 'bg-gray-700 text-white border-b-2 border-indigo-500'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-750'
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                🔧 Setup
+                {isSetupRequired && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white">
+                    Required
+                  </span>
+                )}
+                {setupSaved && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
                     Saved
                   </span>
@@ -162,6 +222,12 @@ const ConfigurationPage = () => {
             <FeedbackForm 
               onSave={handleFeedbackSave}
               feedbackMode={feedbackMode}
+            />
+          </div>
+          <div className={activeTab === 'setup' ? '' : 'hidden'}>
+            <SetupForm 
+              onSave={handleSetupSave}
+              templateName={gradingTemplate}
             />
           </div>
         </div>
