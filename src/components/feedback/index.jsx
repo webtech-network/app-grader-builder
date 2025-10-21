@@ -25,16 +25,6 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
   const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
-  // Sandbox state
-  const [sandboxReadingFiles, setSandboxReadingFiles] = useState([]);
-  const [sandboxCurrentFile, setSandboxCurrentFile] = useState("");
-  const [runtimeImage, setRuntimeImage] = useState("");
-  const [containerPort, setContainerPort] = useState("");
-  const [startCommand, setStartCommand] = useState("");
-  const [commands, setCommands] = useState([]);
-  const [currentCommandKey, setCurrentCommandKey] = useState("");
-  const [currentCommandValue, setCurrentCommandValue] = useState("");
-
   // Event handlers
   const handleToggle = (id) => {
     setToggleStates(prev => ({
@@ -49,18 +39,6 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
 
   const handleDeleteResource = (index) => {
     setResources(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleAddCommand = () => {
-    if (currentCommandKey.trim() && currentCommandValue.trim()) {
-      setCommands(prev => [...prev, { key: currentCommandKey.trim(), value: currentCommandValue.trim() }]);
-      setCurrentCommandKey("");
-      setCurrentCommandValue("");
-    }
-  };
-
-  const handleDeleteCommand = (index) => {
-    setCommands(prev => prev.filter((_, i) => i !== index));
   };
 
   const assembleConfiguration = () => {
@@ -128,32 +106,6 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
     // Include online resources (optional, can be empty array)
     if (resources && resources.length > 0) {
       config.online_resources = resources;
-    }
-    
-    // Sandbox configuration (only if at least one value is set)
-    const sandboxConfig = {};
-    if (sandboxReadingFiles && sandboxReadingFiles.length > 0) {
-      sandboxConfig.submission_files_to_read = sandboxReadingFiles;
-    }
-    if (runtimeImage && runtimeImage.trim() !== '') {
-      sandboxConfig.runtime_image = runtimeImage;
-    }
-    if (containerPort && containerPort.trim() !== '') {
-      sandboxConfig.container_port = parseInt(containerPort, 10);
-    }
-    if (startCommand && startCommand.trim() !== '') {
-      sandboxConfig.start_command = startCommand;
-    }
-    if (commands && commands.length > 0) {
-      const commandsObj = {};
-      commands.forEach(cmd => {
-        commandsObj[cmd.key] = cmd.value;
-      });
-      sandboxConfig.commands = commandsObj;
-    }
-    
-    if (Object.keys(sandboxConfig).length > 0) {
-      config.sandbox = sandboxConfig;
     }
     
     return config;
@@ -529,150 +481,6 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
             </div>
           </section>
           )}
-
-          {/* Seção Sandbox - Always visible */}
-          <section className="bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold border-b-2 border-gray-700 pb-3 mb-6 text-indigo-400">
-              Sandbox
-            </h2>
-            <div className="space-y-5 text-sm">
-              
-              {/* Arquivos para Leitura */}
-              <div className="space-y-3">
-                <div className="flex flex-col justify-between gap-3">
-                  <p className="text-gray-400 font-medium">Arquivos para Leitura</p>
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="text"
-                      value={sandboxCurrentFile}
-                      onChange={(e) => setSandboxCurrentFile(e.target.value)}
-                      placeholder="Nome do arquivo..."
-                      className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <button
-                      onClick={() => {
-                        if (sandboxCurrentFile.trim()) {
-                          setSandboxReadingFiles(prev => [...prev, sandboxCurrentFile.trim()]);
-                          setSandboxCurrentFile("");
-                        }
-                      }}
-                      type="button"
-                      className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700 transition-colors"
-                    >
-                      Adicionar
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  {sandboxReadingFiles.length === 0 ? (
-                    <p className="text-gray-500 italic text-sm">Nenhum arquivo adicionado</p>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {sandboxReadingFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="group flex items-center bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md"
-                        >
-                          {file}
-                          <button
-                            onClick={() => setSandboxReadingFiles(prev => prev.filter((_, i) => i !== index))}
-                            className="ml-2 text-indigo-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Imagem do Runtime */}
-              <ReportTitleInput
-                title={runtimeImage}
-                onChange={setRuntimeImage}
-                label="Imagem do Runtime"
-                placeholder="Ex: python:3.9"
-              />
-
-              {/* Porta do Container */}
-              <div className="space-y-1">
-                <p className="text-gray-400 font-medium text-sm">Porta do Container</p>
-                <input
-                  type="number"
-                  value={containerPort}
-                  onChange={(e) => setContainerPort(e.target.value)}
-                  placeholder="Ex: 8080"
-                  className="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-gray-300 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-
-              {/* Comando para Iniciar */}
-              <ReportTitleInput
-                title={startCommand}
-                onChange={setStartCommand}
-                label="Comando para Iniciar"
-                placeholder="Ex: python app.py"
-              />
-
-              {/* Comandos */}
-              <div className="space-y-3">
-                <div className="flex flex-col gap-3">
-                  <p className="text-gray-400 font-medium">Comandos</p>
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="text"
-                      value={currentCommandKey}
-                      onChange={(e) => setCurrentCommandKey(e.target.value)}
-                      placeholder="Chave (ex: test)"
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <input
-                      type="text"
-                      value={currentCommandValue}
-                      onChange={(e) => setCurrentCommandValue(e.target.value)}
-                      placeholder="Comando (ex: npm test)"
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <button
-                      onClick={handleAddCommand}
-                      type="button"
-                      className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap"
-                    >
-                      Adicionar
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  {commands.length === 0 ? (
-                    <p className="text-gray-500 italic text-sm">Nenhum comando adicionado</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {commands.map((cmd, index) => (
-                        <div
-                          key={index}
-                          className="group flex items-center justify-between bg-gray-700 border border-gray-600 px-3 py-2 rounded-lg"
-                        >
-                          <div className="flex items-center gap-3 flex-1">
-                            <span className="text-indigo-400 font-semibold text-xs font-mono">{cmd.key}:</span>
-                            <span className="text-gray-300 text-xs font-mono">{cmd.value}</span>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteCommand(index)}
-                            className="text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* Save Button - Always visible at the end */}
           <div className="mt-8 flex justify-end items-center gap-3 relative">
