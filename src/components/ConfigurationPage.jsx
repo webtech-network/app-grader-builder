@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import CriteriaForm from './CriteriaForm';
+import { Download, ArrowLeft } from 'lucide-react';
+import CriteriaForm from './criteria';
 import FeedbackForm from './feedback';
 
 const ConfigurationPage = () => {
@@ -12,6 +13,14 @@ const ConfigurationPage = () => {
   const [feedbackSaved, setFeedbackSaved] = useState(false);
   const [criteriaConfig, setCriteriaConfig] = useState(null);
   const [feedbackConfig, setFeedbackConfig] = useState(null);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+
+  // Check if both configurations are saved (must be before early return)
+  useEffect(() => {
+    if (criteriaSaved && feedbackSaved && criteriaConfig && feedbackConfig) {
+      setShowDownloadModal(true);
+    }
+  }, [criteriaSaved, feedbackSaved, criteriaConfig, feedbackConfig]);
 
   if (!gradingTemplate || !feedbackMode) {
     // Redirect back to landing page if no configuration data
@@ -41,6 +50,41 @@ const ConfigurationPage = () => {
       setFeedbackSaved(true);
       console.log('Feedback Configuration Saved:', JSON.stringify(config, null, 2));
     }
+  };
+
+  const handleDownloadZip = () => {
+    // Create configuration files
+    const criteriaJson = JSON.stringify(criteriaConfig, null, 2);
+    const feedbackJson = JSON.stringify(feedbackConfig, null, 2);
+    
+    // Create a simple download for each file (since we can't create actual ZIP in browser without library)
+    // Download criteria_config.json
+    const criteriaBlob = new Blob([criteriaJson], { type: 'application/json' });
+    const criteriaUrl = URL.createObjectURL(criteriaBlob);
+    const criteriaLink = document.createElement('a');
+    criteriaLink.href = criteriaUrl;
+    criteriaLink.download = 'criteria_config.json';
+    document.body.appendChild(criteriaLink);
+    criteriaLink.click();
+    document.body.removeChild(criteriaLink);
+    URL.revokeObjectURL(criteriaUrl);
+    
+    // Download feedback_config.json
+    setTimeout(() => {
+      const feedbackBlob = new Blob([feedbackJson], { type: 'application/json' });
+      const feedbackUrl = URL.createObjectURL(feedbackBlob);
+      const feedbackLink = document.createElement('a');
+      feedbackLink.href = feedbackUrl;
+      feedbackLink.download = 'feedback_config.json';
+      document.body.appendChild(feedbackLink);
+      feedbackLink.click();
+      document.body.removeChild(feedbackLink);
+      URL.revokeObjectURL(feedbackUrl);
+    }, 100);
+  };
+
+  const handleCloseModal = () => {
+    setShowDownloadModal(false);
   };
 
   return (
@@ -109,13 +153,64 @@ const ConfigurationPage = () => {
         {/* Tab Content */}
         <div className="transition-all duration-300">
           <div className={activeTab === 'criteria' ? '' : 'hidden'}>
-            <CriteriaForm onSave={handleCriteriaSave} />
+            <CriteriaForm 
+              onSave={handleCriteriaSave} 
+              templateName={gradingTemplate}
+            />
           </div>
           <div className={activeTab === 'feedback' ? '' : 'hidden'}>
-            <FeedbackForm onSave={handleFeedbackSave} />
+            <FeedbackForm 
+              onSave={handleFeedbackSave}
+              feedbackMode={feedbackMode}
+            />
           </div>
         </div>
       </div>
+
+      {/* Download Modal */}
+      {showDownloadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-gray-800 rounded-2xl shadow-2xl border-2 border-indigo-600 p-8 max-w-md w-full animate-in zoom-in duration-300">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl font-bold text-white text-center mb-4">
+              Configuração Completa!
+            </h2>
+
+            {/* Message */}
+            <p className="text-gray-300 text-center mb-8 text-lg">
+              Clique em "Baixar Arquivos" para fazer o download dos arquivos de configuração!
+            </p>
+
+            {/* Buttons */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleDownloadZip}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Download className="w-5 h-5" />
+                Baixar Arquivos
+              </button>
+              
+              <button
+                onClick={handleCloseModal}
+                className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Voltar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

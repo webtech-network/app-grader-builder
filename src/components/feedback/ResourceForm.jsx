@@ -74,7 +74,7 @@ const ResourceForm = ({ onSubmit }) => {
 
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">
-          Tags
+          Testes
         </label>
         <div className="flex gap-2 mb-2 flex-wrap">
           {newResource.tags.map((tag, index) => (
@@ -99,7 +99,7 @@ const ResourceForm = ({ onSubmit }) => {
             value={currentTag}
             onChange={(e) => setCurrentTag(e.target.value)}
             className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
-            placeholder="Digite uma tag e pressione Adicionar"
+            placeholder="Digite um teste e pressione Adicionar"
           />
           <button
             type="button"

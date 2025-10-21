@@ -1,99 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, X, ListTree, Code, Library, Settings, FileText } from 'lucide-react'; 
-
-// --- DADOS MOCK (Biblioteca de Testes Atualizada) ---
-const TEST_LIBRARY = {
-    "template_name": "Html Css Js Template",
-    "template_description": "Um template abrangente para trabalhos de desenvolvimento web, incluindo testes para HTML, CSS e JavaScript.",
-    "tests": [
-        {
-            "name": "has_class",
-            "description": "Verifica a presença de classes CSS específicas, com suporte a curingas, um número mínimo de vezes.",
-            "required_file": "HTML",
-            "type_tag": "HTML", 
-            "parameters": [
-                { "name": "class_names", "description": "Lista de classes (separadas por vírgulas, ex: 'col-*, container')", "type": "list of strings", "defaultValue": "" },
-                { "name": "required_count", "description": "O número mínimo de vezes que as classes devem aparecer no total.", "type": "integer", "defaultValue": 1 }
-            ],
-            "displayName": "Has Class"
-        },
-        {
-            "name": "check_bootstrap_linked",
-            "description": "Verifica se o framework Bootstrap está vinculado no arquivo HTML.",
-            "required_file": "HTML",
-            "type_tag": "PENALTY",
-            "parameters": [],
-            "displayName": "Check Bootstrap Linked"
-        },
-        {
-            "name": "has_tag",
-            "description": "Verifica se uma tag HTML específica aparece um número mínimo de vezes.",
-            "required_file": "HTML",
-            "type_tag": "HTML",
-            "parameters": [
-                { "name": "tag", "description": "A tag HTML a ser pesquisada (por exemplo, 'div').", "type": "string", "defaultValue": "div" },
-                { "name": "required_count", "description": "O número mínimo de vezes que a tag deve aparecer.", "type": "integer", "defaultValue": 1 }
-            ],
-            "displayName": "Has Tag"
-        },
-        {
-            "name": "check_all_images_have_alt",
-            "description": "Verifica se todas as tags `<img>` possuem um atributo `alt` não vazio.",
-            "required_file": "HTML",
-            "type_tag": "ACCESSIBILITY",
-            "parameters": [],
-            "displayName": "Check All Images Have Alt"
-        },
-        {
-            "name": "js_uses_query_string_parsing",
-            "description": "Verifica se o código JavaScript contém padrões para ler query strings da URL.",
-            "required_file": "JavaScript",
-            "type_tag": "JS",
-            "parameters": [],
-            "displayName": "JS Uses Query String Parsing"
-        },
-        {
-            "name": "check_media_queries",
-            "description": "Verifica se existem media queries no arquivo CSS.",
-            "required_file": "CSS",
-            "type_tag": "CSS",
-            "parameters": [],
-            "displayName": "Check Media Queries"
-        },
-        {
-            "name": "check_dir_exists",
-            "description": "Verifica se um diretório específico existe no envio.",
-            "required_file": "Project Structure",
-            "type_tag": "STRUCTURE",
-            "parameters": [
-                { "name": "dir_path", "description": "O caminho do diretório (ex: css, imgs)", "type": "string", "defaultValue": "css" }
-            ],
-            "displayName": "Check Dir Exists"
-        },
-        {
-            "name": "check_project_structure",
-            "description": "Verifica se o caminho da estrutura esperada existe nos arquivos de envio.",
-            "required_file": "Project Structure",
-            "type_tag": "STRUCTURE",
-            "parameters": [
-                { "name": "expected_structure", "description": "O caminho do arquivo esperado (ex: css/styles.css)", "type": "string", "defaultValue": "" }
-            ],
-            "displayName": "Check Project Structure"
-        },
-        {
-            "name": "has_no_js_framework",
-            "description": "Verifica a presença de frameworks JavaScript proibidos (React, Vue, Angular).",
-            "required_file": "Project Structure",
-            "type_tag": "PENALTY",
-            "parameters": [
-                 // Estes parâmetros são preenchidos pelo autograder, não pelo usuário, então são omitidos da configuração
-            ],
-            "displayName": "Has No JS Framework"
-        }
-    ]
-};
-
-const MOCK_TEST_LIBRARY_FLAT = TEST_LIBRARY.tests;
+import { Plus, X, ListTree, Code, Library, Settings, FileText, Loader2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 // --- ESTILOS CUSTOMIZADOS PARA AS LINHAS DA ÁRVORE (INJETADOS NO JSX) ---
 const TreeStyles = () => (
@@ -214,13 +121,16 @@ const TreeStyles = () => (
 // --- FIM DOS ESTILOS CUSTOMIZADOS ---
 
 // --- COMPONENTE: MODAL DA BIBLIOTECA DE TESTES (DRAG & DROP) ---
-const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpdateTest }) => {
+const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpdateTest, testLibrary }) => {
     
-    // Armazena o objeto MOCK_TEST_LIBRARY_FLAT do teste sendo configurado
+    // Armazena o objeto do teste sendo configurado
     const [currentTestConfig, setCurrentTestConfig] = useState(null); 
     const [isDropping, setIsDropping] = useState(false);
     const [params, setParams] = useState({});
     const [nodeCustomName, setNodeCustomName] = useState(initialName);
+
+    // Get the flat list of tests from the library
+    const testLibraryFlat = testLibrary?.tests || [];
 
     // 1. Determina a definição completa do template (Baseado no drop ou no editingNode)
     const testTemplate = useMemo(() => {
@@ -235,8 +145,8 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
             nameToFind = currentTestConfig.name;
         }
 
-        return nameToFind ? MOCK_TEST_LIBRARY_FLAT.find(t => t.name === nameToFind) || null : null;
-    }, [editingNode, currentTestConfig]);
+        return nameToFind ? testLibraryFlat.find(t => t.name === nameToFind) || null : null;
+    }, [editingNode, currentTestConfig, testLibraryFlat]);
 
     // 2. Efeito para carregar os parâmetros (Roda quando o templateBase muda)
     useEffect(() => {
@@ -244,7 +154,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         // Se estiver no modo edição, inicializa com o template base do nó
         if (editingNode && !currentTestConfig) {
             const initialTestName = editingNode.metadata.functionName;
-            const testBase = MOCK_TEST_LIBRARY_FLAT.find(t => t.name === initialTestName);
+            const testBase = testLibraryFlat.find(t => t.name === initialTestName);
             setCurrentTestConfig(testBase);
         }
         
@@ -297,9 +207,9 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         let parsedValue = value;
         if (type === 'integer' || type === 'number') {
              parsedValue = value === '' ? '' : parseFloat(value);
-        } else if (type === 'list of strings') {
-             parsedValue = value.split(',').map(s => s.trim()).filter(s => s.length > 0);
         }
+        // For 'list of strings', keep the raw string value during editing
+        // It will be parsed only when submitting the form
         setParams(prev => ({ ...prev, [id]: parsedValue }));
     };
 
@@ -313,6 +223,8 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         // Retorna string vazia para undefined/null em inputs controlados
         if (value === undefined || value === null) return ''; 
 
+        // For 'list of strings', keep the raw string during editing
+        // If it's already an array (from loaded data), convert to string
         if (type === 'list of strings' && Array.isArray(value)) {
             return value.join(', ');
         }
@@ -324,27 +236,36 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         
         if (!testTemplate) return;
         
+        // Parse 'list of strings' parameters before validation
+        const parsedParams = { ...params };
+        testTemplate.parameters.forEach(p => {
+            if (p.type === 'list of strings' && typeof parsedParams[p.name] === 'string') {
+                parsedParams[p.name] = parsedParams[p.name]
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0);
+            }
+        });
+        
         // 2. Validação de campos obrigatórios
         const requiredParams = testTemplate.parameters.filter(p => p.type !== 'dictionary');
         
-        for (const p of requiredParams) {
+            for (const p of requiredParams) {
             // Checa se o campo está vazio ou se é NaN para números
-            if (params[p.name] === '' || params[p.name] === null || params[p.name] === undefined || 
-                (p.type === 'list of strings' && (Array.isArray(params[p.name]) && params[p.name].length === 0))) {
-                alert(`O parâmetro '${p.description}' é obrigatório.`);
+            if (parsedParams[p.name] === '' || parsedParams[p.name] === null || parsedParams[p.name] === undefined || 
+                (p.type === 'list of strings' && (Array.isArray(parsedParams[p.name]) && parsedParams[p.name].length === 0))) {
+                toast.error(`O parâmetro '${p.description}' é obrigatório.`);
                 return;
             }
-            if ((p.type === 'integer' || p.type === 'number') && isNaN(params[p.name])) {
-                alert(`O parâmetro '${p.description}' deve ser um número.`);
+            if ((p.type === 'integer' || p.type === 'number') && isNaN(parsedParams[p.name])) {
+                toast.error(`O parâmetro '${p.description}' deve ser um número.`);
                 return;
             }
-        }
-        
-        // 3. Mapeamento de Parâmetros para Calls (Formato de Argumentos)
+        }        // 3. Mapeamento de Parâmetros para Calls (Formato de Argumentos)
         const calls = [[]]; 
         const callArgs = testTemplate.parameters.map(p => {
             if (p.type !== 'dictionary' && p.name !== 'submission_files' && p.name !== 'html_file' && p.name !== 'js_file') {
-                return params[p.name];
+                return parsedParams[p.name];
             }
             return null; 
         }).filter(arg => arg !== null);
@@ -389,11 +310,11 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
             setCurrentTestConfig(data); 
         } catch (error) {
             console.error("Erro ao processar o teste arrastado:", error);
-            alert("Erro ao selecionar o teste. Tente novamente.");
+            toast.error("Erro ao selecionar o teste. Tente novamente.");
         }
     };
 
-    const groupedTests = MOCK_TEST_LIBRARY_FLAT.reduce((acc, test) => {
+    const groupedTests = testLibraryFlat.reduce((acc, test) => {
         const type = test.type_tag || test.required_file || 'Outros';
         if (!acc[type]) acc[type] = [];
         acc[type].push(test);
@@ -465,13 +386,9 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
                                     {p.description}
                                 </label>
                                 <input
-                                    type={getInputType(p.type)}
-                                    min={p.type === 'integer' || p.type === 'number' ? 0 : undefined}
-                                    step={p.type === 'number' ? 'any' : undefined}
-                                    // CORRIGIDO: Garantindo que o valor seja o retorno da função, não undefined
+                                    type="text"
                                     value={getInputValue(p.name, p.type)}
                                     onChange={(e) => handleChange(p.name, e.target.value, p.type)}
-                                    placeholder={p.type === 'list of strings' ? 'Separado por vírgulas (ex: "div, p, h1")' : ''}
                                     className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-50 placeholder-gray-500 focus:ring-indigo-500 focus:border-indigo-500"
                                 />
                                 <p className='text-xs text-gray-500 mt-1'>Tipo esperado: `{p.type}`</p>
@@ -571,8 +488,22 @@ const findNodeById = (nodes, id) => {
     return null;
 };
 
+// Função auxiliar para encontrar o pai de um nó
+const findParentOfNode = (nodes, targetId, parent = null) => {
+    for (const node of nodes) {
+        if (node.id === targetId) {
+            return parent;
+        }
+        if (node.children) {
+            const found = findParentOfNode(node.children, targetId, node);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+};
+
 // Componente Recursivo do Nó
-const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, totalChildWeight, onEditTest }) => {
+const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, totalChildWeight, onEditTest, testLibrary }) => {
   const isLeaf = node.children === null || node.children.length === 0;
   const canAddChild = node.children !== null; 
   
@@ -647,7 +578,7 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
   // --- Renderização do Nome e Título do Teste ---
   const getDisplayName = () => {
     if (isTestNode && node.metadata) {
-        const testTemplate = MOCK_TEST_LIBRARY_FLAT.find(t => t.name === node.metadata.functionName);
+        const testTemplate = testLibrary?.tests?.find(t => t.name === node.metadata.functionName);
         const testDisplayName = testTemplate?.displayName || node.metadata.functionName;
         // Nome customizado + (Título do Teste)
         return `${node.name.replace(/\s\(Teste\)/, '')} (${testDisplayName})`;
@@ -798,7 +729,8 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
               onWeightChange={onWeightChange}
               onEditTest={onEditTest}
               // Calcula o peso dos filhos do nó atual
-              totalChildWeight={calculateChildWeights(child)} 
+              totalChildWeight={calculateChildWeights(child)}
+              testLibrary={testLibrary}
             />
           ))}
         </ul>
@@ -819,7 +751,7 @@ const calculateChildWeights = (node) => {
 };
 
 // Componente Principal
-const CriteriaForm = () => {
+const CriteriaForm = ({ templateName, onSave }) => {
   const initialTreeData = [
     { id: 'base', name: 'Base', children: [], weight: 100 }, 
     { id: 'bonus', name: 'Bonus', children: [], weight: 0 },
@@ -836,7 +768,42 @@ const CriteriaForm = () => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [editingNode, setEditingNode] = useState(null); // Armazena o nó que está sendo editado (ID)
   const [initialName, setInitialName] = useState(''); // Nome inicial do nó
+  
+  // --- Estados para carregamento do template ---
+  const [testLibrary, setTestLibrary] = useState(null);
+  const [loadingTemplate, setLoadingTemplate] = useState(true);
+  const [templateError, setTemplateError] = useState(null);
   // --- Fim dos Novos estados ---
+
+  // Fetch template data from API
+  useEffect(() => {
+    const fetchTemplateData = async () => {
+      if (!templateName) {
+        setTemplateError('No template name provided');
+        setLoadingTemplate(false);
+        return;
+      }
+
+      setLoadingTemplate(true);
+      setTemplateError(null);
+
+      try {
+        const response = await fetch(`http://localhost:8000/templates/${templateName}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch template: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setTestLibrary(data);
+      } catch (error) {
+        console.error('Error fetching template:', error);
+        setTemplateError(error.message);
+      } finally {
+        setLoadingTemplate(false);
+      }
+    };
+
+    fetchTemplateData();
+  }, [templateName]);
 
 
   // Calcula a soma dos pesos de cada categoria L0 (memoization)
@@ -871,7 +838,7 @@ const CriteriaForm = () => {
     return nodes.map(node => {
       if (node.id === targetId) {
         // Encontra o template para atualizar o displayName
-        const testTemplate = MOCK_TEST_LIBRARY_FLAT.find(t => t.name === updatedData.functionName);
+        const testTemplate = testLibrary?.tests?.find(t => t.name === updatedData.functionName);
         const name = `${updatedData.name.trim() || testTemplate?.displayName || updatedData.functionName} (Teste)`;
 
         return {
@@ -976,7 +943,7 @@ const CriteriaForm = () => {
     } else {
         // Modo Criação: Cria um novo nó
         const newId = `node-${selectedParentId}-${nodeCount}`; 
-        const testTemplate = MOCK_TEST_LIBRARY_FLAT.find(t => t.name === testData.functionName);
+        const testTemplate = testLibrary?.tests?.find(t => t.name === testData.functionName);
 
         const newNode = {
             id: newId,
@@ -1010,12 +977,31 @@ const CriteriaForm = () => {
       const hasExistingTests = parentNode.children.some(child => child.children === null);
       const hasExistingSubSubjects = parentNode.children.some(child => child.children !== null);
       
+      // Check if parent is a category node
+      const isCategoryNode = parentNode.id === 'base' || parentNode.id === 'bonus' || parentNode.id === 'penalty';
+      
+      // If trying to create a subject, check if parent's parent is a category
+      // If parent is not a category, find its parent
+      if (isCreatingSubject && !isCategoryNode) {
+          // Parent is not a category, so it's a Tema or Sub-Tema
+          // Find the parent's parent (grandparent)
+          const grandParent = findParentOfNode(treeData, selectedParentId);
+          const isGrandParentCategory = grandParent && (grandParent.id === 'base' || grandParent.id === 'bonus' || grandParent.id === 'penalty');
+          
+          // If grandparent is a category, parent is a Tema (level 1), so we can create Sub-Tema (level 2) ✅
+          // If grandparent is NOT a category, parent is already a Sub-Tema (level 2), so we CANNOT create Sub-Sub-Tema (level 3) ❌
+          if (!isGrandParentCategory) {
+              toast.error("Erro: Não é possível criar Sub-Temas dentro de Sub-Temas. Um Sub-Tema só pode conter Testes.");
+              return;
+          }
+      }
+      
       if (isCreatingTest && hasExistingSubSubjects) {
-          alert("Erro: Este Tema já contém Sub-Temas aninhados. Os Testes devem ser adicionados dentro do último Sujeito aninhado.");
+          toast.error("Erro: Este Tema já contém Sub-Temas aninhados. Os Testes devem ser adicionados dentro do último Sujeito aninhado.");
           return;
       }
       if (isCreatingSubject && hasExistingTests) {
-          alert("Erro: Este Tema já contém Testes. Um Tema só pode conter ou Testes ou Sub-Temas, mas não ambos.");
+          toast.error("Erro: Este Tema já contém Testes. Um Tema só pode conter ou Testes ou Sub-Temas, mas não ambos.");
           return;
       }
     }
@@ -1032,7 +1018,7 @@ const CriteriaForm = () => {
     const newId = `node-${selectedParentId}-${nodeCount}`; 
     const newNode = {
       id: newId,
-      name: newNodeName.trim() + (isCategoryParent ? '' : ` (Sujeito)`),
+      name: newNodeName.trim(),
       children: [], // Sujeito sempre tem array para poder adicionar filhos
       weight: 0, 
     };
@@ -1052,19 +1038,333 @@ const CriteriaForm = () => {
 
   // --- Funções Save/Cancel que usam o estado da árvore (Corpo do Arquivo) ---
 
+  // Transform tree data to backend format
+  const transformTreeToBackendFormat = (nodes) => {
+    const result = {};
+    
+    // Helper function to process children recursively
+    const processNode = (node) => {
+      // If node has no children (leaf/test node), return null
+      if (node.children === null || (Array.isArray(node.children) && node.children.length === 0 && node.metadata)) {
+        return null;
+      }
+      
+      // If node has children, process them
+      const subjects = {};
+      const tests = [];
+      
+      node.children.forEach(child => {
+        // Check if this is a test node (has metadata)
+        if (child.metadata) {
+          // This is a test node - add to tests array
+          const testName = child.metadata.functionName;
+          const calls = child.metadata.calls;
+          
+          // Check if this test has parameters (calls with values)
+          if (calls && calls.length > 0 && calls[0].length > 0) {
+            // Parameterized test format: { "test_name": [[params]] }
+            tests.push({
+              [testName]: calls
+            });
+          } else {
+            // Simple test format: "test_name"
+            tests.push(testName);
+          }
+        } else {
+          // This is a subject node - recursively process it
+          const childName = child.name.replace(/\s\(Sujeito\)/, '').trim().toLowerCase().replace(/\s+/g, '_');
+          const childData = processNode(child);
+          
+          if (childData) {
+            subjects[childName] = childData;
+          } else {
+            // Leaf subject with only tests
+            const leafTests = [];
+            
+            if (child.children && child.children.length > 0) {
+              child.children.forEach(testChild => {
+                if (testChild.metadata) {
+                  const testName = testChild.metadata.functionName;
+                  const calls = testChild.metadata.calls;
+                  
+                  if (calls && calls.length > 0 && calls[0].length > 0) {
+                    leafTests.push({
+                      [testName]: calls
+                    });
+                  } else {
+                    leafTests.push(testName);
+                  }
+                }
+              });
+            }
+            
+            subjects[childName] = {
+              weight: parseFloat(child.weight) || 0,
+              tests: leafTests
+            };
+          }
+        }
+      });
+      
+      // Build the return object
+      const nodeData = {
+        weight: parseFloat(node.weight) || 0
+      };
+      
+      // Add subjects if there are any
+      if (Object.keys(subjects).length > 0) {
+        nodeData.subjects = subjects;
+      }
+      
+      // Add tests if there are any
+      if (tests.length > 0) {
+        nodeData.tests = tests;
+      }
+      
+      return nodeData;
+    };
+    
+    // Process each top-level category (base, bonus, penalty)
+    nodes.forEach(category => {
+      const categoryData = processNode(category);
+      if (categoryData) {
+        result[category.id] = categoryData;
+      }
+    });
+    
+    return result;
+  };
+
+  // Validation function to check for subjects without tests
+  const validateCriteriaTree = (nodes) => {
+    const errors = [];
+    
+    const validateNode = (node, path = [], isCategoryLevel = false) => {
+      const currentPath = [...path, node.name];
+      
+      // Skip validation for test nodes (leaf nodes with metadata)
+      if (node.metadata || node.children === null) {
+        return;
+      }
+      
+      // Check if this is a subject node (has children array)
+      if (Array.isArray(node.children)) {
+        // Allow empty Bonus and Penalty categories
+        if (node.children.length === 0) {
+          if (isCategoryLevel && (node.id === 'bonus' || node.id === 'penalty')) {
+            // Empty bonus/penalty is allowed
+            return;
+          }
+          errors.push(`O tema "${currentPath.join(' > ')}" está vazio. Todos os temas devem conter pelo menos um teste ou sub-tema.`);
+          return;
+        }
+        
+        // Check if all children are also subjects (no tests)
+        const hasTests = node.children.some(child => child.metadata || child.children === null);
+        const hasSubjects = node.children.some(child => !child.metadata && child.children !== null);
+        
+        // If has subjects but no tests at this level, validate children
+        if (hasSubjects && !hasTests) {
+          // Check if any child subject has tests (recursively)
+          let hasTestsInChildren = false;
+          
+          const checkChildrenForTests = (childNode) => {
+            if (childNode.metadata || childNode.children === null) {
+              hasTestsInChildren = true;
+              return true;
+            }
+            if (Array.isArray(childNode.children) && childNode.children.length > 0) {
+              return childNode.children.some(checkChildrenForTests);
+            }
+            return false;
+          };
+          
+          node.children.forEach(child => {
+            if (!child.metadata && child.children !== null) {
+              checkChildrenForTests(child);
+            }
+          });
+          
+          if (!hasTestsInChildren) {
+            errors.push(`O tema "${currentPath.join(' > ')}" não possui testes. Todos os temas devem eventualmente conter testes.`);
+          }
+        }
+        
+        // Recursively validate children
+        node.children.forEach(child => validateNode(child, currentPath, false));
+      }
+    };
+    
+    nodes.forEach(category => validateNode(category, [], true));
+    return errors;
+  };
+  
+  // Validation function to check that subject weights sum to 100 within each category
+  const validateWeightSum = (nodes) => {
+    const errors = [];
+    
+    nodes.forEach(category => {
+      // Skip empty bonus/penalty
+      if ((category.id === 'bonus' || category.id === 'penalty') && 
+          (!category.children || category.children.length === 0)) {
+        return;
+      }
+      
+      // Calculate sum of direct children weights
+      if (category.children && category.children.length > 0) {
+        const weightSum = category.children.reduce((sum, child) => {
+          return sum + (parseFloat(child.weight) || 0);
+        }, 0);
+        
+        // Check if sum is approximately 100 (allowing small floating point differences)
+        if (Math.abs(weightSum - 100) > 0.1) {
+          const categoryDisplayName = category.name;
+          errors.push(
+            `A soma dos pesos dos temas em "${categoryDisplayName}" é ${weightSum.toFixed(1)}. Deve ser exatamente 100%.`
+          );
+        }
+      }
+    });
+    
+    return errors;
+  };
+  
+  // Validation function to check test parameters match template requirements
+  const validateTestParameters = (nodes, testLib) => {
+    const errors = [];
+    
+    const validateNode = (node, path = []) => {
+      const currentPath = [...path, node.name];
+      
+      // Check if this is a test node
+      if (node.metadata) {
+        const testName = node.metadata.functionName;
+        const testCalls = node.metadata.calls;
+        
+        // Find the test definition in the library
+        const testDefinition = testLib?.tests?.find(t => t.name === testName);
+        
+        if (testDefinition) {
+          // Get required parameters (excluding dictionary, submission_files, html_file, js_file)
+          const requiredParams = testDefinition.parameters.filter(
+            p => p.type !== 'dictionary' && 
+                 p.name !== 'submission_files' && 
+                 p.name !== 'html_file' && 
+                 p.name !== 'js_file'
+          );
+          
+          const providedParamsCount = testCalls && testCalls[0] ? testCalls[0].length : 0;
+          const requiredParamsCount = requiredParams.length;
+          
+          if (providedParamsCount !== requiredParamsCount) {
+            errors.push(
+              `O teste "${currentPath.join(' > ')}" requer ${requiredParamsCount} parâmetro(s), mas ${providedParamsCount} foi(foram) fornecido(s).`
+            );
+          }
+        }
+      }
+      
+      // Recursively validate children
+      if (Array.isArray(node.children)) {
+        node.children.forEach(child => validateNode(child, currentPath));
+      }
+    };
+    
+    nodes.forEach(category => validateNode(category));
+    return errors;
+  };
+  
+  // Validation function to check that bonus/penalty with weight > 0 have content
+  const validateBonusPenaltyContent = (nodes) => {
+    const errors = [];
+    
+    nodes.forEach(category => {
+      // Only check bonus and penalty categories
+      if (category.id !== 'bonus' && category.id !== 'penalty') {
+        return;
+      }
+      
+      const categoryWeight = parseFloat(category.weight) || 0;
+      
+      // If weight is greater than 0, must have content
+      if (categoryWeight > 0) {
+        const isEmpty = !category.children || category.children.length === 0;
+        
+        if (isEmpty) {
+          const categoryDisplayName = category.name;
+          errors.push(
+            `A categoria "${categoryDisplayName}" tem peso ${categoryWeight}, mas não possui conteúdo. Adicione pelo menos um tema e um teste.`
+          );
+          return;
+        }
+        
+        // Check if there's at least one test in the entire tree
+        const hasTests = (node) => {
+          if (node.metadata || node.children === null) {
+            return true; // This is a test node
+          }
+          if (Array.isArray(node.children) && node.children.length > 0) {
+            return node.children.some(child => hasTests(child));
+          }
+          return false;
+        };
+        
+        const categoryHasTests = category.children.some(child => hasTests(child));
+        
+        if (!categoryHasTests) {
+          const categoryDisplayName = category.name;
+          errors.push(
+            `A categoria "${categoryDisplayName}" tem peso ${categoryWeight}, mas não possui testes. Adicione pelo menos um teste.`
+          );
+        }
+      }
+    });
+    
+    return errors;
+  };
+
   const handleSaveCriteria = () => {
-    // A lógica de transformação para o formato backend deve ir aqui
-    // (Omitida para manter o foco no frontend)
+    // Validate the tree structure
+    const structureErrors = validateCriteriaTree(treeData);
+    if (structureErrors.length > 0) {
+      structureErrors.forEach(error => toast.error(error));
+      return;
+    }
     
-    // Simulação de salvamento
+    // Validate weight sums
+    const weightErrors = validateWeightSum(treeData);
+    if (weightErrors.length > 0) {
+      weightErrors.forEach(error => toast.error(error));
+      return;
+    }
     
-    // Trigger celebration animation
-    // ... animation logic ...
+    // Validate bonus/penalty content
+    const bonusPenaltyErrors = validateBonusPenaltyContent(treeData);
+    if (bonusPenaltyErrors.length > 0) {
+      bonusPenaltyErrors.forEach(error => toast.error(error));
+      return;
+    }
+    
+    // Validate test parameters
+    const parameterErrors = validateTestParameters(treeData, testLibrary);
+    if (parameterErrors.length > 0) {
+      parameterErrors.forEach(error => toast.error(error));
+      return;
+    }
+    
+    // Transform tree data to backend format
+    const criteriaJson = transformTreeToBackendFormat(treeData);
     
     // Trigger celebration animation
     setSaveButtonAnimation(true);
     setShowSaveSuccess(true);
     setIsSaved(true);
+    
+    // Call the onSave callback with the transformed data
+    if (onSave) {
+      console.log('Final Criteria Configuration:', JSON.stringify(criteriaJson, null, 2));
+      onSave(criteriaJson);
+    }
     
     // Reset animation after it completes
     setTimeout(() => {
@@ -1080,6 +1380,11 @@ const CriteriaForm = () => {
   const handleCancelSave = () => {
     // Lógica para reverter ou limpar o estado de "salvo"
     setIsSaved(false);
+    
+    // Call onSave with null to indicate unsaved state
+    if (onSave) {
+      onSave(null);
+    }
   };
   
   // Variáveis para animação de salvar (Mockadas para evitar erro)
@@ -1091,6 +1396,45 @@ const CriteriaForm = () => {
     setTreeData((prevTree) => removeNode(prevTree, targetId));
   };
 
+  // Show loading state while fetching template
+  if (loadingTemplate) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-indigo-400 animate-spin mx-auto mb-4" />
+          <p className="text-xl text-gray-300">Loading template...</p>
+          <p className="text-sm text-gray-500 mt-2">Fetching {templateName} configuration</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if template fetch failed
+  if (templateError) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-red-400 mb-2">Error Loading Template</h2>
+          <p className="text-gray-400 mb-4">{templateError}</p>
+          <p className="text-sm text-gray-500">
+            Please ensure the API is running at <code className="bg-gray-800 px-2 py-1 rounded">localhost:8000</code>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if no template library loaded
+  if (!testLibrary) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-gray-400">No template data available</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 overflow-x-auto">
@@ -1125,7 +1469,7 @@ const CriteriaForm = () => {
                         title="Nó de Agrupamento que pode conter Testes ou outros Sujeitos."
                     >
                         <ListTree className="w-5 h-5 mr-2" />
-                        <span className="font-semibold text-sm">Tema/Sujeito</span>
+                        <span className="font-semibold text-sm">Tema</span>
                     </button>
 
                     {/* Botão TESTE */}
@@ -1173,7 +1517,7 @@ const CriteriaForm = () => {
         )}
         
         {/* --- MODAL 2: BIBLIOTECA DE TESTES E CONFIGURAÇÃO --- */}
-        {isLibraryOpen && (
+        {isLibraryOpen && testLibrary && (
             <TestLibraryModal 
                 onClose={closeAllModals} 
                 initialName={initialName}
@@ -1185,6 +1529,7 @@ const CriteriaForm = () => {
                     setTreeData(prevTree => updateExistingNode(prevTree, nodeId, testData));
                     closeAllModals();
                 }}
+                testLibrary={testLibrary}
             />
         )}
 
@@ -1274,7 +1619,8 @@ const CriteriaForm = () => {
                 onRemoveNode={handleRemoveNode} 
                 onWeightChange={handleWeightChange}
                 onEditTest={handleEditTest}
-                totalChildWeight={categoryWeights[node.id] || 0} 
+                totalChildWeight={categoryWeights[node.id] || 0}
+                testLibrary={testLibrary}
               />
             ))}
           </ul>
