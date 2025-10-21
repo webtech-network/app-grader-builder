@@ -3,8 +3,9 @@ import ReportTitleInput from './ReportTitleInput';
 import ToggleSwitch from './ToggleSwitch';
 import ResourceForm from './ResourceForm';
 import ResourceList from './ResourceList';
+import { toast } from 'react-toastify';
 
-const FeedbackForm = ({ onSave }) => {
+const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
   // State management
   const [reportTitle, setReportTitle] = useState("");
   const [feedbackTone, setFeedbackTone] = useState("");
@@ -24,6 +25,16 @@ const FeedbackForm = ({ onSave }) => {
   const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
+  // Sandbox state
+  const [sandboxReadingFiles, setSandboxReadingFiles] = useState([]);
+  const [sandboxCurrentFile, setSandboxCurrentFile] = useState("");
+  const [runtimeImage, setRuntimeImage] = useState("");
+  const [containerPort, setContainerPort] = useState("");
+  const [startCommand, setStartCommand] = useState("");
+  const [commands, setCommands] = useState([]);
+  const [currentCommandKey, setCurrentCommandKey] = useState("");
+  const [currentCommandValue, setCurrentCommandValue] = useState("");
+
   // Event handlers
   const handleToggle = (id) => {
     setToggleStates(prev => ({
@@ -40,13 +51,25 @@ const FeedbackForm = ({ onSave }) => {
     setResources(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleAddCommand = () => {
+    if (currentCommandKey.trim() && currentCommandValue.trim()) {
+      setCommands(prev => [...prev, { key: currentCommandKey.trim(), value: currentCommandValue.trim() }]);
+      setCurrentCommandKey("");
+      setCurrentCommandValue("");
+    }
+  };
+
+  const handleDeleteCommand = (index) => {
+    setCommands(prev => prev.filter((_, i) => i !== index));
+  };
+
   const assembleConfiguration = () => {
     // Backend expects: { general: {...}, ai: {...}, default: {...} }
     const config = {};
     
-    // General configuration (always include if any value is set)
+    // General configuration (only include if at least one value is set)
     const generalConfig = {};
-    if (reportTitle) {
+    if (reportTitle && reportTitle.trim() !== '') {
       generalConfig.report_title = reportTitle;
     }
     if (toggleStates.show_passed_tests !== undefined) {
@@ -55,28 +78,40 @@ const FeedbackForm = ({ onSave }) => {
     if (toggleStates.show_score !== undefined) {
       generalConfig.show_test_details = toggleStates.show_score; // Map to backend field
     }
+    if (toggleStates.add_report_summary !== undefined) {
+      generalConfig.add_report_summary = toggleStates.add_report_summary;
+    }
     
+    // Only add general key if at least one field is provided
     if (Object.keys(generalConfig).length > 0) {
       config.general = generalConfig;
     }
     
-    // AI configuration (only if values are provided)
-    const aiConfig = {};
-    if (feedbackPersona) {
-      aiConfig.feedback_persona = feedbackPersona;
-    }
-    if (activityContext) {
-      aiConfig.assignment_context = activityContext;
-    }
-    if (extraGuidelines) {
-      aiConfig.extra_orientations = extraGuidelines;
-    }
-    if (readingFiles && readingFiles.length > 0) {
-      aiConfig.submission_files_to_read = readingFiles;
-    }
-    
-    if (Object.keys(aiConfig).length > 0) {
-      config.ai = aiConfig;
+    // AI configuration (only if feedback mode is 'ai' and values are provided)
+    if (feedbackMode === 'ai') {
+      const aiConfig = {};
+      if (feedbackTone) {
+        aiConfig.feedback_tone = feedbackTone;
+      }
+      if (feedbackPersona) {
+        aiConfig.feedback_persona = feedbackPersona;
+      }
+      if (activityContext) {
+        aiConfig.assignment_context = activityContext;
+      }
+      if (extraGuidelines) {
+        aiConfig.extra_orientations = extraGuidelines;
+      }
+      if (solutionType) {
+        aiConfig.solution_type = solutionType;
+      }
+      if (readingFiles && readingFiles.length > 0) {
+        aiConfig.submission_files_to_read = readingFiles;
+      }
+      
+      if (Object.keys(aiConfig).length > 0) {
+        config.ai = aiConfig;
+      }
     }
     
     // Default configuration (custom category headers)
@@ -90,11 +125,108 @@ const FeedbackForm = ({ onSave }) => {
       config.default = defaultConfig;
     }
     
+    // Include online resources (optional, can be empty array)
+    if (resources && resources.length > 0) {
+      config.online_resources = resources;
+    }
+    
+    // Sandbox configuration (only if at least one value is set)
+    const sandboxConfig = {};
+    if (sandboxReadingFiles && sandboxReadingFiles.length > 0) {
+      sandboxConfig.submission_files_to_read = sandboxReadingFiles;
+    }
+    if (runtimeImage && runtimeImage.trim() !== '') {
+      sandboxConfig.runtime_image = runtimeImage;
+    }
+    if (containerPort && containerPort.trim() !== '') {
+      sandboxConfig.container_port = parseInt(containerPort, 10);
+    }
+    if (startCommand && startCommand.trim() !== '') {
+      sandboxConfig.start_command = startCommand;
+    }
+    if (commands && commands.length > 0) {
+      const commandsObj = {};
+      commands.forEach(cmd => {
+        commandsObj[cmd.key] = cmd.value;
+      });
+      sandboxConfig.commands = commandsObj;
+    }
+    
+    if (Object.keys(sandboxConfig).length > 0) {
+      config.sandbox = sandboxConfig;
+    }
+    
     return config;
   };
 
+  const validateConfiguration = () => {
+    const errors = [];
+    
+    // Validate General section required fields
+    if (!reportTitle || reportTitle.trim() === '') {
+      errors.push('Título do Relatório é obrigatório');
+    }
+    
+    // Note: toggleStates are boolean values and always exist with defaults
+    // We validate that the user has explicitly set them (which they have via defaults)
+    // The toggles show_score, show_passed_tests, and add_report_summary are required
+    // but they have default values (true), so they're always present
+    
+    // Conteúdo Online is optional (resources array can be empty)
+    
+    // Only validate AI fields if feedback mode is 'ai'
+    if (feedbackMode === 'ai') {
+      // Validate Feedback Tone (required)
+      if (!feedbackTone || feedbackTone.trim() === '') {
+        errors.push('Tom do Feedback é obrigatório');
+      }
+      
+      // Validate Feedback Persona (required)
+      if (!feedbackPersona || feedbackPersona.trim() === '') {
+        errors.push('Persona do Feedback é obrigatória');
+      }
+      
+      // Validate Activity Context (required)
+      if (!activityContext || activityContext.trim() === '') {
+        errors.push('Contexto da Atividade é obrigatório');
+      }
+      
+      // Validate Extra Guidelines (required)
+      if (!extraGuidelines || extraGuidelines.trim() === '') {
+        errors.push('Orientações Extras são obrigatórias');
+      }
+      
+      // Validate Solution Type (required, but has default so should always exist)
+      if (!solutionType || solutionType.trim() === '') {
+        errors.push('Tipo de Fornecimento de Soluções é obrigatório');
+      }
+      
+      // Validate Reading Files (required, at least one)
+      if (!readingFiles || readingFiles.length === 0) {
+        errors.push('Pelo menos um arquivo para leitura é obrigatório');
+      }
+    }
+    
+    // Note: resources (online resources) is optional and can be empty
+    
+    return errors;
+  };
+
   const handleSave = () => {
+    // Validate configuration before saving
+    const validationErrors = validateConfiguration();
+    
+    if (validationErrors.length > 0) {
+      validationErrors.forEach((err, idx) => {
+        toast.error(`${idx + 1}. ${err}`);
+      });
+      return;
+    }
+    
     const config = assembleConfiguration();
+    
+    // Log final configuration to console
+    console.log('Final Feedback Configuration:', JSON.stringify(config, null, 2));
     
     // Call parent callback if provided
     if (onSave) {
@@ -279,11 +411,12 @@ const FeedbackForm = ({ onSave }) => {
             </div>
           </section>
 
-          {/* Seção IA */}
-          <section className="bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold border-b-2 border-gray-700 pb-3 mb-6 text-indigo-400">
-              Inteligência Artificial
-            </h2>
+          {/* Seção IA - Only show if feedback mode is 'ai' */}
+          {feedbackMode === 'ai' && (
+            <section className="bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-700">
+              <h2 className="text-2xl font-bold border-b-2 border-gray-700 pb-3 mb-6 text-indigo-400">
+                Inteligência Artificial
+              </h2>
             <div className="space-y-5 text-sm">
               {/* Fornecimento de Soluções */}
               <div>
@@ -393,9 +526,156 @@ const FeedbackForm = ({ onSave }) => {
                   )}
                 </div>
               </div>
+            </div>
+          </section>
+          )}
+
+          {/* Seção Sandbox - Always visible */}
+          <section className="bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-700">
+            <h2 className="text-2xl font-bold border-b-2 border-gray-700 pb-3 mb-6 text-indigo-400">
+              Sandbox
+            </h2>
+            <div className="space-y-5 text-sm">
               
-              {/* Save Button */}
-              <div className="mt-8 flex justify-end items-center gap-3 relative">
+              {/* Arquivos para Leitura */}
+              <div className="space-y-3">
+                <div className="flex flex-col justify-between gap-3">
+                  <p className="text-gray-400 font-medium">Arquivos para Leitura</p>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={sandboxCurrentFile}
+                      onChange={(e) => setSandboxCurrentFile(e.target.value)}
+                      placeholder="Nome do arquivo..."
+                      className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <button
+                      onClick={() => {
+                        if (sandboxCurrentFile.trim()) {
+                          setSandboxReadingFiles(prev => [...prev, sandboxCurrentFile.trim()]);
+                          setSandboxCurrentFile("");
+                        }
+                      }}
+                      type="button"
+                      className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  {sandboxReadingFiles.length === 0 ? (
+                    <p className="text-gray-500 italic text-sm">Nenhum arquivo adicionado</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {sandboxReadingFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="group flex items-center bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md"
+                        >
+                          {file}
+                          <button
+                            onClick={() => setSandboxReadingFiles(prev => prev.filter((_, i) => i !== index))}
+                            className="ml-2 text-indigo-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Imagem do Runtime */}
+              <ReportTitleInput
+                title={runtimeImage}
+                onChange={setRuntimeImage}
+                label="Imagem do Runtime"
+                placeholder="Ex: python:3.9"
+              />
+
+              {/* Porta do Container */}
+              <div className="space-y-1">
+                <p className="text-gray-400 font-medium text-sm">Porta do Container</p>
+                <input
+                  type="number"
+                  value={containerPort}
+                  onChange={(e) => setContainerPort(e.target.value)}
+                  placeholder="Ex: 8080"
+                  className="w-full bg-gray-700 border border-gray-600 rounded-xl p-3 text-gray-300 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Comando para Iniciar */}
+              <ReportTitleInput
+                title={startCommand}
+                onChange={setStartCommand}
+                label="Comando para Iniciar"
+                placeholder="Ex: python app.py"
+              />
+
+              {/* Comandos */}
+              <div className="space-y-3">
+                <div className="flex flex-col gap-3">
+                  <p className="text-gray-400 font-medium">Comandos</p>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={currentCommandKey}
+                      onChange={(e) => setCurrentCommandKey(e.target.value)}
+                      placeholder="Chave (ex: test)"
+                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      value={currentCommandValue}
+                      onChange={(e) => setCurrentCommandValue(e.target.value)}
+                      placeholder="Comando (ex: npm test)"
+                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <button
+                      onClick={handleAddCommand}
+                      type="button"
+                      className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  {commands.length === 0 ? (
+                    <p className="text-gray-500 italic text-sm">Nenhum comando adicionado</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {commands.map((cmd, index) => (
+                        <div
+                          key={index}
+                          className="group flex items-center justify-between bg-gray-700 border border-gray-600 px-3 py-2 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3 flex-1">
+                            <span className="text-indigo-400 font-semibold text-xs font-mono">{cmd.key}:</span>
+                            <span className="text-gray-300 text-xs font-mono">{cmd.value}</span>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteCommand(index)}
+                            className="text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Save Button - Always visible at the end */}
+          <div className="mt-8 flex justify-end items-center gap-3 relative">
                 <button
                   type="button"
                   disabled={isSaved}
@@ -454,24 +734,22 @@ const FeedbackForm = ({ onSave }) => {
                   </button>
                 )}
               </div>
-              
-              {/* Success Toast Notification */}
-              {showSaveSuccess && (
-                <div className="fixed bottom-8 right-8 z-50 toast-enter">
-                  <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border-2 border-green-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <div>
-                      <p className="font-bold">Saved!</p>
-                      <p className="text-sm text-green-100">Feedback saved successfully</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
         </div>
+        
+        {/* Success Toast Notification */}
+        {showSaveSuccess && (
+          <div className="fixed bottom-8 right-8 z-50 toast-enter">
+            <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border-2 border-green-400">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <div>
+                <p className="font-bold">Saved!</p>
+                <p className="text-sm text-green-100">Feedback saved successfully</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

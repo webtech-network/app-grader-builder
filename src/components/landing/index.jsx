@@ -48,7 +48,7 @@ const LandingPage = () => {
 
   const feedbackModeOptions = [
     { value: 'default', label: 'Default', icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' },
-    { value: 'ai-powered', label: 'AI-Powered', icon: '🤖', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' }
+    { value: 'ai', label: 'AI-Powered', icon: '🤖', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' }
   ];
 
   const getFeedbackDisplayInfo = (feedbackValue) => {
