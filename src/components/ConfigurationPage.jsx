@@ -17,6 +17,8 @@ const ConfigurationPage = () => {
   const [feedbackConfig, setFeedbackConfig] = useState(null);
   const [setupConfig, setSetupConfig] = useState(null);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [showDownloadButton, setShowDownloadButton] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Check if setup is required for this template
   const isSetupRequired = gradingTemplate === 'api' || gradingTemplate === 'io';
@@ -32,6 +34,13 @@ const ConfigurationPage = () => {
     }
   }, [criteriaSaved, feedbackSaved, setupSaved, criteriaConfig, feedbackConfig, setupConfig, isSetupRequired]);
 
+  // Hide download button if there are unsaved changes
+  useEffect(() => {
+    if (hasUnsavedChanges) {
+      setShowDownloadButton(false);
+    }
+  }, [hasUnsavedChanges]);
+
   if (!gradingTemplate || !feedbackMode) {
     // Redirect back to landing page if no configuration data
     navigate('/');
@@ -43,9 +52,11 @@ const ConfigurationPage = () => {
       // Unsaved/cancelled
       setCriteriaConfig(null);
       setCriteriaSaved(false);
+      setHasUnsavedChanges(true);
     } else {
       setCriteriaConfig(config);
       setCriteriaSaved(true);
+      setHasUnsavedChanges(false);
       console.log('Criteria Configuration Saved:', JSON.stringify(config, null, 2));
     }
   };
@@ -55,9 +66,11 @@ const ConfigurationPage = () => {
       // Unsaved/cancelled
       setFeedbackConfig(null);
       setFeedbackSaved(false);
+      setHasUnsavedChanges(true);
     } else {
       setFeedbackConfig(config);
       setFeedbackSaved(true);
+      setHasUnsavedChanges(false);
       console.log('Feedback Configuration Saved:', JSON.stringify(config, null, 2));
     }
   };
@@ -67,11 +80,18 @@ const ConfigurationPage = () => {
       // Unsaved/cancelled
       setSetupConfig(null);
       setSetupSaved(false);
+      setHasUnsavedChanges(true);
     } else {
       setSetupConfig(config);
       setSetupSaved(true);
+      setHasUnsavedChanges(false);
       console.log('Setup Configuration Saved:', JSON.stringify(config, null, 2));
     }
+  };
+
+  const handleSaveLater = () => {
+    setShowDownloadModal(false);
+    setShowDownloadButton(true);
   };
 
   const handleDownloadZip = () => {
@@ -119,10 +139,10 @@ const ConfigurationPage = () => {
         }, 200);
       }
     }, 100);
-  };
-
-  const handleCloseModal = () => {
+    
+    // Close modal and show download button after download
     setShowDownloadModal(false);
+    setShowDownloadButton(true);
   };
 
   return (
@@ -133,17 +153,17 @@ const ConfigurationPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white">
-                Configuration Page
+                Página de Configuração
               </h1>
               <p className="text-gray-400 mt-1">
-                Configure your {gradingTemplate} grading package with {feedbackMode} feedback
+                Configure seu pacote de avaliação {gradingTemplate} com feedback {feedbackMode}
               </p>
             </div>
             <button
               onClick={() => navigate('/')}
               className="px-4 py-2 text-gray-400 hover:text-gray-200 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
             >
-              ← Back to Start
+              ← Voltar ao Início
             </button>
           </div>
         </div>
@@ -160,10 +180,10 @@ const ConfigurationPage = () => {
               }`}
             >
               <span className="flex items-center justify-center gap-2">
-                📋 Criteria
+                📋 Critérios
                 {criteriaSaved && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
-                    Saved
+                    Salvo
                   </span>
                 )}
               </span>
@@ -180,7 +200,7 @@ const ConfigurationPage = () => {
                 💬 Feedback
                 {feedbackSaved && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
-                    Saved
+                    Salvo
                   </span>
                 )}
               </span>
@@ -194,20 +214,33 @@ const ConfigurationPage = () => {
               }`}
             >
               <span className="flex items-center justify-center gap-2">
-                🔧 Setup
+                🔧 Configuração
                 {isSetupRequired && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white">
-                    Required
+                    Obrigatório
                   </span>
                 )}
                 {setupSaved && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500 text-white">
-                    Saved
+                    Salvo
                   </span>
                 )}
               </span>
             </button>
           </div>
+
+          {/* Download Button Below Tabs Navigation */}
+          {showDownloadButton && !hasUnsavedChanges && (
+            <div className="p-4 bg-gray-750 border-t border-gray-700 animate-in slide-in-from-top-4 fade-in duration-500">
+              <button
+                onClick={handleDownloadZip}
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              >
+                <Download className="w-6 h-6" />
+                <span className="text-lg">Baixar Pacote de Configuração</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Tab Content */}
@@ -233,45 +266,82 @@ const ConfigurationPage = () => {
         </div>
       </div>
 
-      {/* Download Modal */}
+      {/* Download Modal with Enhanced Animation */}
       {showDownloadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-          <div className="bg-gray-800 rounded-2xl shadow-2xl border-2 border-indigo-600 p-8 max-w-md w-full animate-in zoom-in duration-300">
-            {/* Success Icon */}
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <style jsx>{`
+            @keyframes modalBounce {
+              0% {
+                transform: scale(0.3) translateY(-100px);
+                opacity: 0;
+              }
+              50% {
+                transform: scale(1.05) translateY(0);
+              }
+              70% {
+                transform: scale(0.95);
+              }
+              100% {
+                transform: scale(1);
+                opacity: 1;
+              }
+            }
+            @keyframes successPulse {
+              0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+              }
+              50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+              }
+            }
+            .modal-bounce {
+              animation: modalBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            .success-pulse {
+              animation: successPulse 2s ease-in-out infinite;
+            }
+          `}</style>
+          
+          <div className="bg-gray-800 rounded-2xl shadow-2xl border-2 border-indigo-600 p-8 max-w-md w-full modal-bounce">
+            {/* Success Icon with Enhanced Animation */}
             <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center success-pulse">
+                <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
             </div>
 
-            {/* Title */}
-            <h2 className="text-2xl font-bold text-white text-center mb-4">
+            {/* Title with Gradient */}
+            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 text-center mb-4">
               Configuração Completa!
             </h2>
 
             {/* Message */}
-            <p className="text-gray-300 text-center mb-8 text-lg">
-              Clique em "Baixar Arquivos" para fazer o download dos arquivos de configuração!
+            <p className="text-gray-300 text-center mb-8 text-lg leading-relaxed">
+              Você pode baixar os arquivos agora ou salvá-los para depois. O botão de download ficará disponível abaixo das abas.
             </p>
 
             {/* Buttons */}
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleDownloadZip}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <Download className="w-5 h-5" />
-                Baixar Arquivos
+                Baixar Arquivos Agora
               </button>
               
               <button
-                onClick={handleCloseModal}
-                className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
+                onClick={handleSaveLater}
+                className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                <ArrowLeft className="w-5 h-5" />
-                Voltar
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Salvar para Depois
               </button>
             </div>
           </div>
