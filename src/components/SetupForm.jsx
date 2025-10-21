@@ -152,11 +152,11 @@ const SetupForm = ({ onSave, templateName }) => {
     // Validate required fields for api/io templates
     if (isSetupRequired) {
       if (!sandboxConfig.runtime_image || !sandboxConfig.container_port || !sandboxConfig.start_command) {
-        alert('All sandbox fields are required for API and IO templates!');
+        alert('Todos os campos de sandbox são obrigatórios para modelos API e IO!');
         return;
       }
       if (fileChecks.length === 0) {
-        alert('At least one file check is required for API and IO templates!');
+        alert('Pelo menos uma verificação de arquivo é obrigatória para modelos API e IO!');
         return;
       }
     }
@@ -192,9 +192,9 @@ const SetupForm = ({ onSave, templateName }) => {
         <div className="mb-6 p-4 bg-yellow-900/30 border border-yellow-600 rounded-lg flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-yellow-500 font-semibold mb-1">Setup Required</h3>
+            <h3 className="text-yellow-500 font-semibold mb-1">Configuração Obrigatória</h3>
             <p className="text-yellow-200 text-sm">
-              This template requires setup configuration. Please configure the sandbox environment and file checks.
+              Este modelo requer configuração de setup. Por favor, configure o ambiente sandbox e as verificações de arquivos.
             </p>
           </div>
         </div>
@@ -204,11 +204,11 @@ const SetupForm = ({ onSave, templateName }) => {
         {/* File Checks Section */}
         <div>
           <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            📁 Required Files
-            {!isSetupRequired && <span className="text-sm text-gray-400 font-normal">(Optional)</span>}
+            📁 Arquivos Obrigatórios
+            {!isSetupRequired && <span className="text-sm text-gray-400 font-normal">(Opcional)</span>}
           </h3>
           <p className="text-gray-400 text-sm mb-4">
-            Specify files that must be present in the student's submission
+            Especifique os arquivos que devem estar presentes na submissão do aluno
           </p>
 
           {/* File List */}
@@ -238,7 +238,7 @@ const SetupForm = ({ onSave, templateName }) => {
               value={newFile}
               onChange={(e) => setNewFile(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddFile()}
-              placeholder="e.g., main.py, requirements.txt"
+              placeholder="ex: main.py, requirements.txt"
               className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
             <button
@@ -246,7 +246,7 @@ const SetupForm = ({ onSave, templateName }) => {
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              Add
+              Adicionar
             </button>
           </div>
         </div>
@@ -255,8 +255,8 @@ const SetupForm = ({ onSave, templateName }) => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-              🐳 Sandbox Configuration
-              {!isSetupRequired && <span className="text-sm text-gray-400 font-normal">(Optional)</span>}
+              🐳 Configuração de Sandbox
+              {!isSetupRequired && <span className="text-sm text-gray-400 font-normal">(Opcional)</span>}
             </h3>
           </div>
 
@@ -270,10 +270,10 @@ const SetupForm = ({ onSave, templateName }) => {
                   </div>
                   <div>
                     <p className="text-gray-200 text-sm font-medium mb-1">
-                      Sandbox Configuration Not Required
+                      Configuração de Sandbox Não Obrigatória
                     </p>
                     <p className="text-gray-400 text-xs">
-                      This template doesn't need a Docker environment, but you can configure one if needed
+                      Este modelo não precisa de um ambiente Docker, mas você pode configurar um se necessário
                     </p>
                   </div>
                 </div>
@@ -283,7 +283,7 @@ const SetupForm = ({ onSave, templateName }) => {
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium flex-shrink-0 ml-4"
                 >
                   <Plus className="w-4 h-4" />
-                  Configure
+                  Configurar
                 </button>
               </div>
             </div>
@@ -294,7 +294,7 @@ const SetupForm = ({ onSave, templateName }) => {
             <>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-gray-400 text-sm">
-                  Configure the Docker environment for running and testing the student's code
+                  Configure o ambiente Docker para executar e testar o código do aluno
                 </p>
                 {!isSetupRequired && (
                   <button
@@ -303,7 +303,7 @@ const SetupForm = ({ onSave, templateName }) => {
                     className="text-gray-400 hover:text-gray-200 text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-700 transition-colors"
                   >
                     <X className="w-3 h-3" />
-                    Hide
+                    Ocultar
                   </button>
                 )}
               </div>
@@ -312,10 +312,10 @@ const SetupForm = ({ onSave, templateName }) => {
             {/* Runtime Image */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Runtime Image {isSetupRequired && <span className="text-red-400">*</span>}
+                Imagem de Runtime {isSetupRequired && <span className="text-red-400">*</span>}
               </label>
               <p className="text-xs text-gray-500 mb-3">
-                Select a pre-configured runtime or enter a custom Docker image
+                Selecione um runtime pré-configurado ou insira uma imagem Docker personalizada
               </p>
               
               {/* Preset Options */}
@@ -389,13 +389,13 @@ const SetupForm = ({ onSave, templateName }) => {
             {/* Container Port */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Container Port {isSetupRequired && <span className="text-red-400">*</span>}
+                Porta do Container {isSetupRequired && <span className="text-red-400">*</span>}
               </label>
               <input
                 type="number"
                 value={sandboxConfig.container_port}
                 onChange={(e) => setSandboxConfig({ ...sandboxConfig, container_port: e.target.value })}
-                placeholder="e.g., 8000, 5000, 3000"
+                placeholder="ex: 8000, 5000, 3000"
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
@@ -403,13 +403,13 @@ const SetupForm = ({ onSave, templateName }) => {
             {/* Start Command */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Start Command {isSetupRequired && <span className="text-red-400">*</span>}
+                Comando de Inicialização {isSetupRequired && <span className="text-red-400">*</span>}
               </label>
               <input
                 type="text"
                 value={sandboxConfig.start_command}
                 onChange={(e) => setSandboxConfig({ ...sandboxConfig, start_command: e.target.value })}
-                placeholder="e.g., python app.py, npm start"
+                placeholder="ex: python app.py, npm start"
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
@@ -417,10 +417,10 @@ const SetupForm = ({ onSave, templateName }) => {
             {/* Setup Commands */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Setup Commands (Optional)
+                Comandos de Configuração (Opcional)
               </label>
               <p className="text-gray-500 text-xs mb-3">
-                Commands to run before starting the application (e.g., install dependencies)
+                Comandos a executar antes de iniciar a aplicação (ex: instalar dependências)
               </p>
 
               {/* Command List */}
@@ -441,14 +441,14 @@ const SetupForm = ({ onSave, templateName }) => {
                             <label className="text-indigo-400 font-medium text-sm">{key}</label>
                             {isPresetCommand && (
                               <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">
-                                Auto-added
+                                Auto-adicionado
                               </span>
                             )}
                           </div>
                           <button
                             onClick={() => handleRemoveCommand(key)}
                             className="text-red-400 hover:text-red-300 p-1 hover:bg-red-900/20 rounded transition-colors"
-                            title="Remove command"
+                            title="Remover comando"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -468,13 +468,13 @@ const SetupForm = ({ onSave, templateName }) => {
                   {/* Command Name as Label */}
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                      Command Name
+                      Nome do Comando
                     </label>
                     <input
                       type="text"
                       value={newCommandKey}
                       onChange={(e) => setNewCommandKey(e.target.value)}
-                      placeholder="e.g., install_dependencies"
+                      placeholder="ex: install_dependencies"
                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                     />
                   </div>
@@ -482,7 +482,7 @@ const SetupForm = ({ onSave, templateName }) => {
                   {/* Command Input */}
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                      Command
+                      Comando
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -490,7 +490,7 @@ const SetupForm = ({ onSave, templateName }) => {
                         value={newCommandValue}
                         onChange={(e) => setNewCommandValue(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleAddCommand()}
-                        placeholder="e.g., pip install -r requirements.txt"
+                        placeholder="ex: pip install -r requirements.txt"
                         className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono"
                       />
                       <button
@@ -499,7 +499,7 @@ const SetupForm = ({ onSave, templateName }) => {
                         disabled={!newCommandKey.trim() || !newCommandValue.trim()}
                       >
                         <Plus className="w-4 h-4" />
-                        Add
+                        Adicionar
                       </button>
                     </div>
                   </div>
@@ -519,14 +519,14 @@ const SetupForm = ({ onSave, templateName }) => {
           className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <Save className="w-5 h-5" />
-          Save Configuration
+          Salvar Configuração
         </button>
         <button
           onClick={handleCancel}
           className="px-6 py-3 border border-gray-600 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2"
         >
           <X className="w-5 h-5" />
-          Cancel
+          Cancelar
         </button>
       </div>
     </div>
