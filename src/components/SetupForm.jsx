@@ -81,8 +81,8 @@ const SetupForm = ({ onSave, templateName }) => {
     if (preset) {
       setSandboxConfig({
         runtime_image: imageKey,
-        container_port: sandboxConfig.container_port || preset.defaultPort,
-        start_command: sandboxConfig.start_command || preset.defaultStartCommand,
+        container_port: preset.defaultPort,
+        start_command: preset.defaultStartCommand,
         commands: { ...preset.defaultCommands }
       });
     } else {
@@ -391,13 +391,27 @@ const SetupForm = ({ onSave, templateName }) => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Porta do Container {isSetupRequired && <span className="text-red-400">*</span>}
               </label>
-              <input
-                type="number"
-                value={sandboxConfig.container_port}
-                onChange={(e) => setSandboxConfig({ ...sandboxConfig, container_port: e.target.value })}
-                placeholder="ex: 8000, 5000, 3000"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
+              {Object.keys(runtimePresets).includes(sandboxConfig.runtime_image) ? (
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={sandboxConfig.container_port}
+                    onChange={(e) => setSandboxConfig({ ...sandboxConfig, container_port: e.target.value })}
+                    className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded">
+                    Configuração do preset
+                  </span>
+                </div>
+              ) : (
+                <input
+                  type="number"
+                  value={sandboxConfig.container_port}
+                  onChange={(e) => setSandboxConfig({ ...sandboxConfig, container_port: e.target.value })}
+                  placeholder="ex: 8000, 5000, 3000"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              )}
             </div>
 
             {/* Start Command */}
@@ -405,13 +419,27 @@ const SetupForm = ({ onSave, templateName }) => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Comando de Inicialização {isSetupRequired && <span className="text-red-400">*</span>}
               </label>
-              <input
-                type="text"
-                value={sandboxConfig.start_command}
-                onChange={(e) => setSandboxConfig({ ...sandboxConfig, start_command: e.target.value })}
-                placeholder="ex: python app.py, npm start"
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
+              {Object.keys(runtimePresets).includes(sandboxConfig.runtime_image) ? (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={sandboxConfig.start_command}
+                    onChange={(e) => setSandboxConfig({ ...sandboxConfig, start_command: e.target.value })}
+                    className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded">
+                    Configuração do preset
+                  </span>
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={sandboxConfig.start_command}
+                  onChange={(e) => setSandboxConfig({ ...sandboxConfig, start_command: e.target.value })}
+                  placeholder="ex: python app.py, npm start"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              )}
             </div>
 
             {/* Setup Commands */}
