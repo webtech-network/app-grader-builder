@@ -94,51 +94,59 @@ const ConfigurationPage = () => {
     setShowDownloadButton(true);
   };
 
-  const handleDownloadZip = () => {
-    // Create configuration files
-    const criteriaJson = JSON.stringify(criteriaConfig, null, 2);
-    const feedbackJson = JSON.stringify(feedbackConfig, null, 2);
-    const setupJson = setupConfig ? JSON.stringify(setupConfig, null, 2) : null;
+  const handleDownloadZip = async () => {
+    // Create a single configuration object with all three configs
+    const completeConfig = {
+      workflow: {
+        template_preset: gradingTemplate,
+        feedback_type: feedbackMode
+      },
+      criteria: criteriaConfig,
+      feedback: feedbackConfig,
+      ...(setupConfig && { setup: setupConfig })
+    };
     
-    // Create a simple download for each file (since we can't create actual ZIP in browser without library)
-    // Download criteria_config.json
-    const criteriaBlob = new Blob([criteriaJson], { type: 'application/json' });
-    const criteriaUrl = URL.createObjectURL(criteriaBlob);
-    const criteriaLink = document.createElement('a');
-    criteriaLink.href = criteriaUrl;
-    criteriaLink.download = 'criteria_config.json';
-    document.body.appendChild(criteriaLink);
-    criteriaLink.click();
-    document.body.removeChild(criteriaLink);
-    URL.revokeObjectURL(criteriaUrl);
+    const completeJson = JSON.stringify(completeConfig, null, 2);
     
-    // Download feedback_config.json
-    setTimeout(() => {
-      const feedbackBlob = new Blob([feedbackJson], { type: 'application/json' });
-      const feedbackUrl = URL.createObjectURL(feedbackBlob);
-      const feedbackLink = document.createElement('a');
-      feedbackLink.href = feedbackUrl;
-      feedbackLink.download = 'feedback_config.json';
-      document.body.appendChild(feedbackLink);
-      feedbackLink.click();
-      document.body.removeChild(feedbackLink);
-      URL.revokeObjectURL(feedbackUrl);
+    console.log('='.repeat(80));
+    console.log('📦 COMPLETE CONFIGURATION:');
+    console.log('='.repeat(80));
+    console.log(completeJson);
+    console.log('='.repeat(80));
+    
+    try {
+      // Send configuration to backend API
+      const response = await fetch('http://localhost:8001/api/generate-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(completeConfig)
+      });
       
-      // Download setup_config.json if it exists
-      if (setupJson) {
-        setTimeout(() => {
-          const setupBlob = new Blob([setupJson], { type: 'application/json' });
-          const setupUrl = URL.createObjectURL(setupBlob);
-          const setupLink = document.createElement('a');
-          setupLink.href = setupUrl;
-          setupLink.download = 'setup_config.json';
-          document.body.appendChild(setupLink);
-          setupLink.click();
-          document.body.removeChild(setupLink);
-          URL.revokeObjectURL(setupUrl);
-        }, 200);
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.statusText}`);
       }
-    }, 100);
+      
+      // Get the zip file as a blob
+      const blob = await response.blob();
+      
+      // Create download link for the zip file
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'grader_package.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      console.log('✅ Configuration sent successfully and zip file downloaded!');
+      
+    } catch (error) {
+      console.error('❌ Error sending configuration to API:', error);
+      alert(`Failed to generate configuration package: ${error.message}`);
+    }
     
     // Close modal and show download button after download
     setShowDownloadModal(false);

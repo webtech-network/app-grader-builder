@@ -138,19 +138,25 @@ export const transformTreeToBackendFormat = (nodes) => {
             // Check if this is a test node (has metadata)
             if (child.metadata) {
                 // This is a test node - add to tests array
-                const testName = child.metadata.functionName;
-                const calls = child.metadata.calls;
-                
-                // Check if this test has parameters (calls with values)
-                if (calls && calls.length > 0 && calls[0].length > 0) {
-                    // Parameterized test format: { "test_name": [[params]] }
-                    tests.push({
-                        [testName]: calls
-                    });
+                // Map generic file types to specific filenames
+                let fileName = '';
+                const requiredFile = child.metadata.required_file;
+                if (requiredFile === 'HTML') {
+                    fileName = 'index.html';
+                } else if (requiredFile === 'CSS') {
+                    fileName = 'styles.css';
+                } else if (requiredFile === 'JavaScript') {
+                    fileName = 'index.js';
                 } else {
-                    // Simple test format: "test_name"
-                    tests.push(testName);
+                    fileName = requiredFile || '';
                 }
+                
+                const testObj = {
+                    name: child.metadata.functionName,
+                    file: fileName,
+                    calls: child.metadata.calls || [[]]
+                };
+                tests.push(testObj);
             } else {
                 // This is a subject node - recursively process it
                 const childName = child.name.replace(/\s\(Sujeito\)/, '').trim().toLowerCase().replace(/\s+/g, '_');
@@ -165,16 +171,25 @@ export const transformTreeToBackendFormat = (nodes) => {
                     if (child.children && child.children.length > 0) {
                         child.children.forEach(testChild => {
                             if (testChild.metadata) {
-                                const testName = testChild.metadata.functionName;
-                                const calls = testChild.metadata.calls;
-                                
-                                if (calls && calls.length > 0 && calls[0].length > 0) {
-                                    leafTests.push({
-                                        [testName]: calls
-                                    });
+                                // Map generic file types to specific filenames
+                                let fileName = '';
+                                const requiredFile = testChild.metadata.required_file;
+                                if (requiredFile === 'HTML') {
+                                    fileName = 'index.html';
+                                } else if (requiredFile === 'CSS') {
+                                    fileName = 'styles.css';
+                                } else if (requiredFile === 'JavaScript') {
+                                    fileName = 'index.js';
                                 } else {
-                                    leafTests.push(testName);
+                                    fileName = requiredFile || '';
                                 }
+                                
+                                const testObj = {
+                                    name: testChild.metadata.functionName,
+                                    file: fileName,
+                                    calls: testChild.metadata.calls || [[]]
+                                };
+                                leafTests.push(testObj);
                             }
                         });
                     }
@@ -208,8 +223,17 @@ export const transformTreeToBackendFormat = (nodes) => {
     // Process each top-level category (base, bonus, penalty)
     nodes.forEach(category => {
         const categoryData = processNode(category);
+        
+        // Only include the category if it has content
+        // For bonus and penalty, skip if they're empty (no subjects and no tests)
         if (categoryData) {
-            result[category.id] = categoryData;
+            const isEmpty = !categoryData.subjects && !categoryData.tests;
+            const isBonusOrPenalty = category.id === 'bonus' || category.id === 'penalty';
+            
+            // Include base always, but only include bonus/penalty if they have content
+            if (!isBonusOrPenalty || !isEmpty) {
+                result[category.id] = categoryData;
+            }
         }
     });
     

@@ -1057,19 +1057,13 @@ const CriteriaForm = ({ templateName, onSave }) => {
         // Check if this is a test node (has metadata)
         if (child.metadata) {
           // This is a test node - add to tests array
-          const testName = child.metadata.functionName;
-          const calls = child.metadata.calls;
-          
-          // Check if this test has parameters (calls with values)
-          if (calls && calls.length > 0 && calls[0].length > 0) {
-            // Parameterized test format: { "test_name": [[params]] }
-            tests.push({
-              [testName]: calls
-            });
-          } else {
-            // Simple test format: "test_name"
-            tests.push(testName);
-          }
+          const testObj = {
+            name: child.metadata.functionName,
+            file: child.metadata.required_file || '',
+            calls: child.metadata.calls || [[]]
+          };
+          console.log('🔧 Creating test object:', testObj);
+          tests.push(testObj);
         } else {
           // This is a subject node - recursively process it
           const childName = child.name.replace(/\s\(Sujeito\)/, '').trim().toLowerCase().replace(/\s+/g, '_');
@@ -1084,16 +1078,12 @@ const CriteriaForm = ({ templateName, onSave }) => {
             if (child.children && child.children.length > 0) {
               child.children.forEach(testChild => {
                 if (testChild.metadata) {
-                  const testName = testChild.metadata.functionName;
-                  const calls = testChild.metadata.calls;
-                  
-                  if (calls && calls.length > 0 && calls[0].length > 0) {
-                    leafTests.push({
-                      [testName]: calls
-                    });
-                  } else {
-                    leafTests.push(testName);
-                  }
+                  const testObj = {
+                    name: testChild.metadata.functionName,
+                    file: testChild.metadata.required_file || '',
+                    calls: testChild.metadata.calls || [[]]
+                  };
+                  leafTests.push(testObj);
                 }
               });
             }
@@ -1362,7 +1352,11 @@ const CriteriaForm = ({ templateName, onSave }) => {
     
     // Call the onSave callback with the transformed data
     if (onSave) {
-      console.log('Final Criteria Configuration:', JSON.stringify(criteriaJson, null, 2));
+      console.log('='.repeat(80));
+      console.log('📋 FINAL CRITERIA CONFIGURATION:');
+      console.log('='.repeat(80));
+      console.log(JSON.stringify(criteriaJson, null, 2));
+      console.log('='.repeat(80));
       onSave(criteriaJson);
     }
     
