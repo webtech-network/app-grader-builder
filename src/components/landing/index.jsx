@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Info } from 'lucide-react';
-import config from '../../config';
 import logo from '../../assets/logo.jpeg';
 import TemplateModal from './TemplateModal';
 import TestsModal from './TestsModal';
+import { templatesList, getTemplateDetails } from '../../cachedTemplates';
 
 const LandingPage = () => {
   const [gradingTemplate, setGradingTemplate] = useState('');
@@ -18,28 +18,26 @@ const LandingPage = () => {
   const [showFeedbackDropdown, setShowFeedbackDropdown] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch templates from API
+  // Load templates from cache
   useEffect(() => {
-    const fetchTemplates = async () => {
+    const loadTemplates = async () => {
       try {
-        const response = await fetch(`${config.apiBaseUrl}/templates/`);
-        const data = await response.json();
-        setTemplates(data);
+        // Use cached templates instead of API call
+        setTemplates(templatesList);
       } catch (error) {
-        console.error('Error fetching templates:', error);
+        console.error('Error loading templates:', error);
         setTemplates(['webdev', 'api', 'essay', 'io']);
       } finally {
         setLoadingTemplates(false);
       }
     };
-    fetchTemplates();
+    loadTemplates();
   }, []);
 
-  // Fetch template details
+  // Fetch template details from cache
   const fetchTemplateDetails = async (templateName) => {
     try {
-      const response = await fetch(`${config.apiBaseUrl}/templates/${templateName}`);
-      const data = await response.json();
+      const data = await getTemplateDetails(templateName);
       setSelectedTemplateDetails(data);
       setShowTemplateModal(true);
     } catch (error) {
@@ -153,6 +151,7 @@ const LandingPage = () => {
                         <div className="max-h-80 overflow-y-auto">
                           {templates.map((template) => {
                             const info = getTemplateDisplayInfo(template);
+                            const isAvailableSoon = template === 'essay';
                             return (
                               <div key={template} className="group relative">
                                 <button
@@ -169,7 +168,16 @@ const LandingPage = () => {
                                     <div className={`w-10 h-10 rounded-lg ${info.bgColor} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-200`}>
                                       {info.icon}
                                     </div>
-                                    <span className="font-medium text-gray-100">{info.label}</span>
+                                    <div className="flex flex-col">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-gray-100">{info.label}</span>
+                                        {isAvailableSoon && (
+                                          <span className="px-2 py-0.5text-white-900 text-xs font-bold rounded">
+                                            Em Breve
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
                                   <button
                                     type="button"

@@ -1,0 +1,40 @@
+{
+  "template_name": "API de Testes",
+  "template_description": "Um modelo para avaliar tarefas onde alunos criam uma API web.",
+  "tests": [
+    {
+      "name": "health_check",
+      "description": "Verifica se um endpoint específico está em execução e retorna status code 200.",
+      "required_file": null,
+      "parameters": [
+        {
+          "name": "endpoint",
+          "description": "O endpoint a ser testado (ex: '/health').",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "check_response_json",
+      "description": "Verifica se a resposta em JSON de um endpoint possui a chave e valor específicos.",
+      "required_file": null,
+      "parameters": [
+        {
+          "name": "endpoint",
+          "description": "O endpoint da API a ser testado (ex: '/api/data').",
+          "type": "string"
+        },
+        {
+          "name": "expected_key",
+          "description": "A chave JSON que vai verificar a resposta.",
+          "type": "string"
+        },
+        {
+          "name": "expected_value",
+          "description": "O valor esperado para a chave especificada.",
+          "type": "any"
+        }
+      ]
+    }
+  ]
+}

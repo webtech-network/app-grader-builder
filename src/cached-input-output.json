@@ -1,0 +1,23 @@
+{
+  "template_name": "Input/Output",
+  "template_description": "Um modelo para avaliar trabalhos com base na entrada e saída de linha de comando.",
+  "tests": [
+    {
+      "name": "expect_output",
+      "description": "Executa o programa do aluno, fornece uma série de entradas separadas por linha e verifica se a saída final está correta.",
+      "required_file": null,
+      "parameters": [
+        {
+          "name": "inputs",
+          "description": "Lista de strings a serem enviadas para o programa, cada uma em uma nova linha.",
+          "type": "list of strings"
+        },
+        {
+          "name": "expected_output",
+          "description": "A única string que o programa deve imprimir na saída padrão.",
+          "type": "string"
+        }
+      ]
+    }
+  ]
+}
