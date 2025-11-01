@@ -206,7 +206,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
         }
 
         // --- Criação de Sujeito ---
-        const isCategoryParent = selectedParentId === 'base' || selectedParentId === 'bonus' || selectedParentId === 'penalty';
+        // const isCategoryParent = selectedParentId === 'base' || selectedParentId === 'bonus' || selectedParentId === 'penalty';
         const newId = `node-${selectedParentId}-${nodeCount}`; 
         const newNode = {
             id: newId,

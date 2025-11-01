@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Save, X, Plus, Trash2, AlertCircle } from 'lucide-react';
 
 const SetupForm = ({ onSave, templateName }) => {
@@ -12,7 +12,6 @@ const SetupForm = ({ onSave, templateName }) => {
   });
   const [newCommandKey, setNewCommandKey] = useState('');
   const [newCommandValue, setNewCommandValue] = useState('');
-  const [hasSaved, setHasSaved] = useState(false);
   const [showSandboxConfig, setShowSandboxConfig] = useState(false);
 
   // Check if setup is required for this template
@@ -76,7 +75,7 @@ const SetupForm = ({ onSave, templateName }) => {
   };
 
   // Handle runtime image selection
-  const handleRuntimeImageChange = (imageKey) => {
+  const handleRuntimeImageChange = useCallback((imageKey) => {
     const preset = runtimePresets[imageKey];
     if (preset) {
       setSandboxConfig({
@@ -87,12 +86,13 @@ const SetupForm = ({ onSave, templateName }) => {
       });
     } else {
       // Custom image selected
-      setSandboxConfig({
-        ...sandboxConfig,
+      setSandboxConfig((prev) => ({
+        ...prev,
         runtime_image: imageKey
-      });
+      }));
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Set default values based on template
   useEffect(() => {
@@ -112,7 +112,7 @@ const SetupForm = ({ onSave, templateName }) => {
     } else {
       setShowSandboxConfig(false); // Collapse for optional templates
     }
-  }, [templateName]);
+  }, [templateName, handleRuntimeImageChange]);
 
   const handleAddFile = () => {
     if (newFile.trim() && !fileChecks.includes(newFile.trim())) {
@@ -177,12 +177,10 @@ const SetupForm = ({ onSave, templateName }) => {
     } else {
       console.log(JSON.stringify(config, null, 2));
       onSave(config);
-      setHasSaved(true);
     }
   };
 
   const handleCancel = () => {
-    setHasSaved(false);
     onSave(null);
   };
 
