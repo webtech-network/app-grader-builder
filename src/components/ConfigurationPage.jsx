@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Download, ArrowLeft } from 'lucide-react';
+import { Download } from 'lucide-react';
+import config from '../config';
 import CriteriaForm from './criteria'; // This imports from criteria/index.jsx
 import FeedbackForm from './feedback'; // This imports from feedback/index.jsx
 import SetupForm from './SetupForm'; // This is a standalone component
@@ -116,7 +117,7 @@ const ConfigurationPage = () => {
     
     try {
       // Send configuration to backend API
-      const response = await fetch('http://localhost:8001/api/generate-config', {
+      const response = await fetch(`${config.configApiUrl}/api/generate-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
