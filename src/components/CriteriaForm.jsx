@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Plus, X, ListTree, Code, Library, Settings, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import config from '../config';
 
 // --- ESTILOS CUSTOMIZADOS PARA AS LINHAS DA ÁRVORE (INJETADOS NO JSX) ---
 const TreeStyles = () => (
@@ -788,7 +789,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
       setTemplateError(null);
 
       try {
-        const response = await fetch(`http://localhost:8000/templates/${templateName}`);
+        const response = await fetch(`${config.apiBaseUrl}/templates/${templateName}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch template: ${response.statusText}`);
         }
@@ -1412,7 +1413,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
           <h2 className="text-2xl font-bold text-red-400 mb-2">Error Loading Template</h2>
           <p className="text-gray-400 mb-4">{templateError}</p>
           <p className="text-sm text-gray-500">
-            Please ensure the API is running at <code className="bg-gray-800 px-2 py-1 rounded">localhost:8000</code>
+            Please ensure the API is running at <code className="bg-gray-800 px-2 py-1 rounded">{config.apiBaseUrl}</code>
           </p>
         </div>
       </div>

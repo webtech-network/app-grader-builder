@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Info, Code, Sparkles, X, Zap, FileCode } from 'lucide-react';
+import config from '../config';
 import logo from '../assets/logo.jpeg';
 
 const LandingPage = () => {
@@ -18,7 +19,7 @@ const LandingPage = () => {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('http://localhost:8000/templates/');
+        const response = await fetch(`${config.apiBaseUrl}/templates/`);
         const data = await response.json();
         setTemplates(data);
       } catch (error) {
@@ -35,7 +36,7 @@ const LandingPage = () => {
   // Fetch template details
   const fetchTemplateDetails = async (templateName) => {
     try {
-      const response = await fetch(`http://localhost:8000/templates/${templateName}`);
+      const response = await fetch(`${config.apiBaseUrl}/templates/${templateName}`);
       const data = await response.json();
       setSelectedTemplateDetails(data);
       setShowTemplateModal(true);
