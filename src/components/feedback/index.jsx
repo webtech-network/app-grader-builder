@@ -366,8 +366,11 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
           {/* Seção IA - Only show if feedback mode is 'ai' */}
           {feedbackMode === 'ai' && (
             <section className="bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-700">
-              <h2 className="text-2xl font-bold border-b-2 border-gray-700 pb-3 mb-6 text-indigo-400">
+              <h2 className="text-2xl font-bold border-b-2 border-gray-700 pb-3 mb-6 text-indigo-400 flex items-center gap-3">
                 Inteligência Artificial
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  Beta
+                </span>
               </h2>
             <div className="space-y-5 text-sm">
               {/* Fornecimento de Soluções */}
