@@ -1,7 +1,7 @@
 // Cached template data - used instead of API calls for now
-import webDevData from '../cached-web-dev.json';
-import apiTestingData from '../cached-api-testing.json';
-import inputOutputData from '../cached-input-output.json';
+import webDevData from './cached-web-dev.json';
+import apiTestingData from './cached-api-testing.json';
+import inputOutputData from './cached-input-output.json';
 
 export const cachedTemplates = {
   webdev: webDevData,
@@ -9,8 +9,9 @@ export const cachedTemplates = {
   io: inputOutputData,
   essay: {
     template_name: "Redações",
-    template_description: "Um modelo para avaliar redações e trabalhos escritos.",
-    tests: []
+    template_description: "Um modelo para avaliar redações e trabalhos escritos. Em breve disponível.",
+    tests: [],
+    availableSoon: true
   }
 };
 

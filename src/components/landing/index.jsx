@@ -151,6 +151,7 @@ const LandingPage = () => {
                         <div className="max-h-80 overflow-y-auto">
                           {templates.map((template) => {
                             const info = getTemplateDisplayInfo(template);
+                            const isAvailableSoon = template === 'essay';
                             return (
                               <div key={template} className="group relative">
                                 <button
@@ -167,7 +168,16 @@ const LandingPage = () => {
                                     <div className={`w-10 h-10 rounded-lg ${info.bgColor} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-200`}>
                                       {info.icon}
                                     </div>
-                                    <span className="font-medium text-gray-100">{info.label}</span>
+                                    <div className="flex flex-col">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-gray-100">{info.label}</span>
+                                        {isAvailableSoon && (
+                                          <span className="px-2 py-0.5text-white-900 text-xs font-bold rounded">
+                                            Em Breve
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
                                   <button
                                     type="button"
