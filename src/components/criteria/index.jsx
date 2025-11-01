@@ -374,7 +374,11 @@ const CriteriaForm = ({ templateName, onSave }) => {
                                     {/* Botão TESTE */}
                                     <button
                                         type="button"
-                                        onClick={() => setNodeTypeToCreate('Test')}
+                                        onClick={() => {
+                                            setNodeTypeToCreate('Test');
+                                            setInitialName('');
+                                            setIsLibraryOpen(true);
+                                        }}
                                         className={`flex-1 flex items-center justify-center p-3 rounded-lg border transition duration-150 ${
                                             nodeTypeToCreate === 'Test'
                                                 ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
