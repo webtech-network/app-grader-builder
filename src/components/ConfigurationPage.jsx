@@ -243,10 +243,15 @@ const ConfigurationPage = () => {
             <div className="p-4 bg-gray-750 border-t border-gray-700 animate-in slide-in-from-top-4 fade-in duration-500">
               <button
                 onClick={handleDownloadZip}
-                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                disabled={true}
+                className="w-full bg-gray-600 cursor-not-allowed text-gray-400 font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg relative"
+                title="Esta funcionalidade estará disponível em breve"
               >
                 <Download className="w-6 h-6" />
                 <span className="text-lg">Baixar Pacote de Configuração</span>
+                <span className="ml-2 px-2 py-1 bg-yellow-500 text-gray-900 text-xs font-bold rounded">
+                  Não Disponível Ainda
+                </span>
               </button>
             </div>
           )}
@@ -337,10 +342,15 @@ const ConfigurationPage = () => {
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleDownloadZip}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                disabled={true}
+                className="w-full bg-gray-600 cursor-not-allowed text-gray-400 font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg relative"
+                title="Esta funcionalidade estará disponível em breve"
               >
                 <Download className="w-5 h-5" />
-                Baixar Arquivos Agora
+                <span>Baixar Arquivos Agora</span>
+                <span className="ml-2 px-2 py-1 bg-yellow-500 text-gray-900 text-xs font-bold rounded">
+                  Não Disponível Ainda
+                </span>
               </button>
               
               <button
