@@ -1,6 +1,63 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Save, X, Plus, Trash2, AlertCircle } from 'lucide-react';
 
+// Predefined runtime images with their configurations
+const runtimePresets = {
+  'python:3.11-slim': {
+    name: 'Python 3.11',
+    description: 'For Python assignments and APIs',
+    icon: '🐍',
+    defaultPort: '8000',
+    defaultStartCommand: 'python app.py',
+    defaultCommands: {
+      install_dependencies: 'pip install -r requirements.txt'
+    }
+  },
+  'node:18-alpine': {
+    name: 'Node.js 18',
+    description: 'For JavaScript/Node.js applications and APIs',
+    icon: '🟢',
+    defaultPort: '3000',
+    defaultStartCommand: 'npm start',
+    defaultCommands: {
+      install_dependencies: 'npm install',
+      build: 'npm run build'
+    }
+  },
+  'openjdk:17-slim': {
+    name: 'Java 17',
+    description: 'For Java applications and Spring Boot APIs',
+    icon: '☕',
+    defaultPort: '8080',
+    defaultStartCommand: 'java -jar app.jar',
+    defaultCommands: {
+      build: 'mvn clean package',
+      install_dependencies: 'mvn install'
+    }
+  },
+  'ruby:3.2-slim': {
+    name: 'Ruby 3.2',
+    description: 'For Ruby applications and Rails APIs',
+    icon: '💎',
+    defaultPort: '3000',
+    defaultStartCommand: 'ruby app.rb',
+    defaultCommands: {
+      install_dependencies: 'bundle install'
+    }
+  },
+  'golang:1.21-alpine': {
+    name: 'Go 1.21',
+    description: 'For Go applications and APIs',
+    icon: '🔷',
+    defaultPort: '8080',
+    defaultStartCommand: './main',
+    defaultCommands: {
+      build: 'go build -o main .',
+      install_dependencies: 'go mod download'
+    }
+  }
+};
+
 const SetupForm = ({ onSave, templateName }) => {
   const [fileChecks, setFileChecks] = useState([]);
   const [newFile, setNewFile] = useState('');
@@ -16,63 +73,6 @@ const SetupForm = ({ onSave, templateName }) => {
 
   // Check if setup is required for this template
   const isSetupRequired = templateName === 'api' || templateName === 'io';
-
-  // Predefined runtime images with their configurations
-  const runtimePresets = {
-    'python:3.11-slim': {
-      name: 'Python 3.11',
-      description: 'For Python assignments and APIs',
-      icon: '🐍',
-      defaultPort: '8000',
-      defaultStartCommand: 'python app.py',
-      defaultCommands: {
-        install_dependencies: 'pip install -r requirements.txt'
-      }
-    },
-    'node:18-alpine': {
-      name: 'Node.js 18',
-      description: 'For JavaScript/Node.js applications and APIs',
-      icon: '🟢',
-      defaultPort: '3000',
-      defaultStartCommand: 'npm start',
-      defaultCommands: {
-        install_dependencies: 'npm install',
-        build: 'npm run build'
-      }
-    },
-    'openjdk:17-slim': {
-      name: 'Java 17',
-      description: 'For Java applications and Spring Boot APIs',
-      icon: '☕',
-      defaultPort: '8080',
-      defaultStartCommand: 'java -jar app.jar',
-      defaultCommands: {
-        build: 'mvn clean package',
-        install_dependencies: 'mvn install'
-      }
-    },
-    'ruby:3.2-slim': {
-      name: 'Ruby 3.2',
-      description: 'For Ruby applications and Rails APIs',
-      icon: '💎',
-      defaultPort: '3000',
-      defaultStartCommand: 'ruby app.rb',
-      defaultCommands: {
-        install_dependencies: 'bundle install'
-      }
-    },
-    'golang:1.21-alpine': {
-      name: 'Go 1.21',
-      description: 'For Go applications and APIs',
-      icon: '🔷',
-      defaultPort: '8080',
-      defaultStartCommand: './main',
-      defaultCommands: {
-        build: 'go build -o main .',
-        install_dependencies: 'go mod download'
-      }
-    }
-  };
 
   // Handle runtime image selection
   const handleRuntimeImageChange = useCallback((imageKey) => {
@@ -91,7 +91,6 @@ const SetupForm = ({ onSave, templateName }) => {
         runtime_image: imageKey
       }));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Set default values based on template
