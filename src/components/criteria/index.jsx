@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, Code, ListTree } from 'lucide-react';
 import { toast } from 'react-toastify';
-import config from '../../config';
+import { getTemplateDetails } from '../../cachedTemplates';
 import TreeStyles from './TreeStyles';
 import TestLibraryModal from './TestLibraryModal';
 import TreeNode from './TreeNode';
@@ -50,7 +50,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
     const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
 
-    // Fetch template data from API
+    // Fetch template data from cache
     useEffect(() => {
         const fetchTemplateData = async () => {
             if (!templateName) {
@@ -63,14 +63,10 @@ const CriteriaForm = ({ templateName, onSave }) => {
             setTemplateError(null);
 
             try {
-                const response = await fetch(`${config.apiBaseUrl}/templates/${templateName}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch template: ${response.statusText}`);
-                }
-                const data = await response.json();
+                const data = await getTemplateDetails(templateName);
                 setTestLibrary(data);
             } catch (error) {
-                console.error('Error fetching template:', error);
+                console.error('Error loading template from cache:', error);
                 setTemplateError(error.message);
             } finally {
                 setLoadingTemplate(false);
@@ -316,7 +312,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
                     <h2 className="text-2xl font-bold text-red-400 mb-2">Error Loading Template</h2>
                     <p className="text-gray-400 mb-4">{templateError}</p>
                     <p className="text-sm text-gray-500">
-                        Please ensure the API is running at <code className="bg-gray-800 px-2 py-1 rounded">{config.apiBaseUrl}</code>
+                        Please try selecting a different template or refresh the page.
                     </p>
                 </div>
             </div>
