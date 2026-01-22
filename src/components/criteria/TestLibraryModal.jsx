@@ -11,7 +11,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
     const [nodeCustomName, setNodeCustomName] = useState(initialName);
 
     // Get the flat list of tests from the library
-    const testLibraryFlat = testLibrary?.tests || [];
+    const testLibraryFlat = useMemo(() => testLibrary?.tests || [], [testLibrary]);
 
     // 1. Determina a definição completa do template (Baseado no drop ou no editingNode)
     const testTemplate = useMemo(() => {
@@ -81,7 +81,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
             setParams({});
             setNodeCustomName(initialName);
         }
-    }, [testTemplate, editingNode, initialName]);
+    }, [testTemplate, editingNode, initialName, testLibraryFlat, currentTestConfig]);
 
 
     const handleChange = (id, value, type) => {
@@ -92,11 +92,6 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         // For 'list of strings', keep the raw string value during editing
         // It will be parsed only when submitting the form
         setParams(prev => ({ ...prev, [id]: parsedValue }));
-    };
-
-    const getInputType = (type) => {
-        if (type === 'integer' || type === 'number') return 'number';
-        return 'text';
     };
 
     const getInputValue = (id, type) => {

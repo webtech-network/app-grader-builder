@@ -1,0 +1,433 @@
+{
+  "template_name": "Html Css Js Template",
+  "template_description": "Um template abrangente para trabalhos de desenvolvimento web, incluindo testes para HTML, CSS e JavaScript.",
+  "tests": [
+    {
+      "name": "has_class",
+      "description": "Verifica a presença de classes CSS específicas, com suporte a curingas, um número mínimo de vezes.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "class_names",
+          "description": "Uma lista de nomes de classes a serem pesquisadas. Curingas (*) são suportados (por exemplo, 'col-*').",
+          "type": "list of strings"
+        },
+        {
+          "name": "required_count",
+          "description": "O número mínimo de vezes que as classes devem aparecer no total.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "check_bootstrap_linked",
+      "description": "Verifica se o framework Bootstrap (CSS ou JS) está vinculado no arquivo HTML.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "check_internal_links",
+      "description": "Verifica a existência de um número mínimo de links âncora internos que apontam para IDs de elementos válidos.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "required_count",
+          "description": "O número mínimo de links válidos.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "has_tag",
+      "description": "Verifica se uma tag HTML específica aparece um número mínimo de vezes.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "tag",
+          "description": "A tag HTML a ser pesquisada (por exemplo, 'div').",
+          "type": "string"
+        },
+        {
+          "name": "required_count",
+          "description": "O número mínimo de vezes que a tag deve aparecer.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "has_forbidden_tag",
+      "description": "Verifica a presença de uma tag HTML proibida.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "tag",
+          "description": "A tag HTML proibida a ser pesquisada.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "has_attribute",
+      "description": "Verifica se um atributo HTML específico está presente em qualquer tag, um número mínimo de vezes.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "attribute",
+          "description": "O atributo a ser pesquisado (por exemplo, 'alt').",
+          "type": "string"
+        },
+        {
+          "name": "required_count",
+          "description": "O número mínimo de vezes que o atributo deve aparecer.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "check_no_unclosed_tags",
+      "description": "Realiza uma verificação básica para um documento HTML bem formado.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "check_no_inline_styles",
+      "description": "Garante que nenhum estilo em linha (inline) seja usado no arquivo HTML.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "uses_semantic_tags",
+      "description": "Verifica se o HTML usa pelo menos uma tag semântica comum.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "check_css_linked",
+      "description": "Verifica se uma folha de estilo CSS externa está vinculada no HTML.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "css_uses_property",
+      "description": "Verifica se um par de propriedade e valor CSS específico existe.",
+      "required_file": "CSS",
+      "parameters": [
+        {
+          "name": "prop",
+          "description": "A propriedade CSS.",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "description": "O valor esperado.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "count_over_usage",
+      "description": "Penaliza o uso de uma string de texto específica se exceder uma contagem máxima permitida.",
+      "required_file": "CSS",
+      "parameters": [
+        {
+          "name": "text",
+          "description": "O texto a ser contado.",
+          "type": "string"
+        },
+        {
+          "name": "max_allowed",
+          "description": "O número máximo de ocorrências permitidas.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "js_uses_feature",
+      "description": "Realiza uma busca de string simples para verificar se uma funcionalidade específica está presente.",
+      "required_file": "JavaScript",
+      "parameters": [
+        {
+          "name": "feature",
+          "description": "A funcionalidade a ser pesquisada.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "uses_forbidden_method",
+      "description": "Verifica e penaliza o uso de um método ou palavra-chave proibida.",
+      "required_file": "JavaScript",
+      "parameters": [
+        {
+          "name": "method",
+          "description": "O nome do método proibido.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "count_global_vars",
+      "description": "Conta o número de variáveis declaradas no escopo global.",
+      "required_file": "JavaScript",
+      "parameters": [
+        {
+          "name": "max_allowed",
+          "description": "O número máximo de variáveis globais permitidas.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "check_headings_sequential",
+      "description": "Verifica se os níveis de cabeçalho são sequenciais e não pulam níveis.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "check_all_images_have_alt",
+      "description": "Verifica se todas as tags `<img>` possuem um atributo `alt` não vazio.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "check_html_direct_children",
+      "description": "Garante que os únicos filhos diretos da tag `<html>` são `<head>` e `<body>`.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "check_tag_not_inside",
+      "description": "Verifica se uma tag específica não está aninhada em nenhum lugar dentro de outra tag específica.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "child_tag",
+          "description": "A tag filha.",
+          "type": "string"
+        },
+        {
+          "name": "parent_tag",
+          "description": "A tag pai.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "check_internal_links_to_article",
+      "description": "Verifica a existência de um número mínimo de links âncora internos apontando para IDs em tags `<article>`.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "required_count",
+          "description": "O número mínimo de links válidos.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "has_style",
+      "description": "Verifica se uma regra de estilo CSS específica aparece um número mínimo de vezes.",
+      "required_file": "CSS",
+      "parameters": [
+        {
+          "name": "style",
+          "description": "A regra de estilo.",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "description": "O número mínimo de ocorrências.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "check_head_details",
+      "description": "Verifica se uma tag de detalhe específica existe na seção `<head>`.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "detail_tag",
+          "description": "A tag a ser verificada.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "check_attribute_and_value",
+      "description": "Verifica se uma tag HTML específica contém um atributo específico com um determinado valor.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "tag",
+          "description": "A tag.",
+          "type": "string"
+        },
+        {
+          "name": "attribute",
+          "description": "O atributo.",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "description": "O valor esperado.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "check_dir_exists",
+      "description": "Verifica se um diretório específico existe no envio.",
+      "required_file": null,
+      "parameters": [
+        {
+          "name": "submission_files",
+          "description": "O dicionário de arquivos enviados.",
+          "type": "dictionary"
+        },
+        {
+          "name": "dir_path",
+          "description": "O caminho do diretório.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "check_project_structure",
+      "description": "Verifica se o caminho da estrutura esperada existe nos arquivos de envio.",
+      "required_file": null,
+      "parameters": [
+        {
+          "name": "submission_files",
+          "description": "O dicionário de arquivos enviados.",
+          "type": "dictionary"
+        },
+        {
+          "name": "expected_structure",
+          "description": "O caminho do arquivo esperado.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "check_id_selector_over_usage",
+      "description": "Conta o número de seletores de ID usados e penaliza se exceder o máximo permitido.",
+      "required_file": "CSS",
+      "parameters": [
+        {
+          "name": "max_allowed",
+          "description": "O número máximo de seletores de ID permitidos.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "uses_relative_units",
+      "description": "Verifica se o arquivo CSS usa unidades relativas como em, rem, %, vh, vw.",
+      "required_file": "CSS",
+      "parameters": []
+    },
+    {
+      "name": "check_media_queries",
+      "description": "Verifica se existem media queries no arquivo CSS.",
+      "required_file": "CSS",
+      "parameters": []
+    },
+    {
+      "name": "check_flexbox_usage",
+      "description": "Verifica se propriedades Flexbox são usadas no arquivo CSS.",
+      "required_file": "CSS",
+      "parameters": []
+    },
+    {
+      "name": "check_bootstrap_usage",
+      "description": "Verifica se o Bootstrap está vinculado no arquivo HTML.",
+      "required_file": "HTML",
+      "parameters": []
+    },
+    {
+      "name": "link_points_to_page_with_query_param",
+      "description": "Verifica a existência de tags âncora que levam a uma página específica com um parâmetro de query string obrigatório.",
+      "required_file": "HTML",
+      "parameters": [
+        {
+          "name": "target_page",
+          "description": "A página de destino esperada para o link (ex: 'detalhes.html').",
+          "type": "string"
+        },
+        {
+          "name": "query_param",
+          "description": "O nome do parâmetro de query string a ser verificado (ex: 'id').",
+          "type": "string"
+        },
+        {
+          "name": "required_count",
+          "description": "O número mínimo de links válidos que devem estar presentes.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "js_uses_query_string_parsing",
+      "description": "Verifica se o código JavaScript contém padrões para ler query strings da URL.",
+      "required_file": "JavaScript",
+      "parameters": []
+    },
+    {
+      "name": "js_has_json_array_with_id",
+      "description": "Verifica a existência de um array de objetos JS onde cada objeto possui uma chave específica obrigatória.",
+      "required_file": "JavaScript",
+      "parameters": [
+        {
+          "name": "required_key",
+          "description": "A chave que deve existir em cada objeto (ex: 'id').",
+          "type": "string"
+        },
+        {
+          "name": "min_items",
+          "description": "O número mínimo de itens esperados no array.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "js_uses_dom_manipulation",
+      "description": "Verifica se o código JS usa um número mínimo de métodos comuns de manipulação do DOM.",
+      "required_file": "JavaScript",
+      "parameters": [
+        {
+          "name": "methods",
+          "description": "Uma lista de métodos a serem pesquisados (ex: ['createElement', 'appendChild']).",
+          "type": "list of strings"
+        },
+        {
+          "name": "required_count",
+          "description": "Número mínimo total de vezes que esses métodos devem aparecer.",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "has_no_js_framework",
+      "description": "Verifica a presença de frameworks JavaScript proibidos (React, Vue, Angular).",
+      "required_file": null,
+      "parameters": [
+        {
+          "name": "submission_files",
+          "description": "O dicionário de arquivos enviados.",
+          "type": "dictionary"
+        },
+        {
+          "name": "html_file",
+          "description": "O nome do arquivo HTML a ser analisado.",
+          "type": "string"
+        },
+        {
+          "name": "js_file",
+          "description": "O nome do arquivo JavaScript a ser analisado.",
+          "type": "string"
+        }
+      ]
+    }
+  ]
+}

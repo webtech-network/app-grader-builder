@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, Code, ListTree } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { getTemplateDetails } from '../../cachedTemplates';
 import TreeStyles from './TreeStyles';
 import TestLibraryModal from './TestLibraryModal';
 import TreeNode from './TreeNode';
@@ -50,7 +51,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
     const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
 
-    // Fetch template data from API
+    // Fetch template data from cache
     useEffect(() => {
         const fetchTemplateData = async () => {
             if (!templateName) {
@@ -314,7 +315,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
                     <h2 className="text-2xl font-bold text-red-400 mb-2">Error Loading Template</h2>
                     <p className="text-gray-400 mb-4">{templateError}</p>
                     <p className="text-sm text-gray-500">
-                        Please ensure the API is running at <code className="bg-gray-800 px-2 py-1 rounded">localhost:8000</code>
+                        Please try selecting a different template or refresh the page.
                     </p>
                 </div>
             </div>
@@ -371,7 +372,11 @@ const CriteriaForm = ({ templateName, onSave }) => {
                                     {/* Botão TESTE */}
                                     <button
                                         type="button"
-                                        onClick={() => setNodeTypeToCreate('Test')}
+                                        onClick={() => {
+                                            setNodeTypeToCreate('Test');
+                                            setInitialName('');
+                                            setIsLibraryOpen(true);
+                                        }}
                                         className={`flex-1 flex items-center justify-center p-3 rounded-lg border transition duration-150 ${
                                             nodeTypeToCreate === 'Test'
                                                 ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
