@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import TreeStyles from './TreeStyles';
 import TestLibraryModal from './TestLibraryModal';
 import TreeNode from './TreeNode';
+import { TEMPLATES_API } from '../../constants/api';
 import {
     findNodeById,
     findParentOfNode,
@@ -62,14 +63,13 @@ const CriteriaForm = ({ templateName, onSave }) => {
             setTemplateError(null);
 
             try {
-                const response = await fetch(`http://localhost:8000/templates/${templateName}`);
+                const response = await fetch(TEMPLATES_API.DETAILS(templateName));
                 if (!response.ok) {
                     throw new Error(`Failed to fetch template: ${response.statusText}`);
                 }
                 const data = await response.json();
                 setTestLibrary(data);
             } catch (error) {
-                console.error('Error fetching template:', error);
                 setTemplateError(error.message);
             } finally {
                 setLoadingTemplate(false);
@@ -205,7 +205,6 @@ const CriteriaForm = ({ templateName, onSave }) => {
         }
 
         // --- Criação de Sujeito ---
-        const isCategoryParent = selectedParentId === 'base' || selectedParentId === 'bonus' || selectedParentId === 'penalty';
         const newId = `node-${selectedParentId}-${nodeCount}`; 
         const newNode = {
             id: newId,
@@ -265,7 +264,6 @@ const CriteriaForm = ({ templateName, onSave }) => {
         
         // Call the onSave callback with the transformed data
         if (onSave) {
-            console.log('Final Criteria Configuration:', JSON.stringify(criteriaJson, null, 2));
             onSave(criteriaJson);
         }
         

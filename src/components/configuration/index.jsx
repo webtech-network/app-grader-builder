@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Download, ArrowLeft } from 'lucide-react';
-import CriteriaForm from './criteria'; // This imports from criteria/index.jsx
-import FeedbackForm from './feedback'; // This imports from feedback/index.jsx
-import SetupForm from './SetupForm'; // This is a standalone component
+import { Download } from 'lucide-react';
+import CriteriaForm from '../criteria';
+import FeedbackForm from '../feedback';
+import SetupForm from '../setup';
+import { CONFIG_API } from '../../constants/api';
 
 const ConfigurationPage = () => {
   const location = useLocation();
@@ -57,7 +58,6 @@ const ConfigurationPage = () => {
       setCriteriaConfig(config);
       setCriteriaSaved(true);
       setHasUnsavedChanges(false);
-      console.log('Criteria Configuration Saved:', JSON.stringify(config, null, 2));
     }
   };
 
@@ -71,7 +71,6 @@ const ConfigurationPage = () => {
       setFeedbackConfig(config);
       setFeedbackSaved(true);
       setHasUnsavedChanges(false);
-      console.log('Feedback Configuration Saved:', JSON.stringify(config, null, 2));
     }
   };
 
@@ -85,7 +84,6 @@ const ConfigurationPage = () => {
       setSetupConfig(config);
       setSetupSaved(true);
       setHasUnsavedChanges(false);
-      console.log('Setup Configuration Saved:', JSON.stringify(config, null, 2));
     }
   };
 
@@ -106,17 +104,9 @@ const ConfigurationPage = () => {
       ...(setupConfig && { setup: setupConfig })
     };
     
-    const completeJson = JSON.stringify(completeConfig, null, 2);
-    
-    console.log('='.repeat(80));
-    console.log('📦 COMPLETE CONFIGURATION:');
-    console.log('='.repeat(80));
-    console.log(completeJson);
-    console.log('='.repeat(80));
-    
     try {
       // Send configuration to backend API
-      const response = await fetch('http://localhost:8001/api/generate-config', {
+      const response = await fetch(CONFIG_API.GENERATE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,10 +131,7 @@ const ConfigurationPage = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      console.log('✅ Configuration sent successfully and zip file downloaded!');
-      
     } catch (error) {
-      console.error('❌ Error sending configuration to API:', error);
       alert(`Failed to generate configuration package: ${error.message}`);
     }
     

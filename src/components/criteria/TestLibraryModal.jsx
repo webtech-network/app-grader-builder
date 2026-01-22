@@ -189,8 +189,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
             
             // Define o currentTestConfig com o objeto dropado
             setCurrentTestConfig(data); 
-        } catch (error) {
-            console.error("Erro ao processar o teste arrastado:", error);
+        } catch {
             toast.error("Erro ao selecionar o teste. Tente novamente.");
         }
     };

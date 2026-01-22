@@ -175,7 +175,6 @@ const SetupForm = ({ onSave, templateName }) => {
     if (!config.file_checks && !config.sandbox) {
       onSave(null);
     } else {
-      console.log(JSON.stringify(config, null, 2));
       onSave(config);
       setHasSaved(true);
     }

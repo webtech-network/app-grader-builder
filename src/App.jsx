@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LandingPage from "./components/landing";
-import ConfigurationPage from "./components/ConfigurationPage";
-import DocumentationPage from "./components/DocumentationPage";
+import ConfigurationPage from "./components/configuration";
+import DocumentationPage from "./components/documentation";
 
 const App = () => {
   return (

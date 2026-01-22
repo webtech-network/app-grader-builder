@@ -177,9 +177,6 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
     
     const config = assembleConfiguration();
     
-    // Log final configuration to console
-    console.log('Final Feedback Configuration:', JSON.stringify(config, null, 2));
-    
     // Call parent callback if provided
     if (onSave) {
       onSave(config);
@@ -209,101 +206,8 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
     }
   };
 
-  // Custom styles for toggle and animations
-  const ToggleStyle = () => (
-    <style jsx="true">{`
-      .toggle-checkbox {
-        transform: translate(0);
-      }
-      .toggle-checkbox:checked {
-        transform: translateX(16px);
-        border-color: #4f46e5;
-      }
-      .toggle-checkbox:checked + .toggle-label {
-        background-color: #4f46e5;
-      }
-      .toggle-checkbox:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
-      }
-      
-      /* Save celebration animation */
-      @keyframes celebrate {
-        0% {
-          transform: scale(1);
-        }
-        25% {
-          transform: scale(1.1) rotate(3deg);
-        }
-        50% {
-          transform: scale(1.15) rotate(-3deg);
-        }
-        75% {
-          transform: scale(1.1) rotate(2deg);
-        }
-        100% {
-          transform: scale(1) rotate(0deg);
-        }
-      }
-      
-      @keyframes confetti {
-        0% {
-          opacity: 1;
-          transform: translateY(0) rotate(0deg);
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(-100px) rotate(360deg);
-        }
-      }
-      
-      .save-celebrate {
-        animation: celebrate 0.6s ease-in-out;
-      }
-      
-      .confetti-particle {
-        position: absolute;
-        width: 8px;
-        height: 8px;
-        animation: confetti 0.8s ease-out forwards;
-        pointer-events: none;
-      }
-      
-      @keyframes slideInUp {
-        from {
-          transform: translateY(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
-      
-      @keyframes slideOutDown {
-        from {
-          transform: translateY(0);
-          opacity: 1;
-        }
-        to {
-          transform: translateY(100%);
-          opacity: 0;
-        }
-      }
-      
-      .toast-enter {
-        animation: slideInUp 0.3s ease-out;
-      }
-      
-      .toast-exit {
-        animation: slideOutDown 0.3s ease-in;
-      }
-    `}</style>
-  );
-
   return (
     <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-4 sm:p-8">
-      <ToggleStyle />
       <div className="max-w-5xl mx-auto">
         {/* Header Section */}
         <header className="text-center mb-10 p-4 border-b border-gray-700/50">

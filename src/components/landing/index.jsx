@@ -4,6 +4,7 @@ import { ChevronDown, Info } from 'lucide-react';
 import logo from '../../assets/logo.jpeg';
 import TemplateModal from './TemplateModal';
 import TestsModal from './TestsModal';
+import { TEMPLATES_API } from '../../constants/api';
 
 const LandingPage = () => {
   const [gradingTemplate, setGradingTemplate] = useState('');
@@ -21,11 +22,11 @@ const LandingPage = () => {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const response = await fetch('http://localhost:8000/templates/');
+        const response = await fetch(TEMPLATES_API.LIST);
         const data = await response.json();
         setTemplates(data);
       } catch (error) {
-        console.error('Error fetching templates:', error);
+        // Fallback to default templates if API fails
         setTemplates(['webdev', 'api', 'essay', 'io']);
       } finally {
         setLoadingTemplates(false);
@@ -37,12 +38,12 @@ const LandingPage = () => {
   // Fetch template details
   const fetchTemplateDetails = async (templateName) => {
     try {
-      const response = await fetch(`http://localhost:8000/templates/${templateName}`);
+      const response = await fetch(TEMPLATES_API.DETAILS(templateName));
       const data = await response.json();
       setSelectedTemplateDetails(data);
       setShowTemplateModal(true);
     } catch (error) {
-      console.error('Error fetching template details:', error);
+      // Silent fail - user can retry
     }
   };
 
