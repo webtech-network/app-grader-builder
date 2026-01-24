@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Save, X, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { useArrayState, useFormInput, useToggle, useKeyValueState } from '../../hooks';
 
 // Predefined runtime images with their configurations
 const runtimePresets = {
@@ -59,17 +60,17 @@ const runtimePresets = {
 };
 
 const SetupForm = ({ onSave, templateName }) => {
-  const [fileChecks, setFileChecks] = useState([]);
-  const [newFile, setNewFile] = useState('');
+  const fileChecksState = useArrayState([]);
+  const newFileInput = useFormInput('');
   const [sandboxConfig, setSandboxConfig] = useState({
     runtime_image: '',
     container_port: '',
     start_command: '',
     commands: {}
   });
-  const [newCommandKey, setNewCommandKey] = useState('');
-  const [newCommandValue, setNewCommandValue] = useState('');
-  const [showSandboxConfig, setShowSandboxConfig] = useState(false);
+  const newCommandKeyInput = useFormInput('');
+  const newCommandValueInput = useFormInput('');
+  const sandboxConfigToggle = useToggle(false);
 
   // Check if setup is required for this template
   const isSetupRequired = templateName === 'api' || templateName === 'io';
@@ -97,8 +98,8 @@ const SetupForm = ({ onSave, templateName }) => {
   useEffect(() => {
     if (templateName === 'api') {
       handleRuntimeImageChange('python:3.11-slim');
-      setFileChecks(['app.py', 'requirements.txt']);
-      setShowSandboxConfig(true); // Auto-expand for required templates
+      fileChecksState.set(['app.py', 'requirements.txt']);
+      sandboxConfigToggle.setTrue(); // Auto-expand for required templates
     } else if (templateName === 'io') {
       handleRuntimeImageChange('python:3.11-slim');
       setSandboxConfig(prev => ({
@@ -106,35 +107,35 @@ const SetupForm = ({ onSave, templateName }) => {
         container_port: '5000',
         start_command: 'python main.py'
       }));
-      setFileChecks(['main.py']);
-      setShowSandboxConfig(true); // Auto-expand for required templates
+      fileChecksState.set(['main.py']);
+      sandboxConfigToggle.setTrue(); // Auto-expand for required templates
     } else {
-      setShowSandboxConfig(false); // Collapse for optional templates
+      sandboxConfigToggle.setFalse(); // Collapse for optional templates
     }
-  }, [templateName, handleRuntimeImageChange]);
+  }, [templateName, handleRuntimeImageChange, fileChecksState, sandboxConfigToggle]);
 
   const handleAddFile = () => {
-    if (newFile.trim() && !fileChecks.includes(newFile.trim())) {
-      setFileChecks([...fileChecks, newFile.trim()]);
-      setNewFile('');
+    if (newFileInput.value.trim() && !fileChecksState.items.includes(newFileInput.value.trim())) {
+      fileChecksState.add(newFileInput.value.trim());
+      newFileInput.clear();
     }
   };
 
   const handleRemoveFile = (index) => {
-    setFileChecks(fileChecks.filter((_, i) => i !== index));
+    fileChecksState.remove(index);
   };
 
   const handleAddCommand = () => {
-    if (newCommandKey.trim() && newCommandValue.trim()) {
+    if (newCommandKeyInput.value.trim() && newCommandValueInput.value.trim()) {
       setSandboxConfig({
         ...sandboxConfig,
         commands: {
           ...sandboxConfig.commands,
-          [newCommandKey.trim()]: newCommandValue.trim()
+          [newCommandKeyInput.value.trim()]: newCommandValueInput.value.trim()
         }
       });
-      setNewCommandKey('');
-      setNewCommandValue('');
+      newCommandKeyInput.clear();
+      newCommandValueInput.clear();
     }
   };
 
@@ -209,9 +210,9 @@ const SetupForm = ({ onSave, templateName }) => {
           </p>
 
           {/* File List */}
-          {fileChecks.length > 0 && (
+          {fileChecksState.items.length > 0 && (
             <div className="mb-4 space-y-2">
-              {fileChecks.map((file, index) => (
+              {fileChecksState.items.map((file, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between bg-gray-700 p-3 rounded-lg border border-gray-600"
@@ -232,8 +233,8 @@ const SetupForm = ({ onSave, templateName }) => {
           <div className="flex gap-2">
             <input
               type="text"
-              value={newFile}
-              onChange={(e) => setNewFile(e.target.value)}
+              value={newFileInput.value}
+              onChange={newFileInput.onChange}
               onKeyPress={(e) => e.key === 'Enter' && handleAddFile()}
               placeholder="ex: main.py, requirements.txt"
               className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -258,7 +259,7 @@ const SetupForm = ({ onSave, templateName }) => {
           </div>
 
           {/* Collapsed State for Non-Required Templates */}
-          {!isSetupRequired && !showSandboxConfig && (
+          {!isSetupRequired && !sandboxConfigToggle.value && (
             <div className="bg-gray-700 rounded-lg border border-gray-600 p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -276,7 +277,7 @@ const SetupForm = ({ onSave, templateName }) => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowSandboxConfig(true)}
+                  onClick={() => sandboxConfigToggle.setTrue()}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium flex-shrink-0 ml-4"
                 >
                   <Plus className="w-4 h-4" />
@@ -287,7 +288,7 @@ const SetupForm = ({ onSave, templateName }) => {
           )}
 
           {/* Expanded Sandbox Configuration */}
-          {(isSetupRequired || showSandboxConfig) && (
+          {(isSetupRequired || sandboxConfigToggle.value) && (
             <>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-gray-400 text-sm">
@@ -296,7 +297,7 @@ const SetupForm = ({ onSave, templateName }) => {
                 {!isSetupRequired && (
                   <button
                     type="button"
-                    onClick={() => setShowSandboxConfig(false)}
+                    onClick={() => sandboxConfigToggle.setFalse()}
                     className="text-gray-400 hover:text-gray-200 text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-700 transition-colors"
                   >
                     <X className="w-3 h-3" />
@@ -497,8 +498,8 @@ const SetupForm = ({ onSave, templateName }) => {
                     </label>
                     <input
                       type="text"
-                      value={newCommandKey}
-                      onChange={(e) => setNewCommandKey(e.target.value)}
+                      value={newCommandKeyInput.value}
+                      onChange={newCommandKeyInput.onChange}
                       placeholder="ex: install_dependencies"
                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                     />
@@ -512,8 +513,8 @@ const SetupForm = ({ onSave, templateName }) => {
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        value={newCommandValue}
-                        onChange={(e) => setNewCommandValue(e.target.value)}
+                        value={newCommandValueInput.value}
+                        onChange={newCommandValueInput.onChange}
                         onKeyPress={(e) => e.key === 'Enter' && handleAddCommand()}
                         placeholder="ex: pip install -r requirements.txt"
                         className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono"
@@ -521,7 +522,7 @@ const SetupForm = ({ onSave, templateName }) => {
                       <button
                         onClick={handleAddCommand}
                         className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium shadow-sm"
-                        disabled={!newCommandKey.trim() || !newCommandValue.trim()}
+                        disabled={!newCommandKeyInput.value.trim() || !newCommandValueInput.value.trim()}
                       >
                         <Plus className="w-4 h-4" />
                         Adicionar

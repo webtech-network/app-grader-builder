@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Loader2, Code, ListTree } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
 import { toast } from 'react-toastify';
-import { getTemplateDetails } from '../../cachedTemplates';
 import TreeStyles from './TreeStyles';
-import TestLibraryModal from './TestLibraryModal';
-import TreeNode from './TreeNode';
-import { TEMPLATES_API } from '../../constants/api';
+import TestLibraryModal from './components/TestLibraryModal';
+import TreeNode from './components/TreeNode';
+import LoadingState from '../../shared/LoadingState';
+import ErrorState from '../../shared/ErrorState';
+import EmptyState from '../../shared/EmptyState';
+import NodeCreationModal from './components/NodeCreationModal';
+import SaveButton from '../../shared/SaveButton';
+import { useFetchTemplate, useSaveState, useModal } from '../../hooks';
 import {
     findNodeById,
     findParentOfNode,
@@ -37,48 +40,15 @@ const CriteriaForm = ({ templateName, onSave }) => {
     const [nodeTypeToCreate, setNodeTypeToCreate] = useState('Subject'); 
 
     // --- Novos estados para o fluxo de Testes ---
-    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const libraryModal = useModal(false);
     const [editingNode, setEditingNode] = useState(null); // Armazena o nó que está sendo editado (ID)
     const [initialName, setInitialName] = useState(''); // Nome inicial do nó
     
-    // --- Estados para carregamento do template ---
-    const [testLibrary, setTestLibrary] = useState(null);
-    const [loadingTemplate, setLoadingTemplate] = useState(true);
-    const [templateError, setTemplateError] = useState(null);
+    // --- Template fetching com custom hook ---
+    const { data: testLibrary, loading: loadingTemplate, error: templateError } = useFetchTemplate(templateName);
     
-    // --- Estados de salvamento ---
-    const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-    const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
-
-    // Fetch template data from cache
-    useEffect(() => {
-        const fetchTemplateData = async () => {
-            if (!templateName) {
-                setTemplateError('No template name provided');
-                setLoadingTemplate(false);
-                return;
-            }
-
-            setLoadingTemplate(true);
-            setTemplateError(null);
-
-            try {
-                const response = await fetch(TEMPLATES_API.DETAILS(templateName));
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch template: ${response.statusText}`);
-                }
-                const data = await response.json();
-                setTestLibrary(data);
-            } catch (error) {
-                setTemplateError(error.message);
-            } finally {
-                setLoadingTemplate(false);
-            }
-        };
-
-        fetchTemplateData();
-    }, [templateName]);
+    // --- Save state com custom hook ---
+    const { isSaved, showSuccess: showSaveSuccess, showAnimation: saveButtonAnimation, triggerSave, cancelSave } = useSaveState();
 
     // Calcula a soma dos pesos de cada categoria L0 (memoization)
     const categoryWeights = useMemo(() => {
@@ -108,13 +78,13 @@ const CriteriaForm = ({ templateName, onSave }) => {
             setEditingNode(nodeToEdit);
             // Remove o sufixo (Teste) do nome para o input do modal
             setInitialName(nodeName.replace(/\s\(Teste\)\s\(.*\)/, '').trim()); 
-            setIsLibraryOpen(true); // Abre o modal de configuração
+            libraryModal.open(); // Abre o modal de configuração
         }
     };
 
     const closeAllModals = () => {
         setSelectedParentId(null);
-        setIsLibraryOpen(false);
+        libraryModal.close();
         setEditingNode(null);
         setNewNodeName('');
         setInitialName('');
@@ -201,7 +171,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
         // --- Lógica de Fluxo ---
         if (nodeTypeToCreate === 'Test') {
             setInitialName(newNodeName); // Captura o nome customizado para o modal
-            setIsLibraryOpen(true);
+            libraryModal.open();
             return; 
         }
 
@@ -259,29 +229,17 @@ const CriteriaForm = ({ templateName, onSave }) => {
         const criteriaJson = transformTreeToBackendFormat(treeData);
         
         // Trigger celebration animation
-        setSaveButtonAnimation(true);
-        setShowSaveSuccess(true);
-        setIsSaved(true);
+        triggerSave();
         
         // Call the onSave callback with the transformed data
         if (onSave) {
             onSave(criteriaJson);
         }
-        
-        // Reset animation after it completes
-        setTimeout(() => {
-            setSaveButtonAnimation(false);
-        }, 600);
-        
-        // Hide success message after 2 seconds
-        setTimeout(() => {
-            setShowSaveSuccess(false);
-        }, 2000);
     };
     
     const handleCancelSave = () => {
         // Lógica para reverter ou limpar o estado de "salvo"
-        setIsSaved(false);
+        cancelSave();
         
         // Call onSave with null to indicate unsaved state
         if (onSave) {
@@ -295,42 +253,17 @@ const CriteriaForm = ({ templateName, onSave }) => {
 
     // Show loading state while fetching template
     if (loadingTemplate) {
-        return (
-            <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-12 h-12 text-indigo-400 animate-spin mx-auto mb-4" />
-                    <p className="text-xl text-gray-300">Loading template...</p>
-                    <p className="text-sm text-gray-500 mt-2">Fetching {templateName} configuration</p>
-                </div>
-            </div>
-        );
+        return <LoadingState templateName={templateName} />;
     }
 
     // Show error state if template fetch failed
     if (templateError) {
-        return (
-            <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
-                <div className="text-center max-w-md">
-                    <div className="text-red-500 text-6xl mb-4">⚠️</div>
-                    <h2 className="text-2xl font-bold text-red-400 mb-2">Error Loading Template</h2>
-                    <p className="text-gray-400 mb-4">{templateError}</p>
-                    <p className="text-sm text-gray-500">
-                        Please try selecting a different template or refresh the page.
-                    </p>
-                </div>
-            </div>
-        );
+        return <ErrorState error={templateError} />;
     }
 
     // Show message if no template library loaded
     if (!testLibrary) {
-        return (
-            <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-xl text-gray-400">No template data available</p>
-                </div>
-            </div>
-        );
+        return <EmptyState />;
     }
 
     return (
@@ -347,78 +280,25 @@ const CriteriaForm = ({ templateName, onSave }) => {
                 </header>
 
                 {/* --- MODAL 1: SELETOR DE TIPO (TEMA/TESTE) --- */}
-                {selectedParentId && !isLibraryOpen && (
-                    <div className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-50 p-4">
-                        <form onSubmit={handleSubmitNewNode} className="bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-sm border border-indigo-600 animate-in fade-in zoom-in duration-300">
-                            <h3 className="xl font-bold mb-4 text-indigo-400">{modalTitle}</h3>
-                            
-                            {showTypeSelector && (
-                                <div className="mb-6 flex space-x-4">
-                                    {/* Botão SUJEITO */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setNodeTypeToCreate('Subject')}
-                                        className={`flex-1 flex items-center justify-center p-3 rounded-lg border transition duration-150 ${
-                                            nodeTypeToCreate === 'Subject'
-                                                ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
-                                                : 'bg-gray-700 border-gray-600 text-gray-400 hover:bg-gray-600'
-                                        }`}
-                                        title="Nó de Agrupamento que pode conter Testes ou outros Sujeitos."
-                                    >
-                                        <ListTree className="w-5 h-5 mr-2" />
-                                        <span className="font-semibold text-sm">Tema</span>
-                                    </button>
-
-                                    {/* Botão TESTE */}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setNodeTypeToCreate('Test');
-                                            setInitialName('');
-                                            setIsLibraryOpen(true);
-                                        }}
-                                        className={`flex-1 flex items-center justify-center p-3 rounded-lg border transition duration-150 ${
-                                            nodeTypeToCreate === 'Test'
-                                                ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
-                                                : 'bg-gray-700 border-gray-600 text-gray-400 hover:bg-gray-600'
-                                        }`}
-                                        title="Nó Folha que contém a lógica de avaliação (não pode ter filhos)."
-                                    >
-                                        <Code className="w-5 h-5 mr-2" />
-                                        <span className="font-semibold text-sm">Teste</span>
-                                    </button>
-                                </div>
-                            )}
-
-                            <input
-                                type="text"
-                                value={newNodeName}
-                                onChange={(e) => setNewNodeName(e.target.value)}
-                                placeholder={`Nome do ${isCategoryParent ? 'Tema' : nodeTypeToCreate === 'Subject' ? 'Sujeito' : 'Teste'}`}
-                                className="w-full p-3 mb-4 bg-gray-700 border border-gray-600 rounded-lg text-gray-50 placeholder-gray-500 focus:ring-indigo-500 focus:border-indigo-500"
-                                required
-                            />
-                            <div className="flex justify-end space-x-3">
-                                <button
-                                    type="button"
-                                    onClick={closeAllModals}
-                                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition duration-150"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150"
-                                >
-                                    {nodeTypeToCreate === 'Test' ? 'Abrir Biblioteca' : 'Criar'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                {selectedParentId && !libraryModal.isOpen && (
+                    <NodeCreationModal 
+                        modalTitle={modalTitle}
+                        showTypeSelector={showTypeSelector}
+                        nodeTypeToCreate={nodeTypeToCreate}
+                        newNodeName={newNodeName}
+                        onNodeTypeChange={setNodeTypeToCreate}
+                        onNodeNameChange={setNewNodeName}
+                        onSubmit={handleSubmitNewNode}
+                        onCancel={closeAllModals}
+                        onOpenLibrary={() => {
+                            setInitialName('');
+                            libraryModal.open();
+                        }}
+                    />
                 )}
                 
                 {/* --- MODAL 2: BIBLIOTECA DE TESTES E CONFIGURAÇÃO --- */}
-                {isLibraryOpen && testLibrary && (
+                {libraryModal.isOpen && testLibrary && (
                     <TestLibraryModal 
                         onClose={closeAllModals} 
                         initialName={initialName}
@@ -435,78 +315,13 @@ const CriteriaForm = ({ templateName, onSave }) => {
                 )}
 
                 {/* Save Button */}
-                <div className="flex justify-start items-center gap-3 relative">
-                    <button
-                        onClick={handleSaveCriteria}
-                        disabled={isSaved}
-                        className={`px-4 py-2 font-medium rounded-lg transition duration-150 flex items-center gap-2 text-sm relative overflow-hidden ${
-                            isSaved 
-                                ? 'bg-green-600 text-white cursor-not-allowed' 
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        } ${saveButtonAnimation ? 'save-celebrate' : ''}`}
-                    >
-                        {isSaved ? (
-                            <>
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Salvo
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
-                                </svg>
-                                Salvar Critérios
-                            </>
-                        )}
-                        {saveButtonAnimation && (
-                            <>
-                                {[...Array(8)].map((_, i) => (
-                                    <span
-                                        key={i}
-                                        className="confetti-particle"
-                                        style={{
-                                            left: '50%',
-                                            top: '50%',
-                                            backgroundColor: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'][i % 5],
-                                            transform: `translate(-50%, -50%) rotate(${i * 45}deg) translateX(${20 + i * 5}px)`,
-                                            animationDelay: `${i * 0.05}s`
-                                        }}
-                                    />
-                                ))}
-                            </>
-                        )}
-                    </button>
-                    
-                    {isSaved && (
-                        <button
-                            onClick={handleCancelSave}
-                            className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition duration-150 flex items-center gap-2 text-sm"
-                            title="Cancelar e descartar alterações"
-                        >
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Cancelar
-                        </button>
-                    )}
-                </div>
-
-                {/* Success Toast Notification */}
-                {showSaveSuccess && (
-                    <div className="fixed bottom-8 right-8 z-50 toast-enter">
-                        <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border-2 border-green-400">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            <div>
-                                <p className="font-bold">Salvo!</p>
-                                <p className="text-sm text-green-100">Critérios salvos com sucesso</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <SaveButton 
+                    isSaved={isSaved}
+                    showAnimation={saveButtonAnimation}
+                    showSuccessToast={showSaveSuccess}
+                    onSave={handleSaveCriteria}
+                    onCancel={handleCancelSave}
+                />
 
                 {/* Visualização da Árvore */}
                 <div className="tree relative">

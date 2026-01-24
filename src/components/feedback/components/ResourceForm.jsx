@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useFormInput } from '../../../hooks';
 
 const ResourceForm = ({ onSubmit }) => {
   const [newResource, setNewResource] = useState({
@@ -6,7 +7,7 @@ const ResourceForm = ({ onSubmit }) => {
     url: "",
     tags: []
   });
-  const [currentTag, setCurrentTag] = useState("");
+  const currentTagInput = useFormInput("");
 
   const handleResourceChange = (e) => {
     const { name, value } = e.target;
@@ -18,12 +19,12 @@ const ResourceForm = ({ onSubmit }) => {
 
   const handleAddTag = (e) => {
     e.preventDefault();
-    if (currentTag.trim()) {
+    if (currentTagInput.value.trim()) {
       setNewResource(prev => ({
         ...prev,
-        tags: [...prev.tags, currentTag.trim()]
+        tags: [...prev.tags, currentTagInput.value.trim()]
       }));
-      setCurrentTag("");
+      currentTagInput.clear();
     }
   };
 
@@ -96,8 +97,8 @@ const ResourceForm = ({ onSubmit }) => {
         <div className="flex gap-2">
           <input
             type="text"
-            value={currentTag}
-            onChange={(e) => setCurrentTag(e.target.value)}
+            value={currentTagInput.value}
+            onChange={currentTagInput.onChange}
             className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
             placeholder="Digite um teste e pressione Adicionar"
           />

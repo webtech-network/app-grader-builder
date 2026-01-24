@@ -1,45 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Info } from 'lucide-react';
 import logo from '../../assets/logo.jpeg';
-import TemplateModal from './TemplateModal';
-import TestsModal from './TestsModal';
+import TemplateModal from './components/TemplateModal';
+import TestsModal from './components/TestsModal';
+import { useTemplateList, useModal } from '../../hooks';
 import { TEMPLATES_API } from '../../constants/api';
 
 const LandingPage = () => {
   const [gradingTemplate, setGradingTemplate] = useState('');
   const [feedbackMode, setFeedbackMode] = useState('');
-  const [templates, setTemplates] = useState([]);
-  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const { templates, loading: loadingTemplates } = useTemplateList();
   const [selectedTemplateDetails, setSelectedTemplateDetails] = useState(null);
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [showTestsModal, setShowTestsModal] = useState(false);
-  const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
-  const [showFeedbackDropdown, setShowFeedbackDropdown] = useState(false);
+  const templateModal = useModal(false);
+  const testsModal = useModal(false);
+  const templateDropdown = useModal(false);
+  const feedbackDropdown = useModal(false);
   const navigate = useNavigate();
-
-  // Load templates from cache
-  useEffect(() => {
-    const loadTemplates = async () => {
-      try {
-        const response = await fetch(TEMPLATES_API.LIST);
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setTemplates(data);
-        } else if (data.templates && Array.isArray(data.templates)) {
-          setTemplates(data.templates);
-        } else {
-          setTemplates(['webdev', 'api', 'essay', 'io']);
-        }
-      } catch (error) {
-        // Fallback to default templates if API fails
-        setTemplates(['webdev', 'api', 'essay', 'io']);
-      } finally {
-        setLoadingTemplates(false);
-      }
-    };
-    loadTemplates();
-  }, []);
 
   // Fetch template details from cache
   const fetchTemplateDetails = async (templateName) => {
@@ -47,7 +24,7 @@ const LandingPage = () => {
       const response = await fetch(TEMPLATES_API.DETAILS(templateName));
       const data = await response.json();
       setSelectedTemplateDetails(data);
-      setShowTemplateModal(true);
+      templateModal.open();
     } catch (error) {
       // Silent fail - user can retry
     }
@@ -137,7 +114,7 @@ const LandingPage = () => {
                 <div className="relative">
                   <button
                     type="button"
-                    onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
+                    onClick={() => templateDropdown.toggle()}
                     className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-100 flex items-center justify-between hover:border-gray-500"
                   >
                     {gradingTemplate ? (
@@ -148,10 +125,10 @@ const LandingPage = () => {
                     ) : (
                       <span className="text-gray-400">Selecione um modelo...</span>
                     )}
-                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showTemplateDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${templateDropdown.isOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {showTemplateDropdown && (
+                  {templateDropdown.isOpen && (
                     <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-gray-600 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                       {loadingTemplates ? (
                         <div className="p-4 text-center text-gray-400">Carregando modelos...</div>
@@ -166,7 +143,7 @@ const LandingPage = () => {
                                   type="button"
                                   onClick={() => {
                                     setGradingTemplate(template);
-                                    setShowTemplateDropdown(false);
+                                    templateDropdown.close();
                                   }}
                                   className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-all duration-200 flex items-center justify-between ${
                                     gradingTemplate === template ? 'bg-indigo-600/20 border-l-4 border-indigo-500' : ''
@@ -217,7 +194,7 @@ const LandingPage = () => {
                 <div className="relative">
                   <button
                     type="button"
-                    onClick={() => setShowFeedbackDropdown(!showFeedbackDropdown)}
+                    onClick={() => feedbackDropdown.toggle()}
                     className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-100 flex items-center justify-between hover:border-gray-500"
                   >
                     {feedbackMode ? (
@@ -228,10 +205,10 @@ const LandingPage = () => {
                     ) : (
                       <span className="text-gray-400">Selecione o modo...</span>
                     )}
-                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showFeedbackDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${feedbackDropdown.isOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {showFeedbackDropdown && (
+                  {feedbackDropdown.isOpen && (
                     <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-gray-600 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                       <div className="max-h-80 overflow-y-auto">
                         {feedbackModeOptions.map((option) => (
@@ -240,7 +217,7 @@ const LandingPage = () => {
                               type="button"
                               onClick={() => {
                                 setFeedbackMode(option.value);
-                                setShowFeedbackDropdown(false);
+                                feedbackDropdown.close();
                               }}
                               className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-all duration-200 flex items-center justify-between ${
                                 feedbackMode === option.value ? 'bg-indigo-600/20 border-l-4 border-indigo-500' : ''
@@ -408,33 +385,33 @@ const LandingPage = () => {
 
       {/* Modals */}
       <TemplateModal
-        isOpen={showTemplateModal}
-        onClose={() => setShowTemplateModal(false)}
+        isOpen={templateModal.isOpen}
+        onClose={() => templateModal.close()}
         onViewTests={() => {
-          setShowTestsModal(true);
-          setShowTemplateModal(false);
+          testsModal.open();
+          templateModal.close();
         }}
         templateDetails={selectedTemplateDetails}
         getTemplateDisplayInfo={() => getTemplateDisplayInfo(gradingTemplate)}
       />
 
       <TestsModal
-        isOpen={showTestsModal}
-        onClose={() => setShowTestsModal(false)}
+        isOpen={testsModal.isOpen}
+        onClose={() => testsModal.close()}
         onBackToOverview={() => {
-          setShowTestsModal(false);
-          setShowTemplateModal(true);
+          testsModal.close();
+          templateModal.open();
         }}
         templateDetails={selectedTemplateDetails}
         getTemplateDisplayInfo={() => getTemplateDisplayInfo(gradingTemplate)}
       />
 
       {/* Click outside to close dropdowns */}
-      {showTemplateDropdown && (
-        <div className="fixed inset-0 z-40" onClick={() => setShowTemplateDropdown(false)}></div>
+      {templateDropdown.isOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => templateDropdown.close()}></div>
       )}
-      {showFeedbackDropdown && (
-        <div className="fixed inset-0 z-40" onClick={() => setShowFeedbackDropdown(false)}></div>
+      {feedbackDropdown.isOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => feedbackDropdown.close()}></div>
       )}
     </div>
   );

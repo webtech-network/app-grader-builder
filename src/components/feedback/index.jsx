@@ -1,206 +1,43 @@
-import React, { useState } from 'react';
-import ReportTitleInput from './ReportTitleInput';
-import ToggleSwitch from './ToggleSwitch';
-import ResourceForm from './ResourceForm';
-import ResourceList from './ResourceList';
-import { toast } from 'react-toastify';
+import React from 'react';
+import ReportTitleInput from './components/ReportTitleInput';
+import ToggleSwitch from './components/ToggleSwitch';
+import ResourceForm from './components/ResourceForm';
+import ResourceList from './components/ResourceList';
+import SaveButton from '../../shared/SaveButton';
+import { useSaveState, useArrayState, useFormInput, useFeedbackForm } from '../../hooks';
 
 const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
-  // State management
-  const [reportTitle, setReportTitle] = useState("");
-  const [feedbackTone, setFeedbackTone] = useState("");
-  const [feedbackPersona, setFeedbackPersona] = useState("");
-  const [activityContext, setActivityContext] = useState("");
-  const [extraGuidelines, setExtraGuidelines] = useState("");
-  const [solutionType, setSolutionType] = useState("hint");
-  const [readingFiles, setReadingFiles] = useState([]);
-  const [currentFile, setCurrentFile] = useState("");
-  const [toggleStates, setToggleStates] = useState({
-    show_score: true,
-    show_passed_tests: true,
-    add_report_summary: true
-  });
-  const [resources, setResources] = useState([]);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  const [saveButtonAnimation, setSaveButtonAnimation] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  // Custom hook for feedback form state and logic
+  const feedbackForm = useFeedbackForm(feedbackMode);
+  
+  // Array states for resources and reading files
+  const readingFilesState = useArrayState([]);
+  const currentFileInput = useFormInput("");
+  const resourcesState = useArrayState([]);
+  
+  // Save state hook
+  const { isSaved, showSuccess: showSaveSuccess, showAnimation: saveButtonAnimation, triggerSave, cancelSave } = useSaveState();
 
   // Event handlers
-  const handleToggle = (id) => {
-    setToggleStates(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
   const handleAddResource = (newResource) => {
-    setResources(prev => [...prev, newResource]);
+    resourcesState.add(newResource);
   };
 
   const handleDeleteResource = (index) => {
-    setResources(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const assembleConfiguration = () => {
-    // Backend expects: { general: {...}, ai: {...}, default: {...} }
-    const config = {};
-    
-    // General configuration (only include if at least one value is set)
-    const generalConfig = {};
-    if (reportTitle && reportTitle.trim() !== '') {
-      generalConfig.report_title = reportTitle;
-    }
-    if (toggleStates.show_passed_tests !== undefined) {
-      generalConfig.show_passed_tests = toggleStates.show_passed_tests;
-    }
-    if (toggleStates.show_score !== undefined) {
-      generalConfig.show_test_details = toggleStates.show_score; // Map to backend field
-    }
-    if (toggleStates.add_report_summary !== undefined) {
-      generalConfig.add_report_summary = toggleStates.add_report_summary;
-    }
-    
-    // Only add general key if at least one field is provided
-    if (Object.keys(generalConfig).length > 0) {
-      config.general = generalConfig;
-    }
-    
-    // AI configuration (only if feedback mode is 'ai' and values are provided)
-    if (feedbackMode === 'ai') {
-      const aiConfig = {};
-      if (feedbackTone) {
-        aiConfig.feedback_tone = feedbackTone;
-      }
-      if (feedbackPersona) {
-        aiConfig.feedback_persona = feedbackPersona;
-      }
-      if (activityContext) {
-        aiConfig.assignment_context = activityContext;
-      }
-      if (extraGuidelines) {
-        aiConfig.extra_orientations = extraGuidelines;
-      }
-      if (solutionType) {
-        aiConfig.solution_type = solutionType;
-      }
-      if (readingFiles && readingFiles.length > 0) {
-        aiConfig.submission_files_to_read = readingFiles;
-      }
-      
-      if (Object.keys(aiConfig).length > 0) {
-        config.ai = aiConfig;
-      }
-    }
-    
-    // Default configuration (custom category headers)
-    const defaultConfig = {};
-    if (toggleStates.add_report_summary || Object.keys(defaultConfig).length > 0) {
-      defaultConfig.category_headers = {
-        base: "✅ Essential Requirements",
-        bonus: "⭐ Extra Points and Best Practices",
-        penalty: "🚨 Points of Attention and Bad Practices"
-      };
-      config.default = defaultConfig;
-    }
-    
-    // Include online resources (optional, can be empty array)
-    if (resources && resources.length > 0) {
-      config.online_resources = resources;
-    }
-    
-    return config;
-  };
-
-  const validateConfiguration = () => {
-    const errors = [];
-    
-    // Validate General section required fields
-    if (!reportTitle || reportTitle.trim() === '') {
-      errors.push('Título do Relatório é obrigatório');
-    }
-    
-    // Note: toggleStates are boolean values and always exist with defaults
-    // We validate that the user has explicitly set them (which they have via defaults)
-    // The toggles show_score, show_passed_tests, and add_report_summary are required
-    // but they have default values (true), so they're always present
-    
-    // Conteúdo Online is optional (resources array can be empty)
-    
-    // Only validate AI fields if feedback mode is 'ai'
-    if (feedbackMode === 'ai') {
-      // Validate Feedback Tone (required)
-      if (!feedbackTone || feedbackTone.trim() === '') {
-        errors.push('Tom do Feedback é obrigatório');
-      }
-      
-      // Validate Feedback Persona (required)
-      if (!feedbackPersona || feedbackPersona.trim() === '') {
-        errors.push('Persona do Feedback é obrigatória');
-      }
-      
-      // Validate Activity Context (required)
-      if (!activityContext || activityContext.trim() === '') {
-        errors.push('Contexto da Atividade é obrigatório');
-      }
-      
-      // Validate Extra Guidelines (required)
-      if (!extraGuidelines || extraGuidelines.trim() === '') {
-        errors.push('Orientações Extras são obrigatórias');
-      }
-      
-      // Validate Solution Type (required, but has default so should always exist)
-      if (!solutionType || solutionType.trim() === '') {
-        errors.push('Tipo de Fornecimento de Soluções é obrigatório');
-      }
-      
-      // Validate Reading Files (required, at least one)
-      if (!readingFiles || readingFiles.length === 0) {
-        errors.push('Pelo menos um arquivo para leitura é obrigatório');
-      }
-    }
-    
-    // Note: resources (online resources) is optional and can be empty
-    
-    return errors;
+    resourcesState.remove(index);
   };
 
   const handleSave = () => {
-    // Validate configuration before saving
-    const validationErrors = validateConfiguration();
-    
-    if (validationErrors.length > 0) {
-      validationErrors.forEach((err, idx) => {
-        toast.error(`${idx + 1}. ${err}`);
-      });
-      return;
-    }
-    
-    const config = assembleConfiguration();
-    
-    // Call parent callback if provided
-    if (onSave) {
-      onSave(config);
-    }
-    
-    // Trigger celebration animation
-    setSaveButtonAnimation(true);
-    setShowSaveSuccess(true);
-    setIsSaved(true);
-    
-    // Reset animation after it completes
-    setTimeout(() => {
-      setSaveButtonAnimation(false);
-    }, 600);
-    
-    // Hide success message after 2 seconds
-    setTimeout(() => {
-      setShowSaveSuccess(false);
-    }, 2000);
+    feedbackForm.handleSave(
+      readingFilesState.items,
+      resourcesState.items,
+      onSave,
+      triggerSave
+    );
   };
 
   const handleCancelSave = () => {
-    setIsSaved(false);
-    // Call parent callback with null to indicate unsaved state
+    cancelSave();
     if (onSave) {
       onSave(null);
     }
@@ -224,8 +61,8 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
             
             <div className="space-y-6">
               <ReportTitleInput 
-                title={reportTitle}
-                onChange={setReportTitle}
+                title={feedbackForm.reportTitle}
+                onChange={feedbackForm.setReportTitle}
               />
 
               {/* Configurações Booleanas (Toggles) */}
@@ -233,20 +70,20 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
                 <ToggleSwitch 
                   id="show_score" 
                   label="Exibir Pontuação" 
-                  isChecked={toggleStates.show_score}
-                  onChange={() => handleToggle('show_score')}
+                  isChecked={feedbackForm.toggleStates.show_score}
+                  onChange={() => feedbackForm.handleToggle('show_score')}
                 />
                 <ToggleSwitch 
                   id="show_passed_tests" 
                   label="Exibir Testes Aprovados" 
-                  isChecked={toggleStates.show_passed_tests}
-                  onChange={() => handleToggle('show_passed_tests')}
+                  isChecked={feedbackForm.toggleStates.show_passed_tests}
+                  onChange={() => feedbackForm.handleToggle('show_passed_tests')}
                 />
                 <ToggleSwitch 
                   id="add_report_summary" 
                   label="Adicionar Resumo" 
-                  isChecked={toggleStates.add_report_summary}
-                  onChange={() => handleToggle('add_report_summary')}
+                  isChecked={feedbackForm.toggleStates.add_report_summary}
+                  onChange={() => feedbackForm.handleToggle('add_report_summary')}
                 />
               </div>
 
@@ -260,7 +97,7 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
                 </div>
 
                 <ResourceList 
-                  resources={resources}
+                  resources={resourcesState.items}
                   onDeleteResource={handleDeleteResource}
                 />
               </div>
@@ -284,9 +121,9 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
                   {["hint", "yes", "no"].map((type) => (
                     <button
                       key={type}
-                      onClick={() => setSolutionType(type)}
+                      onClick={() => feedbackForm.setSolutionType(type)}
                       className={`px-3 py-1 rounded-full text-xs font-semibold shadow-md transition-colors ${
-                        solutionType === type 
+                        feedbackForm.solutionType === type 
                           ? "bg-indigo-600 text-white" 
                           : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                       }`}
@@ -299,16 +136,16 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
               
               {/* Tom do Feedback */}
               <ReportTitleInput
-                title={feedbackTone}
-                onChange={setFeedbackTone}
+                title={feedbackForm.feedbackTone}
+                onChange={feedbackForm.setFeedbackTone}
                 label="Tom do Feedback"
                 placeholder='Ex: "amigável, encorajador e direto ao ponto"'
               />
               
               {/* Persona do Feedback */}
               <ReportTitleInput
-                title={feedbackPersona}
-                onChange={setFeedbackPersona}
+                title={feedbackForm.feedbackPersona}
+                onChange={feedbackForm.setFeedbackPersona}
                 label="Persona do Feedback"
                 placeholder="Ex: Code Buddy, um colega programador mais experiente"
               />
@@ -317,8 +154,8 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
               <div className="space-y-1">
                 <p className="text-gray-400 font-medium text-sm">Contexto da Atividade</p>
                 <textarea
-                  value={activityContext}
-                  onChange={(e) => setActivityContext(e.target.value)}
+                  value={feedbackForm.activityContext}
+                  onChange={(e) => feedbackForm.setActivityContext(e.target.value)}
                   className="w-full bg-gray-700 border border-gray-600 rounded-xl p-4 text-gray-300 text-xs leading-relaxed focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[150px] resize-y"
                   placeholder="Descreva o contexto da atividade..."
                 />
@@ -328,8 +165,8 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
               <div className="space-y-1">
                 <p className="text-gray-400 font-medium text-sm">Orientações Extras</p>
                 <textarea
-                  value={extraGuidelines}
-                  onChange={(e) => setExtraGuidelines(e.target.value)}
+                  value={feedbackForm.extraGuidelines}
+                  onChange={(e) => feedbackForm.setExtraGuidelines(e.target.value)}
                   className="w-full bg-gray-700 border border-gray-600 rounded-xl p-4 text-gray-300 text-xs leading-relaxed focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[200px] resize-y"
                   placeholder="Digite as orientações extras aqui..."
                 />
@@ -342,16 +179,16 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
                   <div className="flex gap-2 items-center">
                     <input
                       type="text"
-                      value={currentFile}
-                      onChange={(e) => setCurrentFile(e.target.value)}
+                      value={currentFileInput.value}
+                      onChange={currentFileInput.onChange}
                       placeholder="Nome do arquivo..."
                       className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                     <button
                       onClick={() => {
-                        if (currentFile.trim()) {
-                          setReadingFiles(prev => [...prev, currentFile.trim()]);
-                          setCurrentFile("");
+                        if (currentFileInput.value.trim()) {
+                          readingFilesState.add(currentFileInput.value.trim());
+                          currentFileInput.clear();
                         }
                       }}
                       type="button"
@@ -363,18 +200,18 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
                 </div>
 
                 <div>
-                  {readingFiles.length === 0 ? (
+                  {readingFilesState.items.length === 0 ? (
                     <p className="text-gray-500 italic text-sm">Nenhum arquivo adicionado</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {readingFiles.map((file, index) => (
+                      {readingFilesState.items.map((file, index) => (
                         <div
                           key={index}
                           className="group flex items-center bg-indigo-600 text-white text-xs font-mono font-semibold px-3 py-1 rounded-full shadow-md"
                         >
                           {file}
                           <button
-                            onClick={() => setReadingFiles(prev => prev.filter((_, i) => i !== index))}
+                            onClick={() => readingFilesState.remove(index)}
                             className="ml-2 text-indigo-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             ×
@@ -390,81 +227,14 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
           )}
 
           {/* Save Button - Always visible at the end */}
-          <div className="mt-8 flex justify-end items-center gap-3 relative">
-                <button
-                  type="button"
-                  disabled={isSaved}
-                  className={`px-6 py-3 rounded-xl text-sm font-semibold transition-colors shadow-lg flex items-center gap-2 relative overflow-hidden ${
-                    isSaved 
-                      ? 'bg-green-600 text-white cursor-not-allowed' 
-                      : 'bg-green-600 text-white hover:bg-green-700'
-                  } ${saveButtonAnimation ? 'save-celebrate' : ''}`}
-                  onClick={handleSave}
-                >
-                  {isSaved ? (
-                    <>
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Salvo
-                    </>
-                  ) : (
-                    <>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
-                      </svg>
-                      Salvar
-                    </>
-                  )}
-                  {saveButtonAnimation && (
-                    <>
-                      {[...Array(8)].map((_, i) => (
-                        <span
-                          key={i}
-                          className="confetti-particle"
-                          style={{
-                            left: '50%',
-                            top: '50%',
-                            backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5],
-                            transform: `translate(-50%, -50%) rotate(${i * 45}deg) translateX(${20 + i * 5}px)`,
-                            animationDelay: `${i * 0.05}s`
-                          }}
-                        />
-                      ))}
-                    </>
-                  )}
-                </button>
-                
-                {isSaved && (
-                  <button
-                    type="button"
-                    onClick={handleCancelSave}
-                    className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition duration-150 flex items-center gap-2 text-sm"
-                    title="Cancelar e descartar alterações"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Cancelar
-                  </button>
-                )}
-              </div>
+          <SaveButton 
+            isSaved={isSaved}
+            showAnimation={saveButtonAnimation}
+            showSuccessToast={showSaveSuccess}
+            onSave={handleSave}
+            onCancel={handleCancelSave}
+          />
         </div>
-        
-        {/* Success Toast Notification */}
-        {showSaveSuccess && (
-          <div className="fixed bottom-8 right-8 z-50 toast-enter">
-            <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border-2 border-green-400">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <div>
-                <p className="font-bold">Salvo!</p>
-                <p className="text-sm text-green-100">Feedback salvo com sucesso</p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

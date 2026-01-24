@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plus, X, Code, ListTree } from 'lucide-react';
-import { calculateChildWeights } from './utils';
+import { calculateChildWeights } from '../utils';
+import { useToggle } from '../../../hooks';
 
 const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, totalChildWeight, onEditTest, testLibrary }) => {
     const isLeaf = node.children === null || node.children.length === 0;
     const canAddChild = node.children !== null; 
     
     // State for showing weight input
-    const [showWeightInput, setShowWeightInput] = useState(false);
+    const weightInputToggle = useToggle(false);
     
     const isCategoryNode = level === 0;
     const isSubjectNode = node.children !== null && level > 0;
@@ -111,7 +112,7 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
                         className={`font-semibold text-sm ${textColor} whitespace-nowrap flex items-center gap-2 ${isCategoryNode && node.id !== 'base' ? 'cursor-pointer' : ''}`}
                         onClick={() => {
                             if (isCategoryNode && node.id !== 'base') {
-                                setShowWeightInput(!showWeightInput);
+                                weightInputToggle.toggle();
                             }
                         }}
                     >
@@ -122,7 +123,7 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
                             node.id === 'base' ? (
                                 <span className="opacity-0 group-hover:opacity-100 transition-opacity text-green-400">100</span>
                             ) : (
-                                showWeightInput ? (
+                                weightInputToggle.value ? (
                                     <input
                                         type="text"
                                         inputMode="numeric"
@@ -132,13 +133,13 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
                                         onChange={handleWeightChange}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
-                                                setShowWeightInput(false);
+                                                weightInputToggle.setFalse();
                                             }
                                         }}
                                         className="w-12 p-1 text-xs bg-gray-600 border border-gray-500 rounded text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition duration-150 text-right"
                                         title={`Pontuação Máxima (${node.id.toUpperCase()})`}
                                         onClick={(e) => e.stopPropagation()}
-                                        onBlur={() => setShowWeightInput(false)}
+                                        onBlur={() => weightInputToggle.setFalse()}
                                         autoFocus
                                     />
                                 ) : (
