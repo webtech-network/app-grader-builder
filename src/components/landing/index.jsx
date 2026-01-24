@@ -24,7 +24,13 @@ const LandingPage = () => {
       try {
         const response = await fetch(TEMPLATES_API.LIST);
         const data = await response.json();
-        setTemplates(data);
+        if (Array.isArray(data)) {
+          setTemplates(data);
+        } else if (data.templates && Array.isArray(data.templates)) {
+          setTemplates(data.templates);
+        } else {
+          setTemplates(['webdev', 'api', 'essay', 'io']);
+        }
       } catch (error) {
         // Fallback to default templates if API fails
         setTemplates(['webdev', 'api', 'essay', 'io']);
