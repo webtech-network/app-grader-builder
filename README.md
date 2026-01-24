@@ -19,6 +19,8 @@ These variables configure:
 
 
 ## Running the application
+## **IMPORTANT!!!**
+- You need to have autograder core running in order to properly fetch the templates API. We will later work on a script that automates this requirement
 
 install dependencies 
 ```bash
