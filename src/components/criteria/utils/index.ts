@@ -1,5 +1,62 @@
+// Types for the criteria tree structure
+export interface TestMetadata {
+    functionName: string;
+    calls: unknown[][];
+    description?: string;
+    required_file?: string;
+}
+
+export interface TreeNode {
+    id: string;
+    name: string;
+    children: TreeNode[] | null;
+    weight: number;
+    metadata?: TestMetadata;
+}
+
+export interface TestParameter {
+    name: string;
+    type: 'string' | 'integer' | 'number' | 'boolean' | 'list of strings' | 'dictionary';
+    description?: string;
+    defaultValue?: unknown;
+    required?: boolean;
+}
+
+export interface TestTemplate {
+    name: string;
+    displayName: string;
+    description: string;
+    parameters: TestParameter[];
+    required_file?: string;
+    type_tag?: string;
+}
+
+export interface TestLibrary {
+    name: string;
+    tests: TestTemplate[];
+}
+
+// Backend format types
+export interface BackendTest {
+    name: string;
+    file: string;
+    calls: unknown[][];
+}
+
+export interface BackendCategory {
+    weight: number;
+    subjects?: Record<string, BackendCategory>;
+    tests?: BackendTest[];
+}
+
+export interface BackendCriteriaFormat {
+    base?: BackendCategory;
+    bonus?: BackendCategory;
+    penalty?: BackendCategory;
+}
+
 // Função auxiliar para encontrar o nó por ID (necessário para a validação)
-export const findNodeById = (nodes, id) => {
+export const findNodeById = (nodes: TreeNode[], id: string): TreeNode | null => {
     for (const node of nodes) {
         if (node.id === id) {
             return node;
@@ -13,7 +70,7 @@ export const findNodeById = (nodes, id) => {
 };
 
 // Função auxiliar para encontrar o pai de um nó
-export const findParentOfNode = (nodes, targetId, parent = null) => {
+export const findParentOfNode = (nodes: TreeNode[], targetId: string, parent: TreeNode | null = null): TreeNode | null => {
     for (const node of nodes) {
         if (node.id === targetId) {
             return parent;
@@ -27,21 +84,21 @@ export const findParentOfNode = (nodes, targetId, parent = null) => {
 };
 
 // Função auxiliar para calcular a soma dos pesos dos filhos de QUALQUER nó
-export const calculateChildWeights = (node) => {
+export const calculateChildWeights = (node: TreeNode): number => {
     if (!node.children || node.children.length === 0) {
         return 0;
     }
     // Soma os pesos (garantindo que o peso seja um número)
-    return node.children.reduce((acc, child) => acc + (parseFloat(child.weight) || 0), 0);
+    return node.children.reduce((acc, child) => acc + (parseFloat(String(child.weight)) || 0), 0);
 };
 
 // Adiciona um novo nó filho
-export const addChildNode = (nodes, parentId, newNode) => {
+export const addChildNode = (nodes: TreeNode[], parentId: string, newNode: TreeNode): TreeNode[] => {
     return nodes.map((node) => {
         if (node.id === parentId) {
             return {
                 ...node,
-                children: [...node.children, newNode],
+                children: [...(node.children || []), newNode],
             };
         }
         if (node.children && node.children.length > 0) {
@@ -54,8 +111,17 @@ export const addChildNode = (nodes, parentId, newNode) => {
     });
 };
 
+interface UpdatedNodeData {
+    functionName: string;
+    calls: unknown[][];
+    name: string;
+    description?: string;
+    required_file?: string;
+    weight?: number;
+}
+
 // Atualiza um nó existente
-export const updateExistingNode = (nodes, targetId, updatedData, testLibrary) => {
+export const updateExistingNode = (nodes: TreeNode[], targetId: string, updatedData: UpdatedNodeData, testLibrary: TestLibrary | null): TreeNode[] => {
     return nodes.map(node => {
         if (node.id === targetId) {
             // Encontra o template para atualizar o displayName
@@ -65,7 +131,7 @@ export const updateExistingNode = (nodes, targetId, updatedData, testLibrary) =>
             return {
                 ...node,
                 name: name,
-                weight: updatedData.weight,
+                weight: updatedData.weight ?? node.weight,
                 metadata: {
                     functionName: updatedData.functionName,
                     calls: updatedData.calls,
@@ -85,7 +151,7 @@ export const updateExistingNode = (nodes, targetId, updatedData, testLibrary) =>
 };
 
 // Remove um nó
-export const removeNode = (nodes, targetId) => {
+export const removeNode = (nodes: TreeNode[], targetId: string): TreeNode[] => {
     return nodes.filter((node) => {
         if (node.id === targetId) {
             return false;
@@ -98,10 +164,10 @@ export const removeNode = (nodes, targetId) => {
 };
 
 // Atualiza o peso de um nó
-export const updateNodeWeight = (nodes, targetId, newWeight) => {
+export const updateNodeWeight = (nodes: TreeNode[], targetId: string, newWeight: string | number): TreeNode[] => {
     return nodes.map(node => {
         if (node.id === targetId) {
-            let weightValue = Math.max(0, parseFloat(newWeight) || 0);
+            let weightValue = Math.max(0, parseFloat(String(newWeight)) || 0);
 
             if (targetId === 'bonus' || targetId === 'penalty') {
                 weightValue = Math.min(100, weightValue);
@@ -119,39 +185,36 @@ export const updateNodeWeight = (nodes, targetId, newWeight) => {
     });
 };
 
+// Helper function to map file types
+const mapRequiredFile = (requiredFile: string | undefined): string => {
+    if (requiredFile === 'HTML') return 'index.html';
+    if (requiredFile === 'CSS') return 'styles.css';
+    if (requiredFile === 'JavaScript') return 'index.js';
+    return requiredFile || '';
+};
+
 // Transform tree data to backend format
-export const transformTreeToBackendFormat = (nodes) => {
-    const result = {};
+export const transformTreeToBackendFormat = (nodes: TreeNode[]): BackendCriteriaFormat => {
+    const result: BackendCriteriaFormat = {};
     
     // Helper function to process children recursively
-    const processNode = (node) => {
+    const processNode = (node: TreeNode): BackendCategory | null => {
         // If node has no children (leaf/test node), return null
         if (node.children === null || (Array.isArray(node.children) && node.children.length === 0 && node.metadata)) {
             return null;
         }
         
         // If node has children, process them
-        const subjects = {};
-        const tests = [];
+        const subjects: Record<string, BackendCategory> = {};
+        const tests: BackendTest[] = [];
         
-        node.children.forEach(child => {
+        node.children?.forEach(child => {
             // Check if this is a test node (has metadata)
             if (child.metadata) {
                 // This is a test node - add to tests array
-                // Map generic file types to specific filenames
-                let fileName = '';
-                const requiredFile = child.metadata.required_file;
-                if (requiredFile === 'HTML') {
-                    fileName = 'index.html';
-                } else if (requiredFile === 'CSS') {
-                    fileName = 'styles.css';
-                } else if (requiredFile === 'JavaScript') {
-                    fileName = 'index.js';
-                } else {
-                    fileName = requiredFile || '';
-                }
+                const fileName = mapRequiredFile(child.metadata.required_file);
                 
-                const testObj = {
+                const testObj: BackendTest = {
                     name: child.metadata.functionName,
                     file: fileName,
                     calls: child.metadata.calls || [[]]
@@ -166,25 +229,14 @@ export const transformTreeToBackendFormat = (nodes) => {
                     subjects[childName] = childData;
                 } else {
                     // Leaf subject with only tests
-                    const leafTests = [];
+                    const leafTests: BackendTest[] = [];
                     
                     if (child.children && child.children.length > 0) {
                         child.children.forEach(testChild => {
                             if (testChild.metadata) {
-                                // Map generic file types to specific filenames
-                                let fileName = '';
-                                const requiredFile = testChild.metadata.required_file;
-                                if (requiredFile === 'HTML') {
-                                    fileName = 'index.html';
-                                } else if (requiredFile === 'CSS') {
-                                    fileName = 'styles.css';
-                                } else if (requiredFile === 'JavaScript') {
-                                    fileName = 'index.js';
-                                } else {
-                                    fileName = requiredFile || '';
-                                }
+                                const fileName = mapRequiredFile(testChild.metadata.required_file);
                                 
-                                const testObj = {
+                                const testObj: BackendTest = {
                                     name: testChild.metadata.functionName,
                                     file: fileName,
                                     calls: testChild.metadata.calls || [[]]
@@ -195,7 +247,7 @@ export const transformTreeToBackendFormat = (nodes) => {
                     }
                     
                     subjects[childName] = {
-                        weight: parseFloat(child.weight) || 0,
+                        weight: parseFloat(String(child.weight)) || 0,
                         tests: leafTests
                     };
                 }
@@ -203,8 +255,8 @@ export const transformTreeToBackendFormat = (nodes) => {
         });
         
         // Build the return object
-        const nodeData = {
-            weight: parseFloat(node.weight) || 0
+        const nodeData: BackendCategory = {
+            weight: parseFloat(String(node.weight)) || 0
         };
         
         // Add subjects if there are any
@@ -225,14 +277,13 @@ export const transformTreeToBackendFormat = (nodes) => {
         const categoryData = processNode(category);
         
         // Only include the category if it has content
-        // For bonus and penalty, skip if they're empty (no subjects and no tests)
         if (categoryData) {
             const isEmpty = !categoryData.subjects && !categoryData.tests;
             const isBonusOrPenalty = category.id === 'bonus' || category.id === 'penalty';
             
             // Include base always, but only include bonus/penalty if they have content
             if (!isBonusOrPenalty || !isEmpty) {
-                result[category.id] = categoryData;
+                result[category.id as keyof BackendCriteriaFormat] = categoryData;
             }
         }
     });

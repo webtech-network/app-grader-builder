@@ -1,21 +1,41 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, FormEvent, DragEvent, ChangeEvent } from 'react';
 import { Settings, Library } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { TreeNode, TestLibrary, TestTemplate, TestParameter } from '../utils';
 
-const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpdateTest, testLibrary }) => {
+interface TestData {
+    functionName: string;
+    calls: unknown[][];
+    name: string;
+    description?: string;
+    required_file?: string;
+    displayName?: string;
+    weight?: number;
+}
+
+interface TestLibraryModalProps {
+    onClose: () => void;
+    initialName: string;
+    editingNode: TreeNode | null;
+    onSaveTest: (testData: TestData) => void;
+    onUpdateTest: (nodeId: string, testData: TestData) => void;
+    testLibrary: TestLibrary | null;
+}
+
+const TestLibraryModal: React.FC<TestLibraryModalProps> = ({ onClose, initialName, editingNode, onSaveTest, onUpdateTest, testLibrary }) => {
     
     // Armazena o objeto do teste sendo configurado
-    const [currentTestConfig, setCurrentTestConfig] = useState(null); 
-    const [isDropping, setIsDropping] = useState(false);
-    const [params, setParams] = useState({});
-    const [nodeCustomName, setNodeCustomName] = useState(initialName);
+    const [currentTestConfig, setCurrentTestConfig] = useState<TestTemplate | null>(null); 
+    const [isDropping, setIsDropping] = useState<boolean>(false);
+    const [params, setParams] = useState<Record<string, unknown>>({});
+    const [nodeCustomName, setNodeCustomName] = useState<string>(initialName);
 
     // Get the flat list of tests from the library
-    const testLibraryFlat = useMemo(() => testLibrary?.tests || [], [testLibrary]);
+    const testLibraryFlat = useMemo<TestTemplate[]>(() => testLibrary?.tests || [], [testLibrary]);
 
     // 1. Determina a definição completa do template (Baseado no drop ou no editingNode)
-    const testTemplate = useMemo(() => {
-        let nameToFind = null;
+    const testTemplate = useMemo<TestTemplate | null>(() => {
+        let nameToFind: string | null = null;
         
         // 1. Edição (usa metadata.functionName)
         if (editingNode && editingNode.metadata) {
@@ -34,9 +54,9 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         
         // Se estiver no modo edição, inicializa com o template base do nó
         if (editingNode && !currentTestConfig) {
-            const initialTestName = editingNode.metadata.functionName;
+            const initialTestName = editingNode.metadata?.functionName;
             const testBase = testLibraryFlat.find(t => t.name === initialTestName);
-            setCurrentTestConfig(testBase);
+            setCurrentTestConfig(testBase || null);
         }
         
         if (testTemplate) {
@@ -47,15 +67,15 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
                 : initialName;
             setNodeCustomName(initialCustomName);
 
-            const initialParams = {};
+            const initialParams: Record<string, unknown> = {};
             
-            testTemplate.parameters.forEach(p => {
+            testTemplate.parameters.forEach((p: TestParameter) => {
                 const paramName = p.name;
                 const paramType = p.type;
                 
                 // Tenta carregar valores de CALLS se estiver editando
                 if (editingNode) {
-                    const nodeCalls = editingNode.metadata.calls[0] || [];
+                    const nodeCalls = editingNode.metadata?.calls[0] || [];
                     const paramIndex = testTemplate.parameters.findIndex(tp => tp.name === p.name);
                     const nodeValue = nodeCalls[paramIndex];
                     
@@ -84,8 +104,8 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
     }, [testTemplate, editingNode, initialName, testLibraryFlat, currentTestConfig]);
 
 
-    const handleChange = (id, value, type) => {
-        let parsedValue = value;
+    const handleChange = (id: string, value: string, type: string): void => {
+        let parsedValue: unknown = value;
         if (type === 'integer' || type === 'number') {
              parsedValue = value === '' ? '' : parseFloat(value);
         }
@@ -94,7 +114,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         setParams(prev => ({ ...prev, [id]: parsedValue }));
     };
 
-    const getInputValue = (id, type) => {
+    const getInputValue = (id: string, type: string): string => {
         const value = params[id];
         // Retorna string vazia para undefined/null em inputs controlados
         if (value === undefined || value === null) return ''; 
@@ -104,19 +124,19 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         if (type === 'list of strings' && Array.isArray(value)) {
             return value.join(', ');
         }
-        return value;
+        return String(value);
     };
     
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = (e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
         
         if (!testTemplate) return;
         
         // Parse 'list of strings' parameters before validation
-        const parsedParams = { ...params };
-        testTemplate.parameters.forEach(p => {
+        const parsedParams: Record<string, unknown> = { ...params };
+        testTemplate.parameters.forEach((p: TestParameter) => {
             if (p.type === 'list of strings' && typeof parsedParams[p.name] === 'string') {
-                parsedParams[p.name] = parsedParams[p.name]
+                parsedParams[p.name] = (parsedParams[p.name] as string)
                     .split(',')
                     .map(s => s.trim())
                     .filter(s => s.length > 0);
@@ -126,20 +146,22 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         // 2. Validação de campos obrigatórios
         const requiredParams = testTemplate.parameters.filter(p => p.type !== 'dictionary');
         
-            for (const p of requiredParams) {
+        for (const p of requiredParams) {
             // Checa se o campo está vazio ou se é NaN para números
             if (parsedParams[p.name] === '' || parsedParams[p.name] === null || parsedParams[p.name] === undefined || 
-                (p.type === 'list of strings' && (Array.isArray(parsedParams[p.name]) && parsedParams[p.name].length === 0))) {
+                (p.type === 'list of strings' && (Array.isArray(parsedParams[p.name]) && (parsedParams[p.name] as unknown[]).length === 0))) {
                 toast.error(`O parâmetro '${p.description}' é obrigatório.`);
                 return;
             }
-            if ((p.type === 'integer' || p.type === 'number') && isNaN(parsedParams[p.name])) {
+            if ((p.type === 'integer' || p.type === 'number') && isNaN(parsedParams[p.name] as number)) {
                 toast.error(`O parâmetro '${p.description}' deve ser um número.`);
                 return;
             }
-        }        // 3. Mapeamento de Parâmetros para Calls (Formato de Argumentos)
-        const calls = [[]]; 
-        const callArgs = testTemplate.parameters.map(p => {
+        }
+        
+        // 3. Mapeamento de Parâmetros para Calls (Formato de Argumentos)
+        const calls: unknown[][] = [[]]; 
+        const callArgs = testTemplate.parameters.map((p: TestParameter) => {
             if (p.type !== 'dictionary' && p.name !== 'submission_files' && p.name !== 'html_file' && p.name !== 'js_file') {
                 return parsedParams[p.name];
             }
@@ -148,7 +170,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
 
         calls[0] = callArgs;
         
-        const testData = {
+        const testData: TestData = {
             functionName: testTemplate.name,
             calls: calls,
             name: nodeCustomName,
@@ -166,21 +188,21 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
     };
     
     // --- Lógica de Drag & Drop ---
-    const handleDragStart = (e, test) => {
+    const handleDragStart = (e: DragEvent<HTMLDivElement>, test: TestTemplate): void => {
         e.dataTransfer.setData('application/json', JSON.stringify(test));
         e.dataTransfer.effectAllowed = 'copy';
     };
 
-    const handleDragOver = (e) => {
+    const handleDragOver = (e: DragEvent<HTMLDivElement>): void => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = (e: DragEvent<HTMLDivElement>): void => {
         e.preventDefault();
         setIsDropping(false);
         try {
-            const data = JSON.parse(e.dataTransfer.getData('application/json'));
+            const data = JSON.parse(e.dataTransfer.getData('application/json')) as TestTemplate;
             
             // Define o currentTestConfig com o objeto dropado
             setCurrentTestConfig(data); 
@@ -189,7 +211,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
         }
     };
 
-    const groupedTests = testLibraryFlat.reduce((acc, test) => {
+    const groupedTests = testLibraryFlat.reduce<Record<string, TestTemplate[]>>((acc, test) => {
         const type = test.type_tag || test.required_file || 'Outros';
         if (!acc[type]) acc[type] = [];
         acc[type].push(test);
@@ -197,7 +219,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
     }, {});
     
     // --- Renderização do Painel de Configuração (Lado Direito) ---
-    const renderConfigPanel = () => {
+    const renderConfigPanel = (): JSX.Element => {
         if (!testTemplate) {
             // Drop Target Inicial
             return (
@@ -217,7 +239,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
 
         // Formulário de Configuração do Teste
         const test = testTemplate; // Usa o template completo
-        const userConfigurableParameters = test.parameters.filter(p => 
+        const userConfigurableParameters = test.parameters.filter((p: TestParameter) => 
             p.type !== 'dictionary' && p.name !== 'submission_files' && p.name !== 'html_file' && p.name !== 'js_file'
         );
         const nodeLabel = nodeCustomName.trim() || test.displayName;
@@ -243,7 +265,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
                          <input
                             type="text"
                             value={nodeCustomName}
-                            onChange={(e) => setNodeCustomName(e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setNodeCustomName(e.target.value)}
                             placeholder={test.displayName}
                             className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-50 placeholder-gray-500 focus:ring-indigo-500 focus:border-indigo-500"
                             required
@@ -255,7 +277,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
                     {userConfigurableParameters.length === 0 ? (
                         <p className="text-green-500 text-sm">Este teste não requer parâmetros.</p>
                     ) : (
-                        userConfigurableParameters.map(p => (
+                        userConfigurableParameters.map((p: TestParameter) => (
                             <div key={p.name}>
                                 <label className="block text-gray-300 text-sm font-semibold mb-1">
                                     {p.description}
@@ -263,7 +285,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
                                 <input
                                     type="text"
                                     value={getInputValue(p.name, p.type)}
-                                    onChange={(e) => handleChange(p.name, e.target.value, p.type)}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(p.name, e.target.value, p.type)}
                                     className="w-full p-2 bg-gray-900 border border-gray-600 rounded-lg text-gray-50 placeholder-gray-500 focus:ring-indigo-500 focus:border-indigo-500"
                                 />
                                 <p className='text-xs text-gray-500 mt-1'>Tipo esperado: `{p.type}`</p>
@@ -319,7 +341,7 @@ const TestLibraryModal = ({ onClose, initialName, editingNode, onSaveTest, onUpd
                             <div key={type}>
                                 <h4 className="text-sm font-semibold text-gray-300 uppercase mb-2 border-b border-gray-700 pb-1">{type}</h4>
                                 <div className="space-y-2">
-                                    {tests.map(test => (
+                                    {tests.map((test: TestTemplate) => (
                                         <div
                                             key={test.name}
                                             draggable

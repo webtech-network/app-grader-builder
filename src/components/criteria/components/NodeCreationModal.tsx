@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { FormEvent, ChangeEvent } from 'react';
 import NodeTypeSelector from './NodeTypeSelector';
 
-const NodeCreationModal = ({
+type NodeType = 'Subject' | 'Test';
+
+interface NodeCreationModalProps {
+    modalTitle: string;
+    showTypeSelector: boolean;
+    nodeTypeToCreate: NodeType;
+    newNodeName: string;
+    onNodeTypeChange: (type: NodeType) => void;
+    onNodeNameChange: (name: string) => void;
+    onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+    onCancel: () => void;
+    onOpenLibrary: () => void;
+}
+
+const NodeCreationModal: React.FC<NodeCreationModalProps> = ({
     modalTitle,
     showTypeSelector,
     nodeTypeToCreate,
@@ -28,7 +42,7 @@ const NodeCreationModal = ({
                 <input
                     type="text"
                     value={newNodeName}
-                    onChange={(e) => onNodeNameChange(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => onNodeNameChange(e.target.value)}
                     placeholder={`Nome do ${modalTitle === "Novo Tema" ? 'Tema' : nodeTypeToCreate === 'Subject' ? 'Sujeito' : 'Teste'}`}
                     className="w-full p-3 mb-4 bg-gray-700 border border-gray-600 rounded-lg text-gray-50 placeholder-gray-500 focus:ring-indigo-500 focus:border-indigo-500"
                     required

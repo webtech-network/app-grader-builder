@@ -1,15 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, FormEvent } from 'react';
 import { toast } from 'react-toastify';
 import TreeStyles from './TreeStyles';
 import TestLibraryModal from './components/TestLibraryModal';
 import TreeNode from './components/TreeNode';
-import LoadingState from '../../shared/LoadingState';
-import ErrorState from '../../shared/ErrorState';
-import EmptyState from '../../shared/EmptyState';
+import { LoadingState, ErrorState, EmptyState, SaveButton } from '../../shared';
 import NodeCreationModal from './components/NodeCreationModal';
-import SaveButton from '../../shared/SaveButton';
 import { useFetchTemplate, useSaveState, useModal } from '../../hooks';
 import {
+    TreeNode as TreeNodeType,
+    TestLibrary,
+    BackendCriteriaFormat,
     findNodeById,
     findParentOfNode,
     calculateChildWeights,
@@ -26,23 +26,40 @@ import {
     validateBonusPenaltyContent
 } from './validations';
 
-const CriteriaForm = ({ templateName, onSave }) => {
-    const initialTreeData = [
+type NodeType = 'Subject' | 'Test';
+
+interface TestData {
+    functionName: string;
+    calls: unknown[][];
+    name: string;
+    description?: string;
+    required_file?: string;
+    displayName?: string;
+    weight?: number;
+}
+
+interface CriteriaFormProps {
+    templateName: string;
+    onSave?: (criteria: BackendCriteriaFormat | null) => void;
+}
+
+const CriteriaForm: React.FC<CriteriaFormProps> = ({ templateName, onSave }) => {
+    const initialTreeData: TreeNodeType[] = [
         { id: 'base', name: 'Base', children: [], weight: 100 }, 
         { id: 'bonus', name: 'Bonus', children: [], weight: 0 },
         { id: 'penalty', name: 'Penalty', children: [], weight: 0 },
     ];
     
-    const [treeData, setTreeData] = useState(initialTreeData);
-    const [nodeCount, setNodeCount] = useState(1);
-    const [newNodeName, setNewNodeName] = useState('');
-    const [selectedParentId, setSelectedParentId] = useState(null);
-    const [nodeTypeToCreate, setNodeTypeToCreate] = useState('Subject'); 
+    const [treeData, setTreeData] = useState<TreeNodeType[]>(initialTreeData);
+    const [nodeCount, setNodeCount] = useState<number>(1);
+    const [newNodeName, setNewNodeName] = useState<string>('');
+    const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
+    const [nodeTypeToCreate, setNodeTypeToCreate] = useState<NodeType>('Subject'); 
 
     // --- Novos estados para o fluxo de Testes ---
     const libraryModal = useModal(false);
-    const [editingNode, setEditingNode] = useState(null); // Armazena o nó que está sendo editado (ID)
-    const [initialName, setInitialName] = useState(''); // Nome inicial do nó
+    const [editingNode, setEditingNode] = useState<TreeNodeType | null>(null); // Armazena o nó que está sendo editado (ID)
+    const [initialName, setInitialName] = useState<string>(''); // Nome inicial do nó
     
     // --- Template fetching com custom hook ---
     const { data: testLibrary, loading: loadingTemplate, error: templateError } = useFetchTemplate(templateName);
@@ -51,8 +68,8 @@ const CriteriaForm = ({ templateName, onSave }) => {
     const { isSaved, showSuccess: showSaveSuccess, showAnimation: saveButtonAnimation, triggerSave, cancelSave } = useSaveState();
 
     // Calcula a soma dos pesos de cada categoria L0 (memoization)
-    const categoryWeights = useMemo(() => {
-        const sums = {};
+    const categoryWeights = useMemo<Record<string, number>>(() => {
+        const sums: Record<string, number> = {};
         treeData.forEach(category => {
             sums[category.id] = calculateChildWeights(category);
         });
@@ -60,11 +77,11 @@ const CriteriaForm = ({ templateName, onSave }) => {
     }, [treeData]);
 
     // --- LÓGICA DE NÓS (CRUD) ---
-    const handleWeightChange = (targetId, newWeight) => {
+    const handleWeightChange = (targetId: string, newWeight: string | number): void => {
         setTreeData(prevTree => updateNodeWeight(prevTree, targetId, newWeight));
     };
 
-    const handleAddChild = (parentId) => {
+    const handleAddChild = (parentId: string): void => {
         setSelectedParentId(parentId);
         setNewNodeName('');
         setNodeTypeToCreate('Subject'); 
@@ -72,7 +89,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
         setInitialName(''); // Limpa o nome inicial
     };
 
-    const handleEditTest = (nodeId, nodeName) => {
+    const handleEditTest = (nodeId: string, nodeName: string): void => {
         const nodeToEdit = findNodeById(treeData, nodeId);
         if (nodeToEdit && nodeToEdit.children === null) { // Confirma que é um Teste (folha)
             setEditingNode(nodeToEdit);
@@ -82,7 +99,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
         }
     };
 
-    const closeAllModals = () => {
+    const closeAllModals = (): void => {
         setSelectedParentId(null);
         libraryModal.close();
         setEditingNode(null);
@@ -91,7 +108,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
     };
 
     // --- HANDLER DE CRIAÇÃO/EDIÇÃO DE TESTE ---
-    const handleSaveTest = (testData) => {
+    const handleSaveTest = (testData: TestData): void => {
         if (editingNode) {
             // Modo Edição: Atualiza o nó existente
             const updatedNodeData = {
@@ -102,13 +119,13 @@ const CriteriaForm = ({ templateName, onSave }) => {
                 required_file: testData.required_file,
                 weight: editingNode.weight // Mantém o peso
             };
-            setTreeData(prevTree => updateExistingNode(prevTree, editingNode.id, updatedNodeData, testLibrary));
+            setTreeData(prevTree => updateExistingNode(prevTree, editingNode.id, updatedNodeData, testLibrary as TestLibrary | null));
         } else {
             // Modo Criação: Cria um novo nó
             const newId = `node-${selectedParentId}-${nodeCount}`; 
-            const testTemplate = testLibrary?.tests?.find(t => t.name === testData.functionName);
+            const testTemplate = (testLibrary as TestLibrary | null)?.tests?.find(t => t.name === testData.functionName);
 
-            const newNode = {
+            const newNode: TreeNodeType = {
                 id: newId,
                 name: `${testData.name.trim() || testTemplate?.displayName || testData.functionName} (Teste)`,
                 children: null, 
@@ -120,14 +137,14 @@ const CriteriaForm = ({ templateName, onSave }) => {
                     required_file: testData.required_file
                 } 
             };
-            setTreeData((prevTree) => addChildNode(prevTree, selectedParentId, newNode));
+            setTreeData((prevTree) => addChildNode(prevTree, selectedParentId!, newNode));
             setNodeCount((prev) => prev + 1);
         }
         
         closeAllModals();
-    }
+    };
 
-    const handleSubmitNewNode = (e) => {
+    const handleSubmitNewNode = (e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
         if (!newNodeName.trim() || !selectedParentId) return;
 
@@ -177,7 +194,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
 
         // --- Criação de Sujeito ---
         const newId = `node-${selectedParentId}-${nodeCount}`; 
-        const newNode = {
+        const newNode: TreeNodeType = {
             id: newId,
             name: newNodeName.trim(),
             children: [], // Sujeito sempre tem array para poder adicionar filhos
@@ -196,7 +213,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
     // Determinar o título do modal
     const modalTitle = isCategoryParent ? "Novo Tema" : "Novo Item";
 
-    const handleSaveCriteria = () => {
+    const handleSaveCriteria = (): void => {
         // Validate the tree structure
         const structureErrors = validateCriteriaTree(treeData);
         if (structureErrors.length > 0) {
@@ -219,7 +236,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
         }
         
         // Validate test parameters
-        const parameterErrors = validateTestParameters(treeData, testLibrary);
+        const parameterErrors = validateTestParameters(treeData, testLibrary as TestLibrary | null);
         if (parameterErrors.length > 0) {
             parameterErrors.forEach(error => toast.error(error));
             return;
@@ -237,7 +254,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
         }
     };
     
-    const handleCancelSave = () => {
+    const handleCancelSave = (): void => {
         // Lógica para reverter ou limpar o estado de "salvo"
         cancelSave();
         
@@ -247,7 +264,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
         }
     };
     
-    const handleRemoveNode = (targetId) => {
+    const handleRemoveNode = (targetId: string): void => {
         setTreeData((prevTree) => removeNode(prevTree, targetId));
     };
 
@@ -302,15 +319,14 @@ const CriteriaForm = ({ templateName, onSave }) => {
                     <TestLibraryModal 
                         onClose={closeAllModals} 
                         initialName={initialName}
-                        parentNodeId={selectedParentId}
                         // Se editingNode existe, passamos o nó para o modo Edição
                         editingNode={editingNode} 
                         onSaveTest={handleSaveTest}
-                        onUpdateTest={(nodeId, testData) => {
-                            setTreeData(prevTree => updateExistingNode(prevTree, nodeId, testData, testLibrary));
+                        onUpdateTest={(nodeId: string, testData: TestData) => {
+                            setTreeData(prevTree => updateExistingNode(prevTree, nodeId, testData, testLibrary as TestLibrary));
                             closeAllModals();
                         }}
-                        testLibrary={testLibrary}
+                        testLibrary={testLibrary as TestLibrary}
                     />
                 )}
 
@@ -336,7 +352,7 @@ const CriteriaForm = ({ templateName, onSave }) => {
                                 onWeightChange={handleWeightChange}
                                 onEditTest={handleEditTest}
                                 totalChildWeight={categoryWeights[node.id] || 0}
-                                testLibrary={testLibrary}
+                                testLibrary={testLibrary as TestLibrary}
                             />
                         ))}
                     </ul>

@@ -5,8 +5,8 @@ import React from 'react';
  * Provides CSS styles for the tree visualization.
  * Note: Common animation styles (celebrate, confetti, toast) are now in index.css
  */
-const TreeStyles = () => (
-  <style jsx="true">{`
+const TreeStyles: React.FC = () => (
+  <style>{`
     /* Tree line styles */
     .tree ul {
       padding-left: 25px;

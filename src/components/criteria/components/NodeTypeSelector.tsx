@@ -1,7 +1,15 @@
 import React from 'react';
 import { Code, ListTree } from 'lucide-react';
 
-const NodeTypeSelector = ({ nodeTypeToCreate, onSelectType, onOpenLibrary }) => {
+type NodeType = 'Subject' | 'Test';
+
+interface NodeTypeSelectorProps {
+    nodeTypeToCreate: NodeType;
+    onSelectType: (type: NodeType) => void;
+    onOpenLibrary: () => void;
+}
+
+const NodeTypeSelector: React.FC<NodeTypeSelectorProps> = ({ nodeTypeToCreate, onSelectType, onOpenLibrary }) => {
     return (
         <div className="mb-6 flex space-x-4">
             {/* Botão SUJEITO */}

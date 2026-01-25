@@ -1,9 +1,26 @@
-import React from 'react';
-import { Plus, X, Code, ListTree } from 'lucide-react';
-import { calculateChildWeights } from '../utils';
+import React, { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
+import { Plus, X, Code, ListTree, LucideIcon } from 'lucide-react';
+import { calculateChildWeights, TreeNode as TreeNodeType, TestLibrary } from '../utils';
 import { useToggle } from '../../../hooks';
 
-const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, totalChildWeight, onEditTest, testLibrary }) => {
+interface TreeNodeProps {
+    node: TreeNodeType;
+    level: number;
+    onAddChild: (parentId: string) => void;
+    onRemoveNode: (nodeId: string) => void;
+    onWeightChange: (nodeId: string, weight: string | number) => void;
+    totalChildWeight: number;
+    onEditTest: (nodeId: string, nodeName: string) => void;
+    testLibrary: TestLibrary | null;
+}
+
+interface NodeStyling {
+    className: string;
+    textColor: string;
+    icon: LucideIcon;
+}
+
+const TreeNode: React.FC<TreeNodeProps> = ({ node, level, onAddChild, onRemoveNode, onWeightChange, totalChildWeight, onEditTest, testLibrary }) => {
     const isLeaf = node.children === null || node.children.length === 0;
     const canAddChild = node.children !== null; 
     
@@ -16,7 +33,7 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
     const canBeDeleted = level > 0; 
     
     // Determina a cor e estilo do nó
-    const getStyling = (id, isCategory, isSubject, isTest) => {
+    const getStyling = (id: string, isCategory: boolean, isSubject: boolean, isTest: boolean): NodeStyling => {
         let baseClasses = "flex items-center p-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-[1.01]";
         let textColor = 'text-gray-200';
         let bgClass = 'bg-gray-700'; 
@@ -59,12 +76,12 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
     const barColor = isOver100 ? 'bg-red-500' : (isExactly100 ? 'bg-green-500' : 'bg-indigo-500');
     const barWidth = Math.min(totalChildWeight, 100); 
 
-    const handleWeightChange = (e) => {
+    const handleWeightChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const value = e.target.value;
         onWeightChange(node.id, value);
     };
 
-    const addChildTitle = () => {
+    const addChildTitle = (): string => {
         return isCategoryNode ? "Adicionar Tema (1º nível)" : "Adicionar Sub-Tema ou Teste";
     };
     
@@ -76,9 +93,9 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
     }) : [];
     
     // --- Renderização do Nome e Título do Teste ---
-    const getDisplayName = () => {
+    const getDisplayName = (): string => {
         if (isTestNode && node.metadata) {
-            const testTemplate = testLibrary?.tests?.find(t => t.name === node.metadata.functionName);
+            const testTemplate = testLibrary?.tests?.find(t => t.name === node.metadata?.functionName);
             const testDisplayName = testTemplate?.displayName || node.metadata.functionName;
             // Nome customizado + (Título do Teste)
             return `${node.name.replace(/\s\(Teste\)/, '')} (${testDisplayName})`;
@@ -86,11 +103,23 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
         return node.name;
     };
     
-    const handleNodeClick = () => {
+    const handleNodeClick = (): void => {
         if (isTestNode) {
             onEditTest(node.id, node.name);
         }
-    }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
+        if (e.key === 'Enter') {
+            weightInputToggle.setFalse();
+        }
+    };
+
+    const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
+        if (e.key === 'Enter') {
+            (e.target as HTMLInputElement).blur();
+        }
+    };
 
 
     return (
@@ -131,14 +160,10 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
                                         dir="ltr"
                                         value={node.weight === 0 ? '' : node.weight}
                                         onChange={handleWeightChange}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                weightInputToggle.setFalse();
-                                            }
-                                        }}
+                                        onKeyDown={handleKeyDown}
                                         className="w-12 p-1 text-xs bg-gray-600 border border-gray-500 rounded text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition duration-150 text-right"
                                         title={`Pontuação Máxima (${node.id.toUpperCase()})`}
-                                        onClick={(e) => e.stopPropagation()}
+                                        onClick={(e: MouseEvent<HTMLInputElement>) => e.stopPropagation()}
                                         onBlur={() => weightInputToggle.setFalse()}
                                         autoFocus
                                     />
@@ -162,11 +187,7 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
                             dir="ltr"
                             value={node.weight === 0 ? '' : node.weight}
                             onChange={handleWeightChange}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.target.blur();
-                                }
-                            }}
+                            onKeyDown={handleInputKeyDown}
                             className="ml-4 w-16 p-1 text-xs bg-gray-600 border border-gray-500 rounded text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition duration-150 text-right"
                             title="Peso do Tema (0-100)"
                         />
@@ -195,7 +216,7 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
                         {canAddChild && (
                             <button
                                 className="text-indigo-400 hover:text-indigo-300 transition duration-150"
-                                onClick={(e) => { e.stopPropagation(); onAddChild(node.id); }}
+                                onClick={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onAddChild(node.id); }}
                                 title={addChildTitle()}
                             >
                                 <Plus className="w-4 h-4" />
@@ -206,7 +227,7 @@ const TreeNode = ({ node, level, onAddChild, onRemoveNode, onWeightChange, total
                         {canBeDeleted && (
                             <button
                                 className="text-red-500 hover:text-red-400 transition duration-150"
-                                onClick={(e) => { e.stopPropagation(); onRemoveNode(node.id); }}
+                                onClick={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onRemoveNode(node.id); }}
                                 title="Remover Tema/Teste"
                             >
                                 <X className="w-4 h-4" />

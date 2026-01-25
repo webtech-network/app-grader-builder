@@ -1,8 +1,10 @@
+import { TreeNode, TestLibrary } from '../utils';
+
 // Validation function to check for subjects without tests
-export const validateCriteriaTree = (nodes) => {
-    const errors = [];
+export const validateCriteriaTree = (nodes: TreeNode[]): string[] => {
+    const errors: string[] = [];
     
-    const validateNode = (node, path = [], isCategoryLevel = false) => {
+    const validateNode = (node: TreeNode, path: string[] = [], isCategoryLevel: boolean = false): void => {
         const currentPath = [...path, node.name];
         
         // Skip validation for test nodes (leaf nodes with metadata)
@@ -31,7 +33,7 @@ export const validateCriteriaTree = (nodes) => {
                 // Check if any child subject has tests (recursively)
                 let hasTestsInChildren = false;
                 
-                const checkChildrenForTests = (childNode) => {
+                const checkChildrenForTests = (childNode: TreeNode): boolean => {
                     if (childNode.metadata || childNode.children === null) {
                         hasTestsInChildren = true;
                         return true;
@@ -63,8 +65,8 @@ export const validateCriteriaTree = (nodes) => {
 };
 
 // Validation function to check that subject weights sum to 100 within each category
-export const validateWeightSum = (nodes) => {
-    const errors = [];
+export const validateWeightSum = (nodes: TreeNode[]): string[] => {
+    const errors: string[] = [];
     
     nodes.forEach(category => {
         // Skip empty bonus/penalty
@@ -76,7 +78,7 @@ export const validateWeightSum = (nodes) => {
         // Calculate sum of direct children weights
         if (category.children && category.children.length > 0) {
             const weightSum = category.children.reduce((sum, child) => {
-                return sum + (parseFloat(child.weight) || 0);
+                return sum + (parseFloat(String(child.weight)) || 0);
             }, 0);
             
             // Check if sum is approximately 100 (allowing small floating point differences)
@@ -93,10 +95,10 @@ export const validateWeightSum = (nodes) => {
 };
 
 // Validation function to check test parameters match template requirements
-export const validateTestParameters = (nodes, testLib) => {
-    const errors = [];
+export const validateTestParameters = (nodes: TreeNode[], testLib: TestLibrary | null): string[] => {
+    const errors: string[] = [];
     
-    const validateNode = (node, path = []) => {
+    const validateNode = (node: TreeNode, path: string[] = []): void => {
         const currentPath = [...path, node.name];
         
         // Check if this is a test node
@@ -138,8 +140,8 @@ export const validateTestParameters = (nodes, testLib) => {
 };
 
 // Validation function to check that bonus/penalty with weight > 0 have content
-export const validateBonusPenaltyContent = (nodes) => {
-    const errors = [];
+export const validateBonusPenaltyContent = (nodes: TreeNode[]): string[] => {
+    const errors: string[] = [];
     
     nodes.forEach(category => {
         // Only check bonus and penalty categories
@@ -147,7 +149,7 @@ export const validateBonusPenaltyContent = (nodes) => {
             return;
         }
         
-        const categoryWeight = parseFloat(category.weight) || 0;
+        const categoryWeight = parseFloat(String(category.weight)) || 0;
         
         // If weight is greater than 0, must have content
         if (categoryWeight > 0) {
@@ -162,7 +164,7 @@ export const validateBonusPenaltyContent = (nodes) => {
             }
             
             // Check if there's at least one test in the entire tree
-            const hasTests = (node) => {
+            const hasTests = (node: TreeNode): boolean => {
                 if (node.metadata || node.children === null) {
                     return true; // This is a test node
                 }
