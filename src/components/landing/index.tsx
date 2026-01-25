@@ -1,0 +1,429 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronDown, Info } from 'lucide-react';
+import logo from '../../assets/logo.jpeg';
+import TemplateModal from './components/TemplateModal';
+import TestsModal from './components/TestsModal';
+import { useTemplateList, useModal } from '../../hooks';
+import { TEMPLATES_API } from '../../constants/api';
+import type { TemplateDetails, TemplateDisplayInfo } from './components/TemplateModal';
+
+interface FeedbackModeOption {
+  value: string;
+  label: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+}
+
+const LandingPage: React.FC = () => {
+  const [gradingTemplate, setGradingTemplate] = useState<string>('');
+  const [feedbackMode, setFeedbackMode] = useState<string>('');
+  const { templates, loading: loadingTemplates } = useTemplateList();
+  const [selectedTemplateDetails, setSelectedTemplateDetails] = useState<TemplateDetails | null>(null);
+  const templateModal = useModal(false);
+  const testsModal = useModal(false);
+  const templateDropdown = useModal(false);
+  const feedbackDropdown = useModal(false);
+  const navigate = useNavigate();
+
+  // Fetch template details from cache
+  const fetchTemplateDetails = async (templateName: string): Promise<void> => {
+    try {
+      const response = await fetch(TEMPLATES_API.DETAILS(templateName));
+      const data = await response.json();
+      setSelectedTemplateDetails(data);
+      templateModal.open();
+    } catch (error) {
+      // Silent fail - user can retry
+    }
+  };
+
+  const feedbackModeOptions: FeedbackModeOption[] = [
+    { value: 'default', label: 'Padrão', icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' },
+    { value: 'ai', label: 'Inteligência Artificial', icon: '🤖', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' }
+  ];
+
+  const getFeedbackDisplayInfo = (feedbackValue: string): FeedbackModeOption => {
+    return feedbackModeOptions.find(opt => opt.value === feedbackValue) || 
+           { value: feedbackValue, label: feedbackValue, icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' };
+  };
+
+  const getTemplateDisplayInfo = (templateName: string = gradingTemplate): TemplateDisplayInfo => {
+    const templates: Record<string, TemplateDisplayInfo> = {
+      'webdev': { label: 'Web Dev', icon: '🌐', color: 'from-blue-500 to-cyan-500', bgColor: 'bg-blue-500/10' },
+      'api': { label: 'API Testing', icon: '🔌', color: 'from-green-500 to-emerald-500', bgColor: 'bg-green-500/10' },
+      'essay': { label: 'Redações', icon: '📝', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' },
+      'io': { label: 'Entrada/Saída', icon: '💻', color: 'from-orange-500 to-red-500', bgColor: 'bg-orange-500/10' }
+    };
+    return templates[templateName] || { label: templateName, icon: '📦', color: 'from-gray-500 to-gray-600', bgColor: 'bg-gray-500/10' };
+  };
+
+  const isConfigurationReady = gradingTemplate && feedbackMode;
+
+  const handleStartConfiguring = (): void => {
+    if (isConfigurationReady) {
+      navigate('/configure', { 
+        state: { 
+          gradingTemplate, 
+          feedbackMode 
+        } 
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-gray-50 overflow-x-hidden">
+      {/* Top Header with Logo */}
+      <header className="flex items-center p-6">
+        <div className="flex items-center space-x-4">
+          <img 
+            src={logo} 
+            alt="Webtech Autograder Logo" 
+            className="w-20 h-20 rounded-xl object-cover shadow-lg"
+          />
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              Webtech Autograder
+            </h1>
+            <p className="text-indigo-400 text-sm font-medium">
+              Automated Grading System
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="px-4 sm:px-6 pb-6" style={{minHeight: 'calc(100vh - 120px)'}}>
+        <div className="max-w-5xl mx-auto w-full">
+          {/* Main Title Section */}
+          <div className="text-center mb-12 pt-8">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Crie Seu Pacote de Avaliação
+            </h2>
+            <h3 className="text-xl md:text-2xl text-gray-400 mb-2">
+              para GitHub Classroom
+            </h3>
+            <p className="text-gray-400 max-w-lg mx-auto">
+              Configure seu sistema de avaliação automatizada com apenas alguns cliques. 
+              Selecione seu modelo e preferências de feedback para começar.
+            </p>
+          </div>
+
+        {/* Configuration Card */}
+        <div className="bg-gray-800 rounded-2xl shadow-xl p-8 md:p-10 border border-gray-700 max-w-2xl mx-auto">
+          <div className="space-y-8">
+            {/* Dropdowns Container */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Grading Template Dropdown */}
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-400 mb-2">
+                  Modelo de Avaliação
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => templateDropdown.toggle()}
+                    className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-100 flex items-center justify-between hover:border-gray-500"
+                  >
+                    {gradingTemplate ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{getTemplateDisplayInfo(gradingTemplate).icon}</span>
+                        <span>{getTemplateDisplayInfo(gradingTemplate).label}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">Selecione um modelo...</span>
+                    )}
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${templateDropdown.isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {templateDropdown.isOpen && (
+                    <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-gray-600 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      {loadingTemplates ? (
+                        <div className="p-4 text-center text-gray-400">Carregando modelos...</div>
+                      ) : (
+                        <div className="max-h-80 overflow-y-auto">
+                          {templates.map((template) => {
+                            const info = getTemplateDisplayInfo(template);
+                            const isAvailableSoon = template === 'essay';
+                            return (
+                              <div key={template} className="group relative">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setGradingTemplate(template);
+                                    templateDropdown.close();
+                                  }}
+                                  className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-all duration-200 flex items-center justify-between ${
+                                    gradingTemplate === template ? 'bg-indigo-600/20 border-l-4 border-indigo-500' : ''
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-lg ${info.bgColor} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-200`}>
+                                      {info.icon}
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-gray-100">{info.label}</span>
+                                        {isAvailableSoon && (
+                                          <span className="px-2 py-0.5text-white-900 text-xs font-bold rounded">
+                                            Em Breve
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      fetchTemplateDetails(template);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-600 rounded"
+                                    title="Ver detalhes"
+                                  >
+                                    <Info className="w-5 h-5 text-indigo-400" />
+                                  </button>
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Feedback Mode Dropdown */}
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-400 mb-2">
+                  Modo de Feedback
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => feedbackDropdown.toggle()}
+                    className="w-full px-4 py-3 border-2 border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-100 flex items-center justify-between hover:border-gray-500"
+                  >
+                    {feedbackMode ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{getFeedbackDisplayInfo(feedbackMode).icon}</span>
+                        <span>{getFeedbackDisplayInfo(feedbackMode).label}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">Selecione o modo...</span>
+                    )}
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${feedbackDropdown.isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {feedbackDropdown.isOpen && (
+                    <div className="absolute z-50 w-full mt-2 bg-gray-800 border-2 border-gray-600 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="max-h-80 overflow-y-auto">
+                        {feedbackModeOptions.map((option) => (
+                          <div key={option.value} className="group relative">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFeedbackMode(option.value);
+                                feedbackDropdown.close();
+                              }}
+                              className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition-all duration-200 flex items-center justify-between ${
+                                feedbackMode === option.value ? 'bg-indigo-600/20 border-l-4 border-indigo-500' : ''
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg ${option.bgColor} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-200`}>
+                                  {option.icon}
+                                </div>
+                                <span className="font-medium text-gray-100">{option.label}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/documentation#feedback-modes');
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-600 rounded"
+                                title="View details"
+                              >
+                                <Info className="w-5 h-5 text-indigo-400" />
+                              </button>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Selection Summary */}
+            {(gradingTemplate || feedbackMode) && (
+              <div className="bg-gray-700 rounded-lg p-4 border-l-4 border-l-indigo-400 border border-gray-600">
+                <h3 className="text-sm font-semibold text-gray-300 mb-2">Selected Configuration:</h3>
+                <div className="space-y-1 text-sm text-gray-400">
+                  {gradingTemplate && (
+                    <p>
+                      <span className="font-medium text-gray-300">Template:</span> {getTemplateDisplayInfo(gradingTemplate).label}
+                    </p>
+                  )}
+                  {feedbackMode && (
+                    <p>
+                      <span className="font-medium text-gray-300">Feedback:</span> {feedbackModeOptions.find(opt => opt.value === feedbackMode)?.label}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Start Configuring Button */}
+            <div className="pt-4">
+              <button
+                onClick={handleStartConfiguring}
+                disabled={!isConfigurationReady}
+                className={`w-full py-4 px-8 rounded-lg font-semibold text-lg transition-all duration-300 ${
+                  isConfigurationReady
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isConfigurationReady ? (
+                  <>
+                    <span className="mr-2">🚀</span>
+                    Começar Configuração
+                  </>
+                ) : (
+                  'Selecione um modelo e modo de feedback para continuar'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Info */}
+        <div className="text-center mt-8 text-gray-500 text-sm">
+          <p>
+            Precisa de ajuda? Confira nossa{' '}
+            <button 
+              onClick={() => navigate('/documentation')}
+              className="text-indigo-400 hover:text-indigo-300 underline bg-transparent border-none cursor-pointer"
+            >
+              documentação
+            </button>{' '}
+            ou{' '}
+            <button className="text-indigo-400 hover:text-indigo-300 underline bg-transparent border-none cursor-pointer">
+              exemplos
+            </button>
+          </p>
+        </div>
+
+        {/* Open Source Hook */}
+        <div className="mt-12 bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-2xl p-6 sm:p-8 border border-indigo-500/30 backdrop-blur-sm overflow-visible max-w-3xl mx-auto">
+          <div className="text-center overflow-visible">
+            <div className="flex items-center justify-center space-x-2 mb-4 flex-wrap">
+              <svg className="w-8 h-8 text-indigo-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
+              </svg>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">
+                🚀 Powered by Open Source
+              </h3>
+            </div>
+            
+            <p className="text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
+              Webtech Autograder é uma plataforma educacional robusta confiável por educadores em todo o mundo. 
+              Junte-se à nossa comunidade crescente e ajude a moldar o futuro da avaliação automatizada!
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-4 mb-6 text-sm">
+              <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600">
+                <div className="text-green-400 font-semibold mb-1">🔧 Hiper Flexível</div>
+                <div className="text-gray-400">Adapta-se a qualquer fluxo de avaliação</div>
+              </div>
+              <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600">
+                <div className="text-blue-400 font-semibold mb-1">🎯 Avaliação Precisa</div>
+                <div className="text-gray-400">Avaliação precisa e consistente</div>
+              </div>
+              <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600">
+                <div className="text-purple-400 font-semibold mb-1">🤖 Aprimorado com IA</div>
+                <div className="text-gray-400">Geração inteligente de feedback</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center flex-wrap overflow-visible">
+              <a
+                href="https://github.com/webtech-network/autograder"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all duration-200 border border-gray-600 hover:border-gray-500 group overflow-visible"
+                style={{ minWidth: 'fit-content' }}
+              >
+                <svg className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20" style={{ display: 'block' }}>
+                  <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
+                </svg>
+                <span className="whitespace-nowrap">Estrelar no GitHub</span>
+              </a>
+              
+              <div className="flex items-center flex-wrap gap-3 sm:gap-4 justify-center text-xs sm:text-sm text-gray-400">
+                <div className="flex items-center space-x-1">
+                  <svg className="w-3 h-3 flex-shrink-0" viewBox="0 0 32 32" fill="none">
+                    <path d="M15.885 2.1c-7.1 0-6.651 3.07-6.651 3.07l.008 3.18h6.729v.951H8.066s-4.618-.525-4.618 6.58c0 7.106 4.028 6.846 4.028 6.846h2.411v-3.383s-.13-4.028 3.959-4.028h6.646s3.86.062 3.86-3.729V7.668s.582-5.568-8.467-5.568zm-3.674 3.205a1.193 1.193 0 11.001 2.387 1.193 1.193 0 01-.001-2.387z" fill="#3776ab"/>
+                    <path d="M16.115 29.9c7.1 0 6.651-3.07 6.651-3.07l-.008-3.18h-6.729v-.951h7.905s4.618.525 4.618-6.58c0-7.106-4.028-6.846-4.028-6.846h-2.411v3.383s.13 4.028-3.959 4.028h-6.646s-3.86-.062-3.86 3.729v6.936s-.582 5.568 8.467 5.568v-.017zm3.674-3.205a1.193 1.193 0 11-.001-2.387 1.193 1.193 0 01.001 2.387z" fill="#ffd43b"/>
+                  </svg>
+                  <span>Python</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="w-3 h-3 bg-green-400 rounded-full"></span>
+                  <span>Desenvolvimento Ativo</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="w-3 h-3 bg-purple-400 rounded-full"></span>
+                  <span>Dirigido pela Comunidade</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 text-xs text-gray-500">
+              Feito com ❤️ pela equipe Autograder
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      <TemplateModal
+        isOpen={templateModal.isOpen}
+        onClose={() => templateModal.close()}
+        onViewTests={() => {
+          testsModal.open();
+          templateModal.close();
+        }}
+        templateDetails={selectedTemplateDetails}
+        getTemplateDisplayInfo={() => getTemplateDisplayInfo(gradingTemplate)}
+      />
+
+      <TestsModal
+        isOpen={testsModal.isOpen}
+        onClose={() => testsModal.close()}
+        onBackToOverview={() => {
+          testsModal.close();
+          templateModal.open();
+        }}
+        templateDetails={selectedTemplateDetails}
+        getTemplateDisplayInfo={() => getTemplateDisplayInfo(gradingTemplate)}
+      />
+
+      {/* Click outside to close dropdowns */}
+      {templateDropdown.isOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => templateDropdown.close()}></div>
+      )}
+      {feedbackDropdown.isOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => feedbackDropdown.close()}></div>
+      )}
+    </div>
+  );
+};
+
+export default LandingPage;
