@@ -14,6 +14,9 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    //WARNING: The following setting suppresses deprecation warnings for TypeScript features that will be removed in future versions.
+    "ignoreDeprecations": "6.0",
+    
     "baseUrl": "src",
     "paths": {
       "@/*": ["./*"],

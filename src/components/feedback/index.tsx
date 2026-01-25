@@ -7,7 +7,7 @@ import { SaveButton } from '../../shared';
 import { useSaveState, useArrayState, useFormInput } from '../../hooks';
 import useFeedbackForm, { FeedbackConfig, OnlineResource } from './hooks/useFeedbackForm';
 
-type FeedbackMode = 'ai' | 'static';
+type FeedbackMode = 'ai' | 'static' | 'default';
 
 interface FeedbackFormProps {
   onSave?: (config: FeedbackConfig | null) => void;

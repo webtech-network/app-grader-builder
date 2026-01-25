@@ -1,7 +1,7 @@
 import { useState, Dispatch, SetStateAction } from 'react';
 import { toast } from 'react-toastify';
 
-type FeedbackMode = 'ai' | 'static';
+type FeedbackMode = 'ai' | 'static' | 'default';
 type SolutionType = 'hint' | 'yes' | 'no';
 
 interface ToggleStates {

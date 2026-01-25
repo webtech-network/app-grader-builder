@@ -6,14 +6,15 @@ import FeedbackForm from '../feedback';
 import SetupForm from '../setup';
 import { CONFIG_API } from '../../constants/api';
 import type { SetupConfig } from '../setup';
-import type { TreeNode } from '../criteria/utils';
+import type { BackendCriteriaFormat } from '../criteria/utils';
 import type { FeedbackConfig } from '../feedback/hooks/useFeedbackForm';
 
 type TabType = 'criteria' | 'feedback' | 'setup';
+type FeedbackMode = 'ai' | 'static' | 'default';
 
 interface LocationState {
   gradingTemplate: string;
-  feedbackMode: string;
+  feedbackMode: FeedbackMode;
 }
 
 interface CompleteConfig {
@@ -21,7 +22,7 @@ interface CompleteConfig {
     template_preset: string;
     feedback_type: string;
   };
-  criteria: TreeNode[] | null;
+  criteria: BackendCriteriaFormat | null;
   feedback: FeedbackConfig | null;
   setup?: SetupConfig | null;
 }
@@ -34,7 +35,7 @@ const ConfigurationPage: React.FC = () => {
   const [criteriaSaved, setCriteriaSaved] = useState<boolean>(false);
   const [feedbackSaved, setFeedbackSaved] = useState<boolean>(false);
   const [setupSaved, setSetupSaved] = useState<boolean>(false);
-  const [criteriaConfig, setCriteriaConfig] = useState<TreeNode[] | null>(null);
+  const [criteriaConfig, setCriteriaConfig] = useState<BackendCriteriaFormat | null>(null);
   const [feedbackConfig, setFeedbackConfig] = useState<FeedbackConfig | null>(null);
   const [setupConfig, setSetupConfig] = useState<SetupConfig | null>(null);
   const [showDownloadModal, setShowDownloadModal] = useState<boolean>(false);
@@ -46,7 +47,7 @@ const ConfigurationPage: React.FC = () => {
 
   // Check if all required configurations are saved
   useEffect(() => {
-    const allRequiredSaved = criteriaSaved && feedbackSaved && 
+    const allRequiredSaved = criteriaSaved && feedbackSaved &&
       (isSetupRequired ? setupSaved : true);
     
     if (allRequiredSaved && criteriaConfig && feedbackConfig && 
@@ -68,7 +69,7 @@ const ConfigurationPage: React.FC = () => {
     return null;
   }
 
-  const handleCriteriaSave = (config: TreeNode[] | null): void => {
+  const handleCriteriaSave = (config: BackendCriteriaFormat | null): void => {
     if (config === null) {
       // Unsaved/cancelled
       setCriteriaConfig(null);
