@@ -6,7 +6,7 @@ import LandingPage from "./components/landing";
 import ConfigurationPage from "./components/configuration";
 import DocumentationPage from "./components/documentation";
 
-const App = () => {
+const App: React.FC = () => {
   return (
     <Router>
       <div className="min-h-screen w-full">
