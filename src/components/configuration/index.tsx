@@ -1,25 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Location } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import CriteriaForm from '../criteria';
 import FeedbackForm from '../feedback';
 import SetupForm from '../setup';
 import { CONFIG_API } from '../../constants/api';
+import type { SetupConfig } from '../setup';
+import type { TreeNode } from '../criteria/utils';
+import type { FeedbackConfig } from '../feedback/hooks/useFeedbackForm';
 
-const ConfigurationPage = () => {
-  const location = useLocation();
+type TabType = 'criteria' | 'feedback' | 'setup';
+
+interface LocationState {
+  gradingTemplate: string;
+  feedbackMode: string;
+}
+
+interface CompleteConfig {
+  workflow: {
+    template_preset: string;
+    feedback_type: string;
+  };
+  criteria: TreeNode[] | null;
+  feedback: FeedbackConfig | null;
+  setup?: SetupConfig | null;
+}
+
+const ConfigurationPage: React.FC = () => {
+  const location = useLocation() as Location<LocationState | null>;
   const navigate = useNavigate();
   const { gradingTemplate, feedbackMode } = location.state || {};
-  const [activeTab, setActiveTab] = useState('criteria');
-  const [criteriaSaved, setCriteriaSaved] = useState(false);
-  const [feedbackSaved, setFeedbackSaved] = useState(false);
-  const [setupSaved, setSetupSaved] = useState(false);
-  const [criteriaConfig, setCriteriaConfig] = useState(null);
-  const [feedbackConfig, setFeedbackConfig] = useState(null);
-  const [setupConfig, setSetupConfig] = useState(null);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [showDownloadButton, setShowDownloadButton] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('criteria');
+  const [criteriaSaved, setCriteriaSaved] = useState<boolean>(false);
+  const [feedbackSaved, setFeedbackSaved] = useState<boolean>(false);
+  const [setupSaved, setSetupSaved] = useState<boolean>(false);
+  const [criteriaConfig, setCriteriaConfig] = useState<TreeNode[] | null>(null);
+  const [feedbackConfig, setFeedbackConfig] = useState<FeedbackConfig | null>(null);
+  const [setupConfig, setSetupConfig] = useState<SetupConfig | null>(null);
+  const [showDownloadModal, setShowDownloadModal] = useState<boolean>(false);
+  const [showDownloadButton, setShowDownloadButton] = useState<boolean>(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
   // Check if setup is required for this template
   const isSetupRequired = gradingTemplate === 'api' || gradingTemplate === 'io';
@@ -48,7 +68,7 @@ const ConfigurationPage = () => {
     return null;
   }
 
-  const handleCriteriaSave = (config) => {
+  const handleCriteriaSave = (config: TreeNode[] | null): void => {
     if (config === null) {
       // Unsaved/cancelled
       setCriteriaConfig(null);
@@ -61,7 +81,7 @@ const ConfigurationPage = () => {
     }
   };
 
-  const handleFeedbackSave = (config) => {
+  const handleFeedbackSave = (config: FeedbackConfig | null): void => {
     if (config === null) {
       // Unsaved/cancelled
       setFeedbackConfig(null);
@@ -74,7 +94,7 @@ const ConfigurationPage = () => {
     }
   };
 
-  const handleSetupSave = (config) => {
+  const handleSetupSave = (config: SetupConfig | null): void => {
     if (config === null) {
       // Unsaved/cancelled
       setSetupConfig(null);
@@ -87,14 +107,14 @@ const ConfigurationPage = () => {
     }
   };
 
-  const handleSaveLater = () => {
+  const handleSaveLater = (): void => {
     setShowDownloadModal(false);
     setShowDownloadButton(true);
   };
 
-  const handleDownloadZip = async () => {
+  const handleDownloadZip = async (): Promise<void> => {
     // Create a single configuration object with all three configs
-    const completeConfig = {
+    const completeConfig: CompleteConfig = {
       workflow: {
         template_preset: gradingTemplate,
         feedback_type: feedbackMode
@@ -132,7 +152,8 @@ const ConfigurationPage = () => {
       URL.revokeObjectURL(url);
       
     } catch (error) {
-      alert(`Failed to generate configuration package: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to generate configuration package: ${errorMessage}`);
     }
     
     // Close modal and show download button after download
@@ -269,7 +290,7 @@ const ConfigurationPage = () => {
       {/* Download Modal with Enhanced Animation */}
       {showDownloadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-          <style jsx>{`
+          <style>{`
             @keyframes modalBounce {
               0% {
                 transform: scale(0.3) translateY(-100px);
