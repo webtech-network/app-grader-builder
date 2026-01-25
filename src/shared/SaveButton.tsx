@@ -1,6 +1,14 @@
 import React from 'react';
 
-const SaveButton = ({ 
+interface SaveButtonProps {
+    isSaved: boolean;
+    showAnimation: boolean;
+    showSuccessToast: boolean;
+    onSave: () => void;
+    onCancel: () => void;
+}
+
+const SaveButton: React.FC<SaveButtonProps> = ({ 
     isSaved, 
     showAnimation, 
     showSuccessToast,

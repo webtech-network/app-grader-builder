@@ -1,6 +1,6 @@
 import React from 'react';
 
-const EmptyState = () => {
+const EmptyState: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
             <div className="text-center">

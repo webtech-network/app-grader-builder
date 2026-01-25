@@ -1,7 +1,11 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 
-const LoadingState = ({ templateName }) => {
+interface LoadingStateProps {
+    templateName?: string;
+}
+
+const LoadingState: React.FC<LoadingStateProps> = ({ templateName }) => {
     return (
         <div className="min-h-screen bg-gray-900 text-gray-50 font-sans p-6 md:p-10 flex items-center justify-center">
             <div className="text-center">
