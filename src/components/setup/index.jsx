@@ -155,14 +155,14 @@ const SetupForm = ({ onSave, templateName }) => {
         alert('Todos os campos de sandbox são obrigatórios para modelos API e IO!');
         return;
       }
-      if (fileChecks.length === 0) {
+      if (fileChecksState.items.length === 0) {
         alert('Pelo menos uma verificação de arquivo é obrigatória para modelos API e IO!');
         return;
       }
     }
 
     const config = {
-      file_checks: fileChecks.length > 0 ? fileChecks : null,
+      file_checks: fileChecksState.items.length > 0 ? fileChecksState.items : null,
       sandbox: sandboxConfig.runtime_image ? {
         runtime_image: sandboxConfig.runtime_image,
         container_port: parseInt(sandboxConfig.container_port),
