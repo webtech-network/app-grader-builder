@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { TEMPLATES_API } from '../constants/api';
 
+export interface UseTemplateListReturn {
+  templates: string[];
+  loading: boolean;
+}
+
 /**
  * Custom hook for fetching the list of available templates
- * @returns {Object} - { templates, loading }
  */
-const useTemplateList = () => {
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
+const useTemplateList = (): UseTemplateListReturn => {
+  const [templates, setTemplates] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const loadTemplates = async () => {

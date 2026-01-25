@@ -1,12 +1,18 @@
 import { useState, useCallback } from 'react';
 
+export interface UseModalReturn {
+  isOpen: boolean;
+  open: () => void;
+  close: () => void;
+  toggle: () => void;
+}
+
 /**
  * Custom hook for managing modal state
- * @param {boolean} initialState - Initial open/closed state (default: false)
- * @returns {Object} - { isOpen, open, close, toggle }
+ * @param initialState - Initial open/closed state (default: false)
  */
-const useModal = (initialState = false) => {
-  const [isOpen, setIsOpen] = useState(initialState);
+const useModal = (initialState: boolean = false): UseModalReturn => {
+  const [isOpen, setIsOpen] = useState<boolean>(initialState);
 
   const open = useCallback(() => {
     setIsOpen(true);

@@ -1,15 +1,41 @@
 import { useState, useEffect } from 'react';
 import { TEMPLATES_API } from '../constants/api';
 
+export interface TestLibrary {
+  name: string;
+  tests: TestTemplate[];
+}
+
+export interface TestTemplate {
+  name: string;
+  displayName: string;
+  description: string;
+  parameters: TestParameter[];
+  required_file?: string;
+}
+
+export interface TestParameter {
+  name: string;
+  type: string;
+  description?: string;
+  defaultValue?: unknown;
+  required?: boolean;
+}
+
+export interface UseFetchTemplateReturn {
+  data: TestLibrary | null;
+  loading: boolean;
+  error: string | null;
+}
+
 /**
  * Custom hook for fetching template details from the API
- * @param {string} templateName - The name of the template to fetch
- * @returns {Object} - { data, loading, error }
+ * @param templateName - The name of the template to fetch
  */
-const useFetchTemplate = (templateName) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const useFetchTemplate = (templateName: string | null): UseFetchTemplateReturn => {
+  const [data, setData] = useState<TestLibrary | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTemplateData = async () => {
@@ -30,7 +56,7 @@ const useFetchTemplate = (templateName) => {
         const templateData = await response.json();
         setData(templateData);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setLoading(false);
       }

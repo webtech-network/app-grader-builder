@@ -1,12 +1,19 @@
 import { useState, useCallback } from 'react';
 
+export interface UseToggleReturn {
+  value: boolean;
+  toggle: () => void;
+  setTrue: () => void;
+  setFalse: () => void;
+  set: (value: boolean) => void;
+}
+
 /**
  * Custom hook for managing boolean state (toggle)
- * @param {boolean} initialValue - Initial boolean value (default: false)
- * @returns {Object} - { value, toggle, setTrue, setFalse, set }
+ * @param initialValue - Initial boolean value (default: false)
  */
-const useToggle = (initialValue = false) => {
-  const [value, setValue] = useState(initialValue);
+const useToggle = (initialValue: boolean = false): UseToggleReturn => {
+  const [value, setValue] = useState<boolean>(initialValue);
 
   const toggle = useCallback(() => {
     setValue(prev => !prev);
@@ -20,7 +27,7 @@ const useToggle = (initialValue = false) => {
     setValue(false);
   }, []);
 
-  const set = useCallback((newValue) => {
+  const set = useCallback((newValue: boolean) => {
     setValue(newValue);
   }, []);
 

@@ -1,13 +1,20 @@
 import { useState, useCallback } from 'react';
 
+export interface UseSaveStateReturn {
+  isSaved: boolean;
+  showSuccess: boolean;
+  showAnimation: boolean;
+  triggerSave: () => void;
+  cancelSave: () => void;
+}
+
 /**
  * Custom hook for managing save button state and animations
- * @returns {Object} - { isSaved, showSuccess, showAnimation, triggerSave, cancelSave }
  */
-const useSaveState = () => {
-  const [isSaved, setIsSaved] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showAnimation, setShowAnimation] = useState(false);
+const useSaveState = (): UseSaveStateReturn => {
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const [showAnimation, setShowAnimation] = useState<boolean>(false);
 
   const triggerSave = useCallback(() => {
     setShowAnimation(true);
