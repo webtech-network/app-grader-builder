@@ -1,7 +1,16 @@
 import React from 'react';
 import { X, Code, Sparkles } from 'lucide-react';
+import type { TemplateDetails, TemplateDisplayInfo } from './TemplateModal';
 
-const TestsModal = ({ 
+interface TestsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onBackToOverview: () => void;
+  templateDetails: TemplateDetails | null;
+  getTemplateDisplayInfo: () => TemplateDisplayInfo;
+}
+
+const TestsModal: React.FC<TestsModalProps> = ({ 
   isOpen, 
   onClose, 
   onBackToOverview,
@@ -169,3 +178,4 @@ const TestsModal = ({
 };
 
 export default TestsModal;
+export type { TestsModalProps };

@@ -6,12 +6,21 @@ import TemplateModal from './components/TemplateModal';
 import TestsModal from './components/TestsModal';
 import { useTemplateList, useModal } from '../../hooks';
 import { TEMPLATES_API } from '../../constants/api';
+import type { TemplateDetails, TemplateDisplayInfo } from './components/TemplateModal';
 
-const LandingPage = () => {
-  const [gradingTemplate, setGradingTemplate] = useState('');
-  const [feedbackMode, setFeedbackMode] = useState('');
+interface FeedbackModeOption {
+  value: string;
+  label: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+}
+
+const LandingPage: React.FC = () => {
+  const [gradingTemplate, setGradingTemplate] = useState<string>('');
+  const [feedbackMode, setFeedbackMode] = useState<string>('');
   const { templates, loading: loadingTemplates } = useTemplateList();
-  const [selectedTemplateDetails, setSelectedTemplateDetails] = useState(null);
+  const [selectedTemplateDetails, setSelectedTemplateDetails] = useState<TemplateDetails | null>(null);
   const templateModal = useModal(false);
   const testsModal = useModal(false);
   const templateDropdown = useModal(false);
@@ -19,7 +28,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   // Fetch template details from cache
-  const fetchTemplateDetails = async (templateName) => {
+  const fetchTemplateDetails = async (templateName: string): Promise<void> => {
     try {
       const response = await fetch(TEMPLATES_API.DETAILS(templateName));
       const data = await response.json();
@@ -30,18 +39,18 @@ const LandingPage = () => {
     }
   };
 
-  const feedbackModeOptions = [
+  const feedbackModeOptions: FeedbackModeOption[] = [
     { value: 'default', label: 'Padrão', icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' },
     { value: 'ai', label: 'Inteligência Artificial', icon: '🤖', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' }
   ];
 
-  const getFeedbackDisplayInfo = (feedbackValue) => {
+  const getFeedbackDisplayInfo = (feedbackValue: string): FeedbackModeOption => {
     return feedbackModeOptions.find(opt => opt.value === feedbackValue) || 
-           { label: feedbackValue, icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' };
+           { value: feedbackValue, label: feedbackValue, icon: '📋', color: 'from-gray-500 to-slate-500', bgColor: 'bg-gray-500/10' };
   };
 
-  const getTemplateDisplayInfo = (templateName = gradingTemplate) => {
-    const templates = {
+  const getTemplateDisplayInfo = (templateName: string = gradingTemplate): TemplateDisplayInfo => {
+    const templates: Record<string, TemplateDisplayInfo> = {
       'webdev': { label: 'Web Dev', icon: '🌐', color: 'from-blue-500 to-cyan-500', bgColor: 'bg-blue-500/10' },
       'api': { label: 'API Testing', icon: '🔌', color: 'from-green-500 to-emerald-500', bgColor: 'bg-green-500/10' },
       'essay': { label: 'Redações', icon: '📝', color: 'from-purple-500 to-pink-500', bgColor: 'bg-purple-500/10' },
@@ -52,7 +61,7 @@ const LandingPage = () => {
 
   const isConfigurationReady = gradingTemplate && feedbackMode;
 
-  const handleStartConfiguring = () => {
+  const handleStartConfiguring = (): void => {
     if (isConfigurationReady) {
       navigate('/configure', { 
         state: { 

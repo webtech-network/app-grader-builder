@@ -1,7 +1,41 @@
 import React from 'react';
 import { X, Zap, FileCode } from 'lucide-react';
 
-const TemplateModal = ({ 
+interface TemplateDisplayInfo {
+  label: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+}
+
+interface TestParameter {
+  name: string;
+  type: string;
+  description: string;
+}
+
+interface Test {
+  name: string;
+  description: string;
+  required_file?: string;
+  parameters?: TestParameter[];
+}
+
+interface TemplateDetails {
+  template_name: string;
+  template_description: string;
+  tests: Test[];
+}
+
+interface TemplateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onViewTests: () => void;
+  templateDetails: TemplateDetails | null;
+  getTemplateDisplayInfo: () => TemplateDisplayInfo;
+}
+
+const TemplateModal: React.FC<TemplateModalProps> = ({ 
   isOpen, 
   onClose, 
   onViewTests,
@@ -92,3 +126,4 @@ const TemplateModal = ({
 };
 
 export default TemplateModal;
+export type { TemplateModalProps, TemplateDetails, TemplateDisplayInfo };
