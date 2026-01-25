@@ -1,7 +1,18 @@
 import React from 'react';
 import ResourceCard from './ResourceCard';
 
-const ResourceList = ({ resources, onDeleteResource }) => {
+interface Resource {
+  title: string;
+  url: string;
+  tags: string[];
+}
+
+interface ResourceListProps {
+  resources: Resource[];
+  onDeleteResource: (index: number) => void;
+}
+
+const ResourceList: React.FC<ResourceListProps> = ({ resources, onDeleteResource }) => {
   return (
     <div>
       <p className="text-gray-400 font-medium mb-3 text-sm">Recursos Adicionados</p>

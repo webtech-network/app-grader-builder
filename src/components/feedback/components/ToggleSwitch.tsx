@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 
-const ToggleSwitch = ({ id, label, isChecked, onChange }) => {
+interface ToggleSwitchProps {
+  id: string;
+  label: string;
+  isChecked: boolean;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ id, label, isChecked, onChange }) => {
   const containerId = `toggle-${id}`;
   return (
     <div className="flex items-center justify-between bg-gray-800 p-3 rounded-xl border border-gray-700 shadow-md">

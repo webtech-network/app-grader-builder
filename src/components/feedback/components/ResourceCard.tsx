@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ExternalLinkIcon = () => (
+const ExternalLinkIcon: React.FC = () => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
     className="h-4 w-4 ml-1" 
@@ -17,7 +17,14 @@ const ExternalLinkIcon = () => (
   </svg>
 );
 
-const ResourceCard = ({ title, url, tags, onDelete }) => (
+interface ResourceCardProps {
+  title: string;
+  url: string;
+  tags: string[];
+  onDelete: () => void;
+}
+
+const ResourceCard: React.FC<ResourceCardProps> = ({ title, url, tags, onDelete }) => (
   <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-indigo-500 transition duration-300 group">
     <div className="flex justify-between items-start mb-2">
       <p className="font-semibold text-sm text-gray-50 flex-1">{title}</p>

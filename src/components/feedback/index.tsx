@@ -1,42 +1,50 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import ReportTitleInput from './components/ReportTitleInput';
 import ToggleSwitch from './components/ToggleSwitch';
 import ResourceForm from './components/ResourceForm';
 import ResourceList from './components/ResourceList';
-import SaveButton from '../../shared/SaveButton';
-import { useSaveState, useArrayState, useFormInput, useFeedbackForm } from '../../hooks';
+import { SaveButton } from '../../shared';
+import { useSaveState, useArrayState, useFormInput } from '../../hooks';
+import useFeedbackForm, { FeedbackConfig, OnlineResource } from './hooks/useFeedbackForm';
 
-const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
+type FeedbackMode = 'ai' | 'static';
+
+interface FeedbackFormProps {
+  onSave?: (config: FeedbackConfig | null) => void;
+  feedbackMode?: FeedbackMode;
+}
+
+const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai' }) => {
   // Custom hook for feedback form state and logic
   const feedbackForm = useFeedbackForm(feedbackMode);
   
   // Array states for resources and reading files
-  const readingFilesState = useArrayState([]);
+  const readingFilesState = useArrayState<string>([]);
   const currentFileInput = useFormInput("");
-  const resourcesState = useArrayState([]);
+  const resourcesState = useArrayState<OnlineResource>([]);
   
   // Save state hook
   const { isSaved, showSuccess: showSaveSuccess, showAnimation: saveButtonAnimation, triggerSave, cancelSave } = useSaveState();
 
   // Event handlers
-  const handleAddResource = (newResource) => {
+  const handleAddResource = (newResource: OnlineResource): void => {
     resourcesState.add(newResource);
   };
 
-  const handleDeleteResource = (index) => {
+  const handleDeleteResource = (index: number): void => {
     resourcesState.remove(index);
   };
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     feedbackForm.handleSave(
       readingFilesState.items,
       resourcesState.items,
-      onSave,
+      onSave ?? undefined,
       triggerSave
     );
   };
 
-  const handleCancelSave = () => {
+  const handleCancelSave = (): void => {
     cancelSave();
     if (onSave) {
       onSave(null);
@@ -118,7 +126,7 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
               <div>
                 <p className="text-gray-400 font-medium mb-2">Fornecimento de Soluções</p>
                 <div className="flex gap-3">
-                  {["hint", "yes", "no"].map((type) => (
+                  {(["hint", "yes", "no"] as const).map((type) => (
                     <button
                       key={type}
                       onClick={() => feedbackForm.setSolutionType(type)}
@@ -155,7 +163,7 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
                 <p className="text-gray-400 font-medium text-sm">Contexto da Atividade</p>
                 <textarea
                   value={feedbackForm.activityContext}
-                  onChange={(e) => feedbackForm.setActivityContext(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => feedbackForm.setActivityContext(e.target.value)}
                   className="w-full bg-gray-700 border border-gray-600 rounded-xl p-4 text-gray-300 text-xs leading-relaxed focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[150px] resize-y"
                   placeholder="Descreva o contexto da atividade..."
                 />
@@ -166,7 +174,7 @@ const FeedbackForm = ({ onSave, feedbackMode = 'ai' }) => {
                 <p className="text-gray-400 font-medium text-sm">Orientações Extras</p>
                 <textarea
                   value={feedbackForm.extraGuidelines}
-                  onChange={(e) => feedbackForm.setExtraGuidelines(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => feedbackForm.setExtraGuidelines(e.target.value)}
                   className="w-full bg-gray-700 border border-gray-600 rounded-xl p-4 text-gray-300 text-xs leading-relaxed focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-h-[200px] resize-y"
                   placeholder="Digite as orientações extras aqui..."
                 />

@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useFormInput } from '../../../hooks';
 
-const ResourceForm = ({ onSubmit }) => {
-  const [newResource, setNewResource] = useState({
+interface Resource {
+  title: string;
+  url: string;
+  tags: string[];
+}
+
+interface ResourceFormProps {
+  onSubmit: (resource: Resource) => void;
+}
+
+const ResourceForm: React.FC<ResourceFormProps> = ({ onSubmit }) => {
+  const [newResource, setNewResource] = useState<Resource>({
     title: "",
     url: "",
     tags: []
   });
   const currentTagInput = useFormInput("");
 
-  const handleResourceChange = (e) => {
+  const handleResourceChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setNewResource(prev => ({
       ...prev,
@@ -17,7 +27,7 @@ const ResourceForm = ({ onSubmit }) => {
     }));
   };
 
-  const handleAddTag = (e) => {
+  const handleAddTag = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     if (currentTagInput.value.trim()) {
       setNewResource(prev => ({
@@ -28,14 +38,14 @@ const ResourceForm = ({ onSubmit }) => {
     }
   };
 
-  const handleRemoveTag = (tagToRemove) => {
+  const handleRemoveTag = (tagToRemove: string): void => {
     setNewResource(prev => ({
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (newResource.title && newResource.url && newResource.tags.length > 0) {
       onSubmit(newResource);
