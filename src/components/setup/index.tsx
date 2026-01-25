@@ -2,8 +2,40 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Save, X, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { useArrayState, useFormInput, useToggle, useKeyValueState } from '../../hooks';
 
+// Type definitions
+interface RuntimePreset {
+  name: string;
+  description: string;
+  icon: string;
+  defaultPort: string;
+  defaultStartCommand: string;
+  defaultCommands: Record<string, string>;
+}
+
+interface SandboxConfig {
+  runtime_image: string;
+  container_port: string;
+  start_command: string;
+  commands: Record<string, string>;
+}
+
+interface SetupConfig {
+  file_checks: string[] | null;
+  sandbox: {
+    runtime_image: string;
+    container_port: number;
+    start_command: string;
+    commands: Record<string, string> | null;
+  } | null;
+}
+
+interface SetupFormProps {
+  onSave: (config: SetupConfig | null) => void;
+  templateName: string;
+}
+
 // Predefined runtime images with their configurations
-const runtimePresets = {
+const runtimePresets: Record<string, RuntimePreset> = {
   'python:3.11-slim': {
     name: 'Python 3.11',
     description: 'For Python assignments and APIs',
@@ -59,10 +91,10 @@ const runtimePresets = {
   }
 };
 
-const SetupForm = ({ onSave, templateName }) => {
-  const fileChecksState = useArrayState([]);
+const SetupForm: React.FC<SetupFormProps> = ({ onSave, templateName }) => {
+  const fileChecksState = useArrayState<string>([]);
   const newFileInput = useFormInput('');
-  const [sandboxConfig, setSandboxConfig] = useState({
+  const [sandboxConfig, setSandboxConfig] = useState<SandboxConfig>({
     runtime_image: '',
     container_port: '',
     start_command: '',
@@ -76,7 +108,7 @@ const SetupForm = ({ onSave, templateName }) => {
   const isSetupRequired = templateName === 'api' || templateName === 'io';
 
   // Handle runtime image selection
-  const handleRuntimeImageChange = useCallback((imageKey) => {
+  const handleRuntimeImageChange = useCallback((imageKey: string): void => {
     const preset = runtimePresets[imageKey];
     if (preset) {
       setSandboxConfig({
@@ -114,18 +146,18 @@ const SetupForm = ({ onSave, templateName }) => {
     }
   }, [templateName, handleRuntimeImageChange, fileChecksState, sandboxConfigToggle]);
 
-  const handleAddFile = () => {
+  const handleAddFile = (): void => {
     if (newFileInput.value.trim() && !fileChecksState.items.includes(newFileInput.value.trim())) {
       fileChecksState.add(newFileInput.value.trim());
       newFileInput.clear();
     }
   };
 
-  const handleRemoveFile = (index) => {
+  const handleRemoveFile = (index: number): void => {
     fileChecksState.remove(index);
   };
 
-  const handleAddCommand = () => {
+  const handleAddCommand = (): void => {
     if (newCommandKeyInput.value.trim() && newCommandValueInput.value.trim()) {
       setSandboxConfig({
         ...sandboxConfig,
@@ -139,7 +171,7 @@ const SetupForm = ({ onSave, templateName }) => {
     }
   };
 
-  const handleRemoveCommand = (key) => {
+  const handleRemoveCommand = (key: string): void => {
     const newCommands = { ...sandboxConfig.commands };
     delete newCommands[key];
     setSandboxConfig({
@@ -148,7 +180,7 @@ const SetupForm = ({ onSave, templateName }) => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     // Validate required fields for api/io templates
     if (isSetupRequired) {
       if (!sandboxConfig.runtime_image || !sandboxConfig.container_port || !sandboxConfig.start_command) {
@@ -161,7 +193,7 @@ const SetupForm = ({ onSave, templateName }) => {
       }
     }
 
-    const config = {
+    const config: SetupConfig = {
       file_checks: fileChecksState.items.length > 0 ? fileChecksState.items : null,
       sandbox: sandboxConfig.runtime_image ? {
         runtime_image: sandboxConfig.runtime_image,
@@ -179,7 +211,7 @@ const SetupForm = ({ onSave, templateName }) => {
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = (): void => {
     onSave(null);
   };
 
@@ -560,3 +592,4 @@ const SetupForm = ({ onSave, templateName }) => {
 };
 
 export default SetupForm;
+export type { SetupFormProps, SetupConfig, SandboxConfig, RuntimePreset };
