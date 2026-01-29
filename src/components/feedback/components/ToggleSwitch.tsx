@@ -1,8 +1,8 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, ReactNode } from 'react';
 
 interface ToggleSwitchProps {
   id: string;
-  label: string;
+  label: ReactNode;
   isChecked: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }

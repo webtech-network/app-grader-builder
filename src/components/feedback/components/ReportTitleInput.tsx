@@ -1,9 +1,9 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, ReactNode } from 'react';
 
 interface ReportTitleInputProps {
   title: string;
   onChange: (value: string) => void;
-  label?: string;
+  label?: ReactNode;
   placeholder?: string;
 }
 
