@@ -6,7 +6,7 @@ import ResourceList from './components/ResourceList';
 import { SaveButton, Tooltip } from '../../shared';
 import { useSaveState, useArrayState, useFormInput } from '../../hooks';
 import useFeedbackForm, { FeedbackConfig, OnlineResource } from './hooks/useFeedbackForm';
-import { TOOLTIP_CONTENT } from './config/TooltipContent';
+import { TooltipContent } from './config/TooltipContent';
 
 type FeedbackMode = 'ai' | 'static' | 'default';
 
@@ -72,12 +72,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
               <ReportTitleInput
                 title={feedbackForm.reportTitle}
                 onChange={feedbackForm.setReportTitle}
-                label={
-                  <span className="flex items-center gap-2">
-                    Título do Relatório
-                    <Tooltip content={TOOLTIP_CONTENT.geral.Titulo_do_relatorio} />
-                  </span>
-                }
+                label="Título do Relatório"
+                tooltipText={TooltipContent.geral.Titulo_do_relatorio}
               />
 
               {/* Configurações Booleanas */}
@@ -86,34 +82,22 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                   id="show_score"
                   isChecked={feedbackForm.toggleStates.show_score}
                   onChange={() => feedbackForm.handleToggle('show_score')}
-                  label={
-                    <span className="flex items-center gap-2">
-                      Exibir Pontuação
-                      <Tooltip content={TOOLTIP_CONTENT.geral.Exibir_pontuacao} />
-                    </span>
-                  }
+                  label="Exibir Pontuação"
+                  tooltipText={TooltipContent.geral.Exibir_pontuacao}
                 />
                 <ToggleSwitch
                   id="show_passed_tests"
                   isChecked={feedbackForm.toggleStates.show_passed_tests}
                   onChange={() => feedbackForm.handleToggle('show_passed_tests')}
-                  label={
-                    <span className="flex items-center gap-2">
-                      Exibir Testes Aprovados
-                      <Tooltip content={TOOLTIP_CONTENT.geral.Exibir_testes_aprovados} />
-                    </span>
-                  }
+                  label="Exibir Testes Aprovados"
+                  tooltipText={TooltipContent.geral.Exibir_testes_aprovados}
                 />
                 <ToggleSwitch
                   id="add_report_summary"
                   isChecked={feedbackForm.toggleStates.add_report_summary}
                   onChange={() => feedbackForm.handleToggle('add_report_summary')}
-                  label={
-                    <span className="flex items-center gap-2">
-                      Adicionar Resumo
-                      <Tooltip content={TOOLTIP_CONTENT.geral.Adicionar_resumo} />
-                    </span>
-                  }
+                  label="Adicionar Resumo"
+                  tooltipText={TooltipContent.geral.Adicionar_resumo}
                 />
 
               </div>
@@ -125,7 +109,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                     <p className="text-gray-400 font-medium">
                       Adicionar Conteúdo Online de Apoio
                     </p>
-                    <Tooltip content={TOOLTIP_CONTENT.geral.Adicionar_conteudo_online_de_apoio} />
+                    <Tooltip content={TooltipContent.geral.Adicionar_conteudo_online_de_apoio} />
                   </div>
                   <ResourceForm onSubmit={handleAddResource} />
                 </div>
@@ -143,7 +127,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
             <section className="bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 border border-gray-700">
               <h2 className="text-2xl font-bold border-b-2 border-gray-700 pb-3 mb-6 text-indigo-400 flex items-center gap-3">
                 Inteligência Artificial
-                <Tooltip content={TOOLTIP_CONTENT.ai.inteligencia_artificial} />
+                <Tooltip content={TooltipContent.ai.inteligencia_artificial} />
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
                   Beta
                 </span>
@@ -155,7 +139,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                     <p className="text-gray-400 font-medium">
                       Fornecimento de Soluções
                     </p>
-                    <Tooltip content={TOOLTIP_CONTENT.ai.Fornecimento_de_solucoes} />
+                    <Tooltip content={TooltipContent.ai.Fornecimento_de_solucoes} />
                   </div>
 
                   <div className="flex gap-3">
@@ -178,12 +162,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                 <ReportTitleInput
                   title={feedbackForm.feedbackTone}
                   onChange={feedbackForm.setFeedbackTone}
-                  label={
-                    <span className="flex items-center gap-2">
-                      Tom do Feedback
-                      <Tooltip content={TOOLTIP_CONTENT.ai.Tom_do_feedback} />
-                    </span>
-                  }
+                  label="Tom do Feedback"
+                  tooltipText={TooltipContent.ai.Tom_do_feedback}
                   placeholder='Ex: "amigável, encorajador e direto ao ponto"'
                 />
 
@@ -192,12 +172,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                 <ReportTitleInput
                   title={feedbackForm.feedbackPersona}
                   onChange={feedbackForm.setFeedbackPersona}
-                  label={
-                    <span className="flez items-center gap-2">
-                      Persona do Feedback
-                      <Tooltip content={TOOLTIP_CONTENT.ai.Persona_do_feedback} />
-                    </span>
-                  }
+                  label="Persona do Feedback"
+                  tooltipText={TooltipContent.ai.Persona_do_feedback}
                   placeholder="Ex: Code Buddy, um colega programador mais experiente"
                 />
 
@@ -205,7 +181,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <p className="text-gray-400 font-medium text-sm">Contexto da Atividade</p>
-                    <Tooltip content={TOOLTIP_CONTENT.ai.Contexto_da_atividade} />
+                    <Tooltip content={TooltipContent.ai.Contexto_da_atividade} />
                   </div>
                   <textarea
                     value={feedbackForm.activityContext}
@@ -219,7 +195,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <p className="text-gray-400 font-medium text-sm">Orientações Extras</p>
-                    <Tooltip content={TOOLTIP_CONTENT.ai.Orientacoes_extras} />
+                    <Tooltip content={TooltipContent.ai.Orientacoes_extras} />
                   </div>
                   <textarea
                     value={feedbackForm.extraGuidelines}
@@ -234,7 +210,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSave, feedbackMode = 'ai'
                   <div className="flex flex-col justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-gray-400 font-medium">Arquivos para Leitura</p>
-                      <Tooltip content={TOOLTIP_CONTENT.ai.Arquivos_para_leitura} />
+                      <Tooltip content={TooltipContent.ai.Arquivos_para_leitura} />
                     </div>
 
                     <div className="flex gap-2 items-center">

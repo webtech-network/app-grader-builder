@@ -1,4 +1,4 @@
-export const TOOLTIP_CONTENT = {
+export const TooltipContent = {
   header: {},
   geral: {
     Titulo_do_relatorio: "Define o título que aparecerá no topo do relatório de feedback gerado",

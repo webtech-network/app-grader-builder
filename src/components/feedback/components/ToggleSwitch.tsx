@@ -1,17 +1,22 @@
-import React, { ChangeEvent, ReactNode } from 'react';
+import React, { ChangeEvent } from 'react';
+import { Tooltip } from '../../../shared';
 
 interface ToggleSwitchProps {
   id: string;
-  label: ReactNode;
+  label: string;
+  tooltipText?: string;
   isChecked: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ id, label, isChecked, onChange }) => {
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ id, label, tooltipText, isChecked, onChange }) => {
   const containerId = `toggle-${id}`;
   return (
     <div className="flex items-center justify-between bg-gray-800 p-3 rounded-xl border border-gray-700 shadow-md">
-      <span className="font-medium text-gray-300 text-sm">{label}</span>
+      <div className="fex items-center gap-2">
+        <span className="font-medium text-gray-300 text-sm">{label}</span>
+        {tooltipText && <Tooltip content={tooltipText} />}
+      </div>
       <div className="relative inline-block w-10 mr-2 align-middle select-none">
         <input 
           type="checkbox" 

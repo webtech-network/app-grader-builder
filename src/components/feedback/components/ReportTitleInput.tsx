@@ -1,9 +1,11 @@
-import React, { ChangeEvent, ReactNode } from 'react';
+import React, { ChangeEvent } from 'react';
+import { Tooltip } from '../../../shared';
 
 interface ReportTitleInputProps {
   title: string;
   onChange: (value: string) => void;
-  label?: ReactNode;
+  label?: string;
+  tooltipText?: string;
   placeholder?: string;
 }
 
@@ -11,13 +13,18 @@ const ReportTitleInput: React.FC<ReportTitleInputProps> = ({
   title, 
   onChange, 
   label = "Título do Relatório",
+  tooltipText,
   placeholder = "Digite o título do relatório"
 }) => {
   return (
     <div>
-      <label className="text-gray-400 font-medium mb-1 text-sm block">
-        {label}
-      </label>
+      <div className="flex items-center gap-2 mb-1">
+        <label className="text-gray-400 font-medium mb-1 text-sm block">
+          {label}
+        </label>
+        {tooltipText && <Tooltip content={tooltipText} />}
+      </div>
+      
       <input
         type="text"
         value={title}
