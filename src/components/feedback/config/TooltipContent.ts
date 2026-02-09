@@ -1,6 +1,34 @@
+/**
+ * @fileoverview Centralized tooltip content configuration for feedback components.
+ * 
+ * @description Contains all tooltip text strings used throughout the feedback
+ * configuration form. Organized by section (header, geral, ai) to match the
+ * form structure. This centralization ensures consistent messaging and makes
+ * it easy to update help text across the entire feature.
+ * 
+ * @module components/feedback/config/TooltipContent
+ */
+
+/**
+ * Tooltip content organized by form section.
+ * 
+ * @property {Object} header - Tooltip content for header elements (currently empty)
+ * @property {Object} geral - Tooltip content for the General section
+ * @property {Object} ai - Tooltip content for the AI section
+ * 
+ * @example
+ * ```tsx
+ * import { TooltipContent } from '../config/TooltipContent';
+ * 
+ * <Tooltip content={TooltipContent.geral.Titulo_do_relatorio} />
+ * ```
+ */
 export const TooltipContent = {
+  /** Tooltip content for header elements */
   header: {},
+  /** Tooltip content for the General section */
   geral: {
+    /** Tooltip for report title input */
     Titulo_do_relatorio: "Define o título que aparecerá no topo do relatório de feedback gerado",
     Exibir_pontuacao: "Quando ativado, exibe a pontuação numérica (0-100) no feedback final",
     Exibir_testes_aprovados: "Exibe quais testes foram aprovados no relatório de feedback",

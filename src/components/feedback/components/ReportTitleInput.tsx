@@ -1,14 +1,50 @@
+/**
+ * @fileoverview Single-line text input component with label and tooltip.
+ * @module components/feedback/components/ReportTitleInput
+ */
+
 import React, { ChangeEvent } from 'react';
 import { Tooltip } from '../../../shared';
 
+/**
+ * Props for the ReportTitleInput component.
+ * @interface ReportTitleInputProps
+ */
 interface ReportTitleInputProps {
+  /** Current input value */
   title: string;
+  /** Callback fired when the value changes */
   onChange: (value: string) => void;
+  /** Label text displayed above the input. Defaults to 'Título do Relatório' */
   label?: string;
+  /** Optional tooltip text for additional context */
   tooltipText?: string;
+  /** Placeholder text shown when empty */
   placeholder?: string;
 }
 
+/**
+ * ReportTitleInput - A single-line text input with label and tooltip support.
+ * 
+ * @description Provides a styled text input field with consistent formatting,
+ * including a label, optional tooltip icon, and placeholder support. Despite
+ * the name, this component is generic and can be used for any single-line
+ * text input (titles, names, short descriptions, etc.).
+ * 
+ * @example
+ * ```tsx
+ * <ReportTitleInput
+ *   title={reportTitle}
+ *   onChange={setReportTitle}
+ *   label="Report Title"
+ *   tooltipText="The title shown at the top of the report"
+ *   placeholder="Enter title..."
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered ReportTitleInput component
+ */
 const ReportTitleInput: React.FC<ReportTitleInputProps> = ({ 
   title, 
   onChange, 
