@@ -1,61 +1,160 @@
-// Types for the criteria tree structure
+/**
+ * @fileoverview Utility functions and types for criteria tree management.
+ * 
+ * @description Provides type definitions for the criteria tree structure,
+ * tree manipulation functions (CRUD operations), and backend transformation
+ * utilities. Handles the complex tree operations and data transformations
+ * needed for the criteria builder.
+ * 
+ * @module components/criteria/utils
+ */
+
+// ============================================================================
+//  TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Metadata for test nodes containing evaluation logic.
+ * @interface TestMetadata
+ * @exports
+ */
 export interface TestMetadata {
+    /** Internal function name from the test library */
     functionName: string;
+    /** Array of test parameter arrays (usually one call) */
     calls: unknown[][];
+    /** Optional test description */
     description?: string;
+    /** Required file type (HTML, CSS, JavaScript) */
     required_file?: string;
 }
 
+/**
+ * Represents a node in the criteria tree hierarchy.
+ * @interface TreeNode
+ * @exports
+ */
 export interface TreeNode {
+    /** Unique identifier for the node */
     id: string;
+    /** Display name of the node */
     name: string;
+    /** Child nodes array (null for test/leaf nodes) */
     children: TreeNode[] | null;
+    /** Weight percentage (0-100) */
     weight: number;
+    /** Test metadata (only present for test nodes) */
     metadata?: TestMetadata;
 }
 
+/**
+ * Parameter definition for a test template.
+ * @interface TestParameter
+ * @exports
+ */
 export interface TestParameter {
+    /** Parameter name/identifier */
     name: string;
+    /** Parameter data type */
     type: 'string' | 'integer' | 'number' | 'boolean' | 'list of strings' | 'dictionary';
+    /** Optional description of the parameter */
     description?: string;
+    /** Default value for the parameter */
     defaultValue?: unknown;
+    /** Whether the parameter is required */
     required?: boolean;
 }
 
+/**
+ * Test template definition from the library.
+ * @interface TestTemplate
+ * @exports
+ */
 export interface TestTemplate {
+    /** Internal function name */
     name: string;
+    /** Human-readable display name */
     displayName: string;
+    /** Description of what the test validates */
     description: string;
+    /** Array of parameter definitions */
     parameters: TestParameter[];
+    /** Required file type (HTML, CSS, JS) */
     required_file?: string;
+    /** Type tag for categorization */
     type_tag?: string;
 }
 
+/**
+ * Test library container with metadata.
+ * @interface TestLibrary
+ * @exports
+ */
 export interface TestLibrary {
+    /** Library name/identifier */
     name: string;
+    /** Array of available test templates */
     tests: TestTemplate[];
 }
 
-// Backend format types
+// ============================================================================
+//  BACKEND FORMAT TYPES
+// ============================================================================
+
+/**
+ * Backend test format (simplified from frontend TreeNode).
+ * @interface BackendTest
+ * @exports
+ */
 export interface BackendTest {
+    /** Test function name */
     name: string;
+    /** Required file name (e.g., 'index.html') */
     file: string;
+    /** Array of parameter calls */
     calls: unknown[][];
 }
 
+/**
+ * Backend category format (recursive structure).
+ * @interface BackendCategory
+ * @exports
+ */
 export interface BackendCategory {
+    /** Category/subject weight percentage */
     weight: number;
+    /** Nested subjects/themes (recursive) */
     subjects?: Record<string, BackendCategory>;
+    /** Tests at this level */
     tests?: BackendTest[];
 }
 
+/**
+ * Complete backend criteria format with three categories.
+ * @interface BackendCriteriaFormat
+ * @exports
+ */
 export interface BackendCriteriaFormat {
+    /** Base criteria (required, weighted at 100%) */
     base?: BackendCategory;
+    /** Bonus criteria (extra credit) */
     bonus?: BackendCategory;
+    /** Penalty criteria (deductions) */
     penalty?: BackendCategory;
 }
 
-// Função auxiliar para encontrar o nó por ID (necessário para a validação)
+// ============================================================================
+//  TREE SEARCH & ACCESS FUNCTIONS
+// ============================================================================
+
+/**
+ * Recursively finds a node by its ID in the tree.
+ * 
+ * @param nodes - Array of tree nodes to search
+ * @param id - Node ID to find
+ * @returns The found node or null
+ * @exports
+ */
 export const findNodeById = (nodes: TreeNode[], id: string): TreeNode | null => {
     for (const node of nodes) {
         if (node.id === id) {
@@ -69,7 +168,15 @@ export const findNodeById = (nodes: TreeNode[], id: string): TreeNode | null => 
     return null;
 };
 
-// Função auxiliar para encontrar o pai de um nó
+/**
+ * Recursively finds the parent node of a target node.
+ * 
+ * @param nodes - Array of tree nodes to search
+ * @param targetId - ID of the node whose parent to find
+ * @param parent - Current parent node in recursion
+ * @returns The parent node or null
+ * @exports
+ */
 export const findParentOfNode = (nodes: TreeNode[], targetId: string, parent: TreeNode | null = null): TreeNode | null => {
     for (const node of nodes) {
         if (node.id === targetId) {
@@ -83,7 +190,13 @@ export const findParentOfNode = (nodes: TreeNode[], targetId: string, parent: Tr
     return null;
 };
 
-// Função auxiliar para calcular a soma dos pesos dos filhos de QUALQUER nó
+/**
+ * Calculates the sum of all direct children weights.
+ * 
+ * @param node - The parent node to calculate for
+ * @returns Sum of children weights (0-100+)
+ * @exports
+ */
 export const calculateChildWeights = (node: TreeNode): number => {
     if (!node.children || node.children.length === 0) {
         return 0;
@@ -92,7 +205,19 @@ export const calculateChildWeights = (node: TreeNode): number => {
     return node.children.reduce((acc, child) => acc + (parseFloat(String(child.weight)) || 0), 0);
 };
 
-// Adiciona um novo nó filho
+// ============================================================================
+//  TREE MODIFICATION FUNCTIONS (CRUD)
+// ============================================================================
+
+/**
+ * Adds a new child node to a parent node in the tree.
+ * 
+ * @param nodes - Array of tree nodes
+ * @param parentId - ID of the parent node
+ * @param newNode - New node to add
+ * @returns Updated tree array
+ * @exports
+ */
 export const addChildNode = (nodes: TreeNode[], parentId: string, newNode: TreeNode): TreeNode[] => {
     return nodes.map((node) => {
         if (node.id === parentId) {
@@ -111,16 +236,35 @@ export const addChildNode = (nodes: TreeNode[], parentId: string, newNode: TreeN
     });
 };
 
+/**
+ * Data structure for updating test nodes.
+ * @interface UpdatedNodeData
+ */
 interface UpdatedNodeData {
+    /** Test function name */
     functionName: string;
+    /** Parameter call arrays */
     calls: unknown[][];
+    /** Custom display name */
     name: string;
+    /** Test description */
     description?: string;
+    /** Required file type */
     required_file?: string;
+    /** Node weight */
     weight?: number;
 }
 
-// Atualiza um nó existente
+/**
+ * Updates an existing test node with new configuration.
+ * 
+ * @param nodes - Array of tree nodes
+ * @param targetId - ID of the node to update
+ * @param updatedData - New data for the node
+ * @param testLibrary - Test library for display name lookup
+ * @returns Updated tree array
+ * @exports
+ */
 export const updateExistingNode = (nodes: TreeNode[], targetId: string, updatedData: UpdatedNodeData, testLibrary: TestLibrary | null): TreeNode[] => {
     return nodes.map(node => {
         if (node.id === targetId) {
@@ -150,7 +294,14 @@ export const updateExistingNode = (nodes: TreeNode[], targetId: string, updatedD
     });
 };
 
-// Remove um nó
+/**
+ * Removes a node from the tree by ID.
+ * 
+ * @param nodes - Array of tree nodes
+ * @param targetId - ID of the node to remove
+ * @returns Updated tree array with node removed
+ * @exports
+ */
 export const removeNode = (nodes: TreeNode[], targetId: string): TreeNode[] => {
     return nodes.filter((node) => {
         if (node.id === targetId) {
@@ -163,7 +314,15 @@ export const removeNode = (nodes: TreeNode[], targetId: string): TreeNode[] => {
     });
 };
 
-// Atualiza o peso de um nó
+/**
+ * Updates the weight of a specific node.
+ * 
+ * @param nodes - Array of tree nodes
+ * @param targetId - ID of the node to update
+ * @param newWeight - New weight value (clamped to valid range)
+ * @returns Updated tree array
+ * @exports
+ */
 export const updateNodeWeight = (nodes: TreeNode[], targetId: string, newWeight: string | number): TreeNode[] => {
     return nodes.map(node => {
         if (node.id === targetId) {
@@ -185,7 +344,16 @@ export const updateNodeWeight = (nodes: TreeNode[], targetId: string, newWeight:
     });
 };
 
-// Helper function to map file types
+// ============================================================================
+//  BACKEND TRANSFORMATION
+// ============================================================================
+
+/**
+ * Maps internal file type to actual filename.
+ * 
+ * @param requiredFile - File type string (HTML, CSS, JavaScript)
+ * @returns Actual filename or empty string
+ */
 const mapRequiredFile = (requiredFile: string | undefined): string => {
     if (requiredFile === 'HTML') return 'index.html';
     if (requiredFile === 'CSS') return 'styles.css';
@@ -193,7 +361,20 @@ const mapRequiredFile = (requiredFile: string | undefined): string => {
     return requiredFile || '';
 };
 
-// Transform tree data to backend format
+/**
+ * Transforms the frontend tree structure to backend API format.
+ * 
+ * @description Recursively converts the tree structure used in the UI
+ * to the flattened format expected by the backend API. Handles:
+ * - Three main categories (base, bonus, penalty)
+ * - Nested subjects/themes
+ * - Test nodes with metadata
+ * - Weight distribution
+ * 
+ * @param nodes - Array of tree nodes (should be the root categories)
+ * @returns Backend-formatted criteria object
+ * @exports
+ */
 export const transformTreeToBackendFormat = (nodes: TreeNode[]): BackendCriteriaFormat => {
     const result: BackendCriteriaFormat = {};
     

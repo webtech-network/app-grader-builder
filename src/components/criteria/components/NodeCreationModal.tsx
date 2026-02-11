@@ -1,20 +1,66 @@
+/**
+ * @fileoverview Modal component for creating new nodes in the criteria tree.
+ * @module components/criteria/components/NodeCreationModal
+ */
+
 import React, { FormEvent, ChangeEvent } from 'react';
 import NodeTypeSelector from './NodeTypeSelector';
 
+/**
+ * Defines the type of node to create.
+ */
 type NodeType = 'Subject' | 'Test';
 
+/**
+ * Props for the NodeCreationModal component.
+ * @interface NodeCreationModalProps
+ */
 interface NodeCreationModalProps {
+    /** Title displayed in the modal header */
     modalTitle: string;
+    /** Whether to show the type selector (Subject/Test) */
     showTypeSelector: boolean;
+    /** Currently selected node type */
     nodeTypeToCreate: NodeType;
+    /** Current value of the name input field */
     newNodeName: string;
+    /** Callback when node type changes */
     onNodeTypeChange: (type: NodeType) => void;
+    /** Callback when name input changes */
     onNodeNameChange: (name: string) => void;
+    /** Callback fired when form is submitted */
     onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+    /** Callback fired when cancel button is clicked */
     onCancel: () => void;
+    /** Callback to open the test library modal */
     onOpenLibrary: () => void;
 }
 
+/**
+ * NodeCreationModal - Modal for creating new subjects or tests in the tree.
+ * 
+ * @description First-step modal that allows users to choose between creating
+ * a Subject (theme/topic) or Test (evaluation) node. For Test nodes, opens
+ * the test library modal for configuration.
+ * 
+ * @example
+ * ```tsx
+ * <NodeCreationModal
+ *   modalTitle="New Theme"
+ *   showTypeSelector={true}
+ *   nodeTypeToCreate="Subject"
+ *   newNodeName=""
+ *   onNodeTypeChange={setType}
+ *   onNodeNameChange={setName}
+ *   onSubmit={handleCreate}
+ *   onCancel={handleClose}
+ *   onOpenLibrary={openLibrary}
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered NodeCreationModal component
+ */
 const NodeCreationModal: React.FC<NodeCreationModalProps> = ({
     modalTitle,
     showTypeSelector,

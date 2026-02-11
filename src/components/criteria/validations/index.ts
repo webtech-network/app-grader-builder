@@ -1,6 +1,29 @@
+/**
+ * @fileoverview Validation functions for criteria tree structure and data.
+ * 
+ * @description Provides comprehensive validation for the criteria tree including:
+ * - Structure validation (no empty subjects)
+ * - Weight sum validation (must equal 100%)
+ * - Test parameter validation
+ * - Bonus/penalty content validation
+ * 
+ * @module components/criteria/validations
+ */
+
 import { TreeNode, TestLibrary } from '../utils';
 
-// Validation function to check for subjects without tests
+/**
+ * Validates that all subjects in the tree have content (tests or sub-subjects).
+ * 
+ * @description Recursively checks all nodes to ensure:
+ * - No empty subjects (except empty Bonus/Penalty is allowed)
+ * - All subjects eventually contain tests
+ * - Structure is logically valid
+ * 
+ * @param nodes - Array of root tree nodes (categories)
+ * @returns Array of error messages (empty if valid)
+ * @exports
+ */
 export const validateCriteriaTree = (nodes: TreeNode[]): string[] => {
     const errors: string[] = [];
     
@@ -64,7 +87,17 @@ export const validateCriteriaTree = (nodes: TreeNode[]): string[] => {
     return errors;
 };
 
-// Validation function to check that subject weights sum to 100 within each category
+/**
+ * Validates that direct children weights sum to 100% within each category.
+ * 
+ * @description Checks each category (Base, Bonus, Penalty) to ensure the
+ * weights of immediate children sum to exactly 100% (within 0.1 tolerance).
+ * Skips empty Bonus/Penalty categories.
+ * 
+ * @param nodes - Array of root tree nodes (categories)
+ * @returns Array of error messages (empty if valid)
+ * @exports
+ */
 export const validateWeightSum = (nodes: TreeNode[]): string[] => {
     const errors: string[] = [];
     
@@ -94,7 +127,19 @@ export const validateWeightSum = (nodes: TreeNode[]): string[] => {
     return errors;
 };
 
-// Validation function to check test parameters match template requirements
+/**
+ * Validates that test parameters match their template requirements.
+ * 
+ * @description Checks all test nodes to ensure:
+ * - Correct number of parameters provided
+ * - Required parameters are present
+ * - Parameter types match template
+ * 
+ * @param nodes - Array of root tree nodes (categories)
+ * @param testLib - Test library for template lookups
+ * @returns Array of error messages (empty if valid)
+ * @exports
+ */
 export const validateTestParameters = (nodes: TreeNode[], testLib: TestLibrary | null): string[] => {
     const errors: string[] = [];
     
@@ -139,7 +184,17 @@ export const validateTestParameters = (nodes: TreeNode[], testLib: TestLibrary |
     return errors;
 };
 
-// Validation function to check that bonus/penalty with weight > 0 have content
+/**
+ * Validates that Bonus/Penalty categories with weight > 0 have content.
+ * 
+ * @description Ensures that if a Bonus or Penalty category has a non-zero
+ * weight, it must contain at least one test. Empty categories with weight > 0
+ * are invalid.
+ * 
+ * @param nodes - Array of root tree nodes (categories)
+ * @returns Array of error messages (empty if valid)
+ * @exports
+ */
 export const validateBonusPenaltyContent = (nodes: TreeNode[]): string[] => {
     const errors: string[] = [];
     
