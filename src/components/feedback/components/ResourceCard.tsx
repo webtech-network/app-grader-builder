@@ -1,5 +1,14 @@
+/**
+ * @fileoverview Individual resource card component with delete functionality.
+ * @module components/feedback/components/ResourceCard
+ */
+
 import React from 'react';
 
+/**
+ * ExternalLinkIcon - SVG icon indicating an external link.
+ * @returns The rendered SVG icon
+ */
 const ExternalLinkIcon: React.FC = () => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
@@ -17,13 +26,41 @@ const ExternalLinkIcon: React.FC = () => (
   </svg>
 );
 
+/**
+ * Props for the ResourceCard component.
+ * @interface ResourceCardProps
+ */
 interface ResourceCardProps {
+  /** Display title of the resource */
   title: string;
+  /** URL to the online resource */
   url: string;
+  /** Tags/tests associated with this resource */
   tags: string[];
+  /** Callback fired when the delete button is clicked */
   onDelete: () => void;
 }
 
+/**
+ * ResourceCard - Displays a single online resource with metadata and actions.
+ * 
+ * @description A card component showing resource information including title,
+ * link to access the resource, and associated tags. Features a delete button
+ * that appears on hover and a visual hover effect on the card border.
+ * 
+ * @example
+ * ```tsx
+ * <ResourceCard
+ *   title="DOM Manipulation Guide"
+ *   url="https://example.com/dom-guide"
+ *   tags={['DOM', 'JavaScript']}
+ *   onDelete={() => removeResource(id)}
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered ResourceCard component
+ */
 const ResourceCard: React.FC<ResourceCardProps> = ({ title, url, tags, onDelete }) => (
   <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 hover:border-indigo-500 transition duration-300 group">
     <div className="flex justify-between items-start mb-2">

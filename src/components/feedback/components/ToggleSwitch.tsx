@@ -1,14 +1,49 @@
+/**
+ * @fileoverview Toggle switch component for boolean settings.
+ * @module components/feedback/components/ToggleSwitch
+ */
+
 import React, { ChangeEvent } from 'react';
 import { Tooltip } from '../../../shared';
 
+/**
+ * Props for the ToggleSwitch component.
+ * @interface ToggleSwitchProps
+ */
 interface ToggleSwitchProps {
+  /** Unique identifier for the toggle (used for label association) */
   id: string;
+  /** Display label for the toggle */
   label: string;
+  /** Optional tooltip text for additional context */
   tooltipText?: string;
+  /** Current checked/on state */
   isChecked: boolean;
+  /** Callback fired when the toggle state changes */
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
+/**
+ * ToggleSwitch - A styled checkbox presented as a toggle switch.
+ * 
+ * @description Renders a toggle switch (on/off) control with a label and
+ * optional tooltip. Uses custom CSS for the sliding toggle appearance.
+ * Wraps a native checkbox input for accessibility.
+ * 
+ * @example
+ * ```tsx
+ * <ToggleSwitch
+ *   id="show_score"
+ *   label="Show Score"
+ *   tooltipText="Display the numeric score in feedback"
+ *   isChecked={showScore}
+ *   onChange={() => setShowScore(!showScore)}
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered ToggleSwitch component
+ */
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ id, label, tooltipText, isChecked, onChange }) => {
   const containerId = `toggle-${id}`;
   return (

@@ -1,16 +1,53 @@
+/**
+ * @fileoverview Form component for creating new online resources.
+ * @module components/feedback/components/ResourceForm
+ */
+
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useFormInput } from '../../../hooks';
 
+/**
+ * Represents an online learning resource.
+ * @interface Resource
+ */
 interface Resource {
+  /** Display title of the resource */
   title: string;
+  /** URL to the online resource */
   url: string;
+  /** Tags/tests associated with this resource */
   tags: string[];
 }
 
+/**
+ * Props for the ResourceForm component.
+ * @interface ResourceFormProps
+ */
 interface ResourceFormProps {
+  /** Callback fired when the form is submitted with a valid resource */
   onSubmit: (resource: Resource) => void;
 }
 
+/**
+ * ResourceForm - A form for creating new online learning resources.
+ * 
+ * @description Provides inputs for resource title, URL, and associated tags.
+ * Validates that all fields are filled before allowing submission. Tags can
+ * be added incrementally and removed individually before submitting.
+ * 
+ * @example
+ * ```tsx
+ * <ResourceForm
+ *   onSubmit={(resource) => {
+ *     console.log('New resource:', resource);
+ *     addToList(resource);
+ *   }}
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered ResourceForm component
+ */
 const ResourceForm: React.FC<ResourceFormProps> = ({ onSubmit }) => {
   const [newResource, setNewResource] = useState<Resource>({
     title: "",
