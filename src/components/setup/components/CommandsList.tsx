@@ -3,7 +3,7 @@
  * @module components/setup/components/CommandsList
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import CommandItem from './CommandItem';
 import CommandInput from './CommandInput';
 import { RuntimePreset } from './RuntimePresetCard';
@@ -24,9 +24,9 @@ interface CommandsListProps {
     /** Input value for new command value */
     valueInputValue: string;
     /** Callback when key input changes */
-    onKeyInputChange: (value: string) => void;
+    onKeyInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback when value input changes */
-    onValueInputChange: (value: string) => void;
+    onValueInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback to add new command */
     onAdd: () => void;
     /** Callback to remove command by key */

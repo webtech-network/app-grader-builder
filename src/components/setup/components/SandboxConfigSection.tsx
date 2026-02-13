@@ -3,7 +3,7 @@
  * @module components/setup/components/SandboxConfigSection
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { X } from 'lucide-react';
 import SectionTitle from './SectionTitle';
 import SandboxCollapsedState from './SandboxCollapsedState';
@@ -53,9 +53,9 @@ interface SandboxConfigSectionProps {
     /** Callback when configuration changes */
     onConfigChange: (config: Partial<SandboxConfig>) => void;
     /** Callback when command key input changes */
-    onCommandKeyChange: (value: string) => void;
+    onCommandKeyChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback when command value input changes */
-    onCommandValueChange: (value: string) => void;
+    onCommandValueChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback to add command */
     onAddCommand: () => void;
     /** Callback to remove command */

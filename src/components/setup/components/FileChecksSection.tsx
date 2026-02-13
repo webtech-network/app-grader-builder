@@ -3,7 +3,7 @@
  * @module components/setup/components/FileChecksSection
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import SectionTitle from './SectionTitle';
 import FileCheckItem from './FileCheckItem';
 import FileCheckInput from './FileCheckInput';
@@ -20,7 +20,7 @@ interface FileChecksSectionProps {
     /** Whether this section is required */
     isRequired: boolean;
     /** Callback when input value changes */
-    onInputChange: (value: string) => void;
+    onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback to add new file */
     onAdd: () => void;
     /** Callback to remove file by index */

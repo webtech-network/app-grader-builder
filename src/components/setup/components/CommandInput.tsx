@@ -3,7 +3,7 @@
  * @module components/setup/components/CommandInput
  */
 
-import React, { KeyboardEvent } from 'react';
+import React, { ChangeEvent, KeyboardEvent } from 'react';
 import { Plus } from 'lucide-react';
 
 /**
@@ -16,9 +16,9 @@ interface CommandInputProps {
     /** Command value input value */
     commandValue: string;
     /** Callback when key changes */
-    onKeyChange: (value: string) => void;
+    onKeyChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback when command value changes */
-    onValueChange: (value: string) => void;
+    onValueChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback to add the command */
     onAdd: () => void;
 }
@@ -69,7 +69,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
                     <input
                         type="text"
                         value={keyValue}
-                        onChange={(e) => onKeyChange(e.target.value)}
+                        onChange={onKeyChange}
                         placeholder="ex: install_dependencies"
                         className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                     />
@@ -84,7 +84,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
                         <input
                             type="text"
                             value={commandValue}
-                            onChange={(e) => onValueChange(e.target.value)}
+                            onChange={onValueChange}
                             onKeyPress={handleKeyPress}
                             placeholder="ex: pip install -r requirements.txt"
                             className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono"

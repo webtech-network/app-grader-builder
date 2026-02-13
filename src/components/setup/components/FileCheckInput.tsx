@@ -3,7 +3,7 @@
  * @module components/setup/components/FileCheckInput
  */
 
-import React, { KeyboardEvent } from 'react';
+import React, { ChangeEvent, KeyboardEvent } from 'react';
 import { Plus } from 'lucide-react';
 
 /**
@@ -14,7 +14,7 @@ interface FileCheckInputProps {
     /** Current input value */
     value: string;
     /** Callback when value changes */
-    onChange: (value: string) => void;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
     /** Callback when add button is clicked */
     onAdd: () => void;
 }
@@ -49,7 +49,7 @@ const FileCheckInput: React.FC<FileCheckInputProps> = ({ value, onChange, onAdd 
             <input
                 type="text"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={onChange}
                 onKeyPress={handleKeyPress}
                 placeholder="ex: main.py, requirements.txt"
                 className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"

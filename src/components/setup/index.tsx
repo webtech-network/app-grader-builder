@@ -103,6 +103,26 @@ const runtimePresets: Record<string, RuntimePreset> = {
 };
 
 /**
+ * SetupForm - Configuration form for runtime environment and file checks.
+ * 
+ * @description Provides interface for configuring:
+ * - Required file checks
+ * - Docker sandbox environment (runtime, port, commands)
+ * 
+ * Supports API and IO templates with required configurations,
+ * and optional setup for WebDev templates.
+ * 
+ * @example
+ * ```tsx
+ * <SetupForm
+ *   templateName="api"
+ *   onSave={(config) => saveConfig(config)}
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered SetupForm component
+ */
 const SetupForm: React.FC<SetupFormProps> = ({ onSave, templateName }) => {
   // State management
   const fileChecksState = useArrayState<string>([]);
@@ -268,28 +288,7 @@ const SetupForm: React.FC<SetupFormProps> = ({ onSave, templateName }) => {
       </div>
 
       {/* Action Buttons */}
-      <ActionButtons onSave={handleSave} onCancel={handleCancel} /   </>
-            )}
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-4 mt-8 pt-6 border-t border-gray-700">
-        <button
-          onClick={handleSave}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          <Save className="w-5 h-5" />
-          Salvar Configuração
-        </button>
-        <button
-          onClick={handleCancel}
-          className="px-6 py-3 border border-gray-600 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2"
-        >
-          <X className="w-5 h-5" />
-          Cancelar
-        </button>
-      </div>
+      <ActionButtons onSave={handleSave} onCancel={handleCancel} />
     </div>
   );
 };
