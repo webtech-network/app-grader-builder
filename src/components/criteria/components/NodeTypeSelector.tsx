@@ -1,14 +1,47 @@
+/**
+ * @fileoverview Button group for selecting node type (Subject vs Test).
+ * @module components/criteria/components/NodeTypeSelector
+ */
+
 import React from 'react';
 import { Code, ListTree } from 'lucide-react';
 
+/**
+ * Defines the type of node to create.
+ */
 type NodeType = 'Subject' | 'Test';
 
+/**
+ * Props for the NodeTypeSelector component.
+ * @interface NodeTypeSelectorProps
+ */
 interface NodeTypeSelectorProps {
+    /** Currently selected node type */
     nodeTypeToCreate: NodeType;
+    /** Callback fired when a type is selected */
     onSelectType: (type: NodeType) => void;
+    /** Callback to open the test library (for Test type) */
     onOpenLibrary: () => void;
 }
 
+/**
+ * NodeTypeSelector - Toggle button group for choosing node type.
+ * 
+ * @description Displays two buttons (Subject and Test) for selecting the type
+ * of node to create. When Test is selected, automatically opens the library.
+ * 
+ * @example
+ * ```tsx
+ * <NodeTypeSelector
+ *   nodeTypeToCreate="Subject"
+ *   onSelectType={(type) => setNodeType(type)}
+ *   onOpenLibrary={() => setLibraryOpen(true)}
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered NodeTypeSelector component
+ */
 const NodeTypeSelector: React.FC<NodeTypeSelectorProps> = ({ nodeTypeToCreate, onSelectType, onOpenLibrary }) => {
     return (
         <div className="mb-6 flex space-x-4">

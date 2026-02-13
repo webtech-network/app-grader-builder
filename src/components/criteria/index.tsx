@@ -1,3 +1,13 @@
+/**
+ * @fileoverview Main criteria builder component for defining assignment structure.
+ * 
+ * @description Provides a tree-based interface for creating and managing assignment
+ * criteria with hierarchical categories (Base, Bonus, Penalty), subjects/themes, and
+ * tests. Includes weight distribution, validation, and test library integration.
+ * 
+ * @module components/criteria
+ */
+
 import React, { useState, useMemo, FormEvent } from 'react';
 import { toast } from 'react-toastify';
 import TreeStyles from './TreeStyles';
@@ -26,23 +36,68 @@ import {
     validateBonusPenaltyContent
 } from './validations';
 
+/**
+ * Defines the type of node that can be created.
+ * - 'Subject': A theme/topic node that can contain other nodes
+ * - 'Test': A leaf node containing test evaluation logic
+ */
 type NodeType = 'Subject' | 'Test';
 
+/**
+ * Test configuration data structure.
+ * @interface TestData
+ */
 interface TestData {
+    /** Internal function name from the test library */
     functionName: string;
+    /** Array of test parameter call arrays */
     calls: unknown[][];
+    /** Custom display name for the test */
     name: string;
+    /** Optional description of what the test validates */
     description?: string;
+    /** Required file type (HTML, CSS, JavaScript) */
     required_file?: string;
+    /** Display name from the test template */
     displayName?: string;
+    /** Weight percentage for this test */
     weight?: number;
 }
 
+/**
+ * Props for the CriteriaForm component.
+ * @interface CriteriaFormProps
+ */
 interface CriteriaFormProps {
+    /** Name of the template/test library to load */
     templateName: string;
+    /** Callback fired when criteria is saved or cancelled */
     onSave?: (criteria: BackendCriteriaFormat | null) => void;
 }
 
+/**
+ * CriteriaForm - Main component for building assignment evaluation criteria.
+ * 
+ * @description A comprehensive tree-based editor for creating hierarchical assignment
+ * criteria. Features include:
+ * - Three-tier structure: Categories > Subjects/Themes > Tests
+ * - Weight distribution with validation (must sum to 100%)
+ * - Test library integration with parameter configuration
+ * - Drag-and-drop test selection
+ * - Real-time weight calculation and visualization
+ * - Validation for structure, weights, and test parameters
+ * 
+ * @example
+ * ```tsx
+ * <CriteriaForm
+ *   templateName="web-dev"
+ *   onSave={(criteria) => console.log('Saved:', criteria)}
+ * />
+ * ```
+ * 
+ * @param props - Component props
+ * @returns The rendered CriteriaForm component
+ */
 const CriteriaForm: React.FC<CriteriaFormProps> = ({ templateName, onSave }) => {
     const initialTreeData: TreeNodeType[] = [
         { id: 'base', name: 'Base', children: [], weight: 100 }, 
