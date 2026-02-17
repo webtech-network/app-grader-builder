@@ -3,20 +3,23 @@ import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 
 const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
-  // Estados dos campos
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  // Visibilidade independente
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const passwordsMatch = isLogin || !confirmPassword || password === confirmPassword;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isLogin) {
       console.log("Login attempt:", { email, password });
     } else {
+      if (password !== confirmPassword) {
+        return; 
+      }
+      
       console.log("Register attempt:", { firstName, email, password, confirmPassword });
     }
   };
@@ -45,8 +48,6 @@ const LoginPage: React.FC = () => {
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md">
-            
-            {/* Primeiro Nome */}
             {!isLogin && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                 <label className="text-sm font-medium text-gray-300">Primeiro Nome</label>
@@ -61,7 +62,6 @@ const LoginPage: React.FC = () => {
               </div>
             )}
 
-            {/* Email */}
             <div>
               <label className="text-sm font-medium text-gray-300">Email</label>
               <input
@@ -74,7 +74,6 @@ const LoginPage: React.FC = () => {
               />
             </div>
 
-            {/* Senha */}
             <div>
               <label className="text-sm font-medium text-gray-300">Senha</label>
               <div className="relative mt-1"> 
@@ -94,16 +93,8 @@ const LoginPage: React.FC = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {isLogin && (
-                <div className="flex justify-end mt-2">
-                  <button type="button" className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
-                    Esqueceu a senha?
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* Confirmar Senha */}
             {!isLogin && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                 <label className="text-sm font-medium text-gray-300">Confirmar Senha</label>
@@ -111,7 +102,11 @@ const LoginPage: React.FC = () => {
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     required={!isLogin}
-                    className="block w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 pr-10 text-white placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm transition-all"
+                    className={`block w-full rounded-md border bg-gray-700 px-3 py-2 pr-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 sm:text-sm transition-all ${
+                      passwordsMatch 
+                        ? 'border-gray-600 focus:border-indigo-500 focus:ring-indigo-500' 
+                        : 'border-red-500 focus:ring-red-500/50'
+                    }`}
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -124,17 +119,25 @@ const LoginPage: React.FC = () => {
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
+                {!passwordsMatch && (
+                  <p className="mt-1 text-xs text-red-500 animate-in fade-in duration-200">
+                    As senhas não coincidem.
+                  </p>
+                )}
               </div>
             )}
           </div>
-
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            disabled={!passwordsMatch}
+            className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform ${
+              passwordsMatch 
+                ? 'bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-xl hover:-translate-y-0.5' 
+                : 'bg-gray-600 cursor-not-allowed opacity-50'
+            }`}
           >
             {isLogin ? "Entrar" : "Finalizar Cadastro"}
           </button>
-
           <div className="pt-6 mt-6 border-t border-gray-700 text-center">
             <p className="text-sm text-gray-400">
               {isLogin ? "Não tem uma conta?" : "Já possui uma conta?"}{' '}
