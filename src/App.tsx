@@ -5,6 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import LandingPage from "./components/landing";
 import ConfigurationPage from "./components/configuration";
 import DocumentationPage from "./components/documentation";
+import LoginPage from "./components/login";
+import PasswordResetPage from "./components/password-reset";
 
 const App: React.FC = () => {
   return (
@@ -12,6 +14,8 @@ const App: React.FC = () => {
       <div className="min-h-screen w-full">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/password_reset" element={<PasswordResetPage />} />
           <Route path="/configure" element={<ConfigurationPage />} />
           <Route path="/documentation" element={<DocumentationPage />} />
         </Routes>
