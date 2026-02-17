@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 
 const LoginPage: React.FC = () => {
@@ -75,7 +76,14 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-300">Senha</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-300">Senha</label>
+                {isLogin && (
+                  <Link to="/password_reset" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                    Esqueceu a senha?
+                  </Link>
+                )}
+              </div>
               <div className="relative mt-1"> 
                 <input
                   type={showPassword ? "text" : "password"}
